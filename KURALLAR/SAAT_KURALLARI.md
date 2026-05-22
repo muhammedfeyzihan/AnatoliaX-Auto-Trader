@@ -414,10 +414,70 @@ Gunun Dersi:
 
 | Gun | Saat | Gorev |
 |-----|------|-------|
-| Cumartesi | 10:00 | Haftalik performans ozeti |
-| Cumartesi | 14:00 | Strateji optimizasyonu |
+| **Cumartesi** | **10:00-12:00** | **HAFTALIK STRATEJI KONSEYI (K197-K203)** |
+| Cumartesi | 14:00 | Strateji optimizasyonu (detayli backtest) |
 | Pazar | 10:00 | Gelecek hafta plani |
 | Pazar | 14:00 | Kural guncelleme (AGENTS.md) |
+
+---
+
+## ⏰ Cumartesi — HAFTALIK STRATEJI KONSEYI (K197-K203)
+
+**Katilim:** Sinyal + Risk + Strateji (3 ajan zorunlu)
+**Hedef:** Gecen haftayi analiz edip yeni haftanin stratejisini belirlemek
+
+### Konsey Akisi:
+```
+10:00 ---- Sinyal Ajan raporu
+         |-- Gecen hafta en iyi/worst setup
+         |-- En karli zaman dilimi (M5/M15/H1/D1)
+         |-- Win rate, toplam islem sayisi
+10:15 ---- Risk Ajan raporu
+         |-- Max drawdown, volatilite
+         |-- Piyasa rejimi (bull/bear/sideways)
+         |-- Behavioral metrikler (FOMO, loss aversion)
+         |-- Consecutive loss sayisi
+10:30 ---- Strateji Ajan raporu
+         |-- Gecmis haftalarin analizi (4+ hafta)
+         |-- Hedef carpani belirleme (1x -> 2x -> 4x -> 8x)
+         |-- Birincil strateji secimi
+         |-- Zaman dilimi onerisi
+10:45 ---- 3/3 Onay Oylamasi
+         |-- Sinyal: Win rate >= %40 ? APPROVE : REJECT
+         |-- Risk: Max DD <= %5 ve vol < %30 ? APPROVE : REJECT
+         |-- Strateji: Daima APPROVE
+         |-- 1 RED = Onceki haftanin stratejisi korunur, carpani 0.5x
+11:00 ---- Nihai Karar (CouncilDecision)
+         |-- Hedef Carpani: [1x / 2x / 4x / 8x]
+         |-- Birincil Strateji: [trend_following / mean_reversion / scalping]
+         |-- Zaman Dilimleri: [M5 / M15 / H1 / D1]
+         |-- Pozisyon Olcegi: [1.0x / 0.75x / 0.5x]
+         |-- Risk Ayarlamalari
+11:15 ---- Telegram raporu gonder
+```
+
+### Konsey Ciktilari:
+- `CouncilDecision` JSON arsivlenir.
+- Telegram'da markdown raporu yayinlanir.
+- Yeni hafta Pazartesi 07:00'de yeni strateji aktif olur.
+
+### Matematiksel Hedef Carpani:
+| Onceki Hafta | Yeni Carpani | Aciklama |
+|---|---|---|
+| Net PnL > 0 | Carpani x2 | Kazaninca agresifles |
+| Net PnL < 0 | Carpani /2 | Zararda korun |
+| Net PnL = 0 | Sabit | Degismez |
+| Ust sinir | 8.0 | Asla gecilmez |
+| Alt sinir | 0.25 | Asla dusmez |
+
+### Risk Ayarlamalari (K202):
+- Max DD < %2  → Pozisyon 1.0x
+- %2 <= DD < %5 → Pozisyon 0.75x
+- DD >= %5       → Pozisyon 0.5x
+- Kelly fraction: 0.25 sabit
+
+**Kural:** Konsey toplanmazsa → Onceki strateji korunur, hedef carpani 0.5x (ultra-korumali mod).
+**Kural:** 4 haftadan az gecmis varsa → Hedef carpani 1.0x sabit, strateji "balanced".
 
 ---
 

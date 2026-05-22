@@ -7,7 +7,7 @@
 | **Versiyon** | 3.2 |
 | **Tarih** | 2026-05-22 |
 | **Ajanlar** | 3 (Sinyal / Risk / Strateji) + Telegram |
-| **Test** | 792+ test, %80+ coverage |
+| **Test** | 801+ test, %83+ coverage |
 | **Lisans** | MIT |
 
 ---
@@ -28,6 +28,8 @@ AnatoliaX, BIST 30/50/100 hisseleri icin gelistirilmis event-driven, cok ajanli 
 **Nautilus Trader Entegrasyonu** (v3.1, opsiyonel) — Event-driven MessageBus, PreTradeRiskEngine, FillModel, InstrumentProvider patternleri.
 
 **Enterprise Modülleri** (v3.2) — BIST regülasyon uyumluluğu, davranışsal finans kontrolleri, BIST özel slippage, gerçekçi maliyet simülasyonu, OOS validasyon, temel analiz filtresi, piyasa mikro yapısı, CVaR ensemble optimizasyonu, online learning, paper/live ayrımı, ileri trade analitikleri, gelişmiş pozisyon ölçekleme.
+
+**Haftalık Strateji Konseyi** (v3.2) — Her cumartesi 3 ajan bir araya gelip geçen haftayı analiz eder: kazanç/zarar, en iyi setup, zaman dilimi, rejim tespiti. Matematiksel hedef çarpanı (1x→2x→4x→8x), 3/3 onay mekanizması, risk ayarlamaları ile yeni haftanın stratejisi belirlenir.
 
 ---
 
@@ -75,6 +77,7 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 - **K184-K188** — İleri trade analitikleri (Calmar, Omega, streak analysis).
 - **K189-K192** — Gerçekçi maliyet simülasyonu (BIST, Takasbank, brokerage).
 - **K193-K196** — Gelişmiş pozisyon ölçekleme (Kelly, Optimal f, vol targeting).
+- **K197-K203** — Haftalık Strateji Konseyi (cumartesi toplantı, hedef çarpanı, 3/3 onay, geçmiş tecrübe birleştirme).
 
 Tum kurallar: `KURALLAR/` dizini.
 
