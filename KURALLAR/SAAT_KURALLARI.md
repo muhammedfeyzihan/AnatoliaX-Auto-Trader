@@ -483,3 +483,139 @@ Gunun Dersi:
 
 *Saat bazli kurallar tum ajanlar icin zorunludur.*
 *Ihlal eden ajan raporu RED sayilir.*
+
+---
+
+## K246-K248 — Zaman Bazli Trading Pencereleri ve Uyari Sistemi (v3.3)
+
+**Versiyon:** 3.3  
+**Tarih:** 2026-05-22  
+**Kapsam:** BIST piyasa saatlerine gore dinamik risk ayarlari, trading pencereleri, ve otomatik uyari motoru.
+
+---
+
+### K246 — Trading Pencereleri (TradingWindow)
+
+BIST piyasa saatleri 8 zaman penceresine ayrilir. Her pencerenin kendi risk profili, pozisyon limiti, ve SL/TP carpani vardir.
+
+| Pencere | Saat | Trading | Risk Carpanı | SL Carpani | TP Carpani | Max Pozisyon | Aciklama |
+|---------|------|---------|--------------|------------|------------|--------------|----------|
+| **PRE_MARKET** | 07:00-09:30 | KAPALI | 0.0 | 1.0 | 1.0 | 0 | Piyasa kapali, analiz zamani |
+| **OPENING** | 09:30-10:00 | ACIK | 1.2 | 1.5 | 1.2 | 3 | Acilis momentumu — yuksek volatilite, genis SL |
+| **MORNING** | 10:00-11:30 | ACIK | 1.0 | 1.0 | 1.0 | 5 | Optimal trading — normal risk |
+| **LUNCH** | 11:30-13:00 | KAPALI | 0.5 | 1.0 | 0.8 | 2 | Ogle arasi — dusuk hacim, spread artisi, KACIN |
+| **AFTERNOON** | 13:00-15:00 | ACIK | 0.9 | 1.0 | 1.0 | 4 | Ogleden sonra — trend devami |
+| **CLOSING** | 15:00-18:00 | ACIK | 0.7 | 0.8 | 0.8 | 2 | Kapanis oncesi — pozisyon kucultme |
+| **POST_MARKET** | 18:00-23:59 | KAPALI | 0.0 | 1.0 | 1.0 | 0 | Piyasa kapali, gece analizi |
+| **NIGHT** | 00:00-07:00 | KAPALI | 0.0 | 1.0 | 1.0 | 0 | Gece — sistem bakimi |
+
+**Kural K246a:** `can_trade=False` pencerelerinde (PRE_MARKET, LUNCH, POST_MARKET, NIGHT) yeni pozisyon acilamaz.
+**Kural K246b:** Her pencere kendi `risk_multiplier`'ini uygular. OPENING = 1.2x, MORNING = 1.0x, CLOSING = 0.7x.
+**Kural K246c:** `max_positions` dinamiktir. MORNING = 5, CLOSING = 2, OPENING = 3.
+**Kural K246d:** LUNCH penceresinde trading KAPALI. Dusuk hacim, spread artisi nedeniyle islem KACIN.
+**Kural K246e:** SL ve TP carpani pencereye gore ayarlanir. OPENING SL 1.5x (genis), CLOSING SL 0.8x (dar).
+
+**Entegrasyon:** `PYTHON/common/time_rules.py` (`TimeBasedTradingManager`)
+**Kullanim:**
+```bash
+python PYTHON/main.py --time-check
+python PYTHON/main.py --time-summary
+```
+
+---
+
+### K247 — EOD Pozisyon Kapatma ve Uyari Sistemi (TimeAlert)
+
+Gun sonu yaklastiginda pozisyonlar otomatik olarak kucultulur veya kapatilir.
+
+**EOD Kurallari:**
+- **15:30'dan sonra:** Yeni pozisyon ACMA (kapanis oncesi).
+- **17:30'dan sonra:** Kalan pozisyonlari KAPAT (gece tasima yok).
+- **CLOSING penceresi (15:00-18:00):** `risk_multiplier=0.7`, `max_positions=2`, `position_size_multiplier=0.8`.
+
+**Uyari Seviyeleri (TimeAlertLevel):**
+| Seviye | Renk | Davranis |
+|--------|------|----------|
+| INFO | Mavi | Bilgilendirme (ornegin: acilis momentumu) |
+| WARNING | Sari | Dikkat gerektirir (ornegin: kapanis oncesi) |
+| CRITICAL | Kirmizi | Acil eylem (ornegin: gunluk limit asimi) |
+| BLOCK | Kirmizi | Islem tamamen engellenir (piyasa kapali) |
+
+**Otomatik Uyarilar:**
+- **Piyasa kapali:** BLOCK — "Piyasa kapali: {description}"
+- **Ogle arasi (LUNCH):** WARNING — "Ogle arasi: Dusuk hacim, spread artisi. Islem KACIN."
+- **Kapanis oncesi (CLOSING):** WARNING + action_required — "Yeni pozisyon ACMA, mevcut pozisyonlari kucult."
+- **Acilis momentumu (OPENING):** INFO — "Yuksek volatilite, SL genisletildi."
+
+**Kural K247a:** Her uyari bir kez emit edilir (`_time_alerts_emitted` set ile takip).
+**Kural K247b:** `should_close_positions()` 17:30'dan sonra `True` dondurur.
+**Kural K247c:** `get_time_until_close()` kapanisa kalan dakikayi hesaplar (18:00 BIST kapanis).
+
+**Entegrasyon:** `PYTHON/common/time_rules.py` (`TimeBasedTradingManager.check_and_alert()`)
+**Entegrasyon:** `PYTHON/paper_trading/signal_engine.py` (`SignalEngine._check_time_window()`)
+
+---
+
+### K248 — Optimal Trading Zaman Onerisi ve Raporlama
+
+Sistem, mevcut zamana gore en mantikli islem zamanini otomatik onerir.
+
+**Optimal Trading Suggestion (`suggest_optimal_trading_time()`):**
+- Eger aktif pencerede trading aciksa: `can_trade_now=True`, risk carpani, max pozisyon, ve aciklama dondurulur.
+- Eger kapaliysa: Bir sonraki trading penceresine kalan dakika hesaplanir.
+- Ertesi gunun acilisina kadar sure hesaplanir.
+
+**Summary Raporu (`get_summary()`):**
+```json
+{
+  "current_time": "2026-05-22T10:30:00+00:00",
+  "current_window": "morning",
+  "can_trade": true,
+  "risk_multiplier": 1.0,
+  "position_size_multiplier": 1.0,
+  "sl_multiplier": 1.0,
+  "tp_multiplier": 1.0,
+  "max_positions": 5,
+  "description": "Optimal trading penceresi — normal risk",
+  "minutes_until_close": 450,
+  "should_close_positions": false,
+  "optimal_trading_suggestion": { ... }
+}
+```
+
+**Kural K248a:** `suggest_optimal_trading_time()` her scan oncesi cagrilmali.
+**Kural K248b:** Kapanisa 30 dk kala (`minutes_until_close <= 30`) WARNING uyari ver.
+**Kural K248c:** LUNCH penceresinde fallback hisse aramasi DURDURULUR (dusuk hacim, manipülasyon riski yuksek).
+
+**Entegrasyon:** `PYTHON/common/time_rules.py`, `PYTHON/paper_trading/signal_engine.py`
+**Kullanim:**
+```bash
+# Python dogrudan
+python -c "from PYTHON.common.time_rules import TimeBasedTradingManager; tm=TimeBasedTradingManager(); print(tm.get_summary())"
+```
+
+---
+
+## K246-K248 Kritik Kurallar
+
+- **K246a** — Trading penceresi KAPALI ise islem yok.
+- **K246b** — Risk carpani pencereye gore dinamik.
+- **K246c** — Max pozisyon pencereye gore degisir.
+- **K246d** — LUNCH'da islem yasak (dusuk hacim/spread).
+- **K246e** — SL/TP carpani pencereye gore ayarlanir.
+- **K247a** — 15:30'dan sonra yeni pozisyon acma.
+- **K247b** — 17:30'dan sonra kalan pozisyonlari kapat.
+- **K248a** — Optimal trading onerisi her scan oncesi cagrilmali.
+- **K248b** — Kapanisa 30 dk kala uyari ver.
+- **K248c** — LUNCH'da fallback aramasi durdurulur.
+
+---
+
+## Test
+
+- `pytest PYTHON/tests/test_time_rules.py` — 59 test
+- **Sistem toplami:** 1054+ test
+
+---
+
+*AnatoliaX Trading System v3.3 — Zaman Bazli Trading Kurallari (K246-K248)*

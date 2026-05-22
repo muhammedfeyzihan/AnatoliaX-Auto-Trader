@@ -44,6 +44,7 @@ from PYTHON.manipulation.agent_trust_scorer import AgentTrustScorer
 from PYTHON.manipulation.consensus_engine import ByzantineConsensus
 from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter
 from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator
+from PYTHON.common.time_rules import TimeBasedTradingManager
 
 
 class SignalEngine:
@@ -104,6 +105,9 @@ class SignalEngine:
             fallback_router=self.fallback_router,
             enable_auto_rotate=enable_auto_rotate,
         )
+        # Zaman bazli trading yonetimi (K246-K248)
+        self.time_manager = TimeBasedTradingManager()
+        self._time_alerts_emitted: set = set()
 
     def _check_market_open(self) -> tuple[bool, str]:
         """Piyasa acik mi kontrol et. Tatil/haftasonu bilgisi dondur."""
@@ -112,6 +116,29 @@ class SignalEngine:
         if not self.calendar.is_market_open():
             return False, "BIST su an kapali (09:30-18:00 acik)"
         return True, "Piyasa acik"
+
+    def _check_time_window(self) -> tuple[bool, str]:
+        """K246-K248: Zaman bazli trading penceresi kontrolu."""
+        if not self.time_manager.can_trade_now():
+            suggestion = self.time_manager.suggest_optimal_trading_time()
+            reason = suggestion.get("reason", "Piyasa kapali")
+            return False, reason
+        # Uyarlari kontrol et ve bir kez yazdir
+        alerts = self.time_manager.check_and_alert()
+        for alert in alerts:
+            key = (alert.window.value, alert.level.value, alert.message)
+            if key not in self._time_alerts_emitted:
+                self._time_alerts_emitted.add(key)
+                print(f"ZAMAN UYARISI [{alert.level.value.upper()}]: {alert.message}")
+        return True, "Trading penceresi acik"
+
+    def _get_time_based_max_positions(self) -> int:
+        """K246: Aktif zaman penceresine gore max pozisyon limiti."""
+        return self.time_manager.get_max_positions()
+
+    def _get_time_based_risk_multiplier(self) -> float:
+        """K246: Aktif zaman penceresine gore risk carpani."""
+        return self.time_manager.get_risk_multiplier()
 
     def _check_manipulation(self, symbol: str):
         """Çoklu zaman diliminde manipülasyon tespiti."""
@@ -330,17 +357,22 @@ class SignalEngine:
             result["reason"] = reason
             return result
 
-        # Risk kontrolu: Max pozisyon
-        open_pos = len(self.broker.get_open_positions())
-        if open_pos >= self.max_positions:
-            result["reason"] = "Max pozisyon limiti"
+        # K246-K248: Zaman bazli trading penceresi kontrolu
+        can_trade_time, time_reason = self._check_time_window()
+        if not can_trade_time:
+            result["reason"] = time_reason
             return result
 
-        # Risk kontrolu: Gunluk kayip
-        daily_pnl = self.broker.get_daily_pnl()
-        initial = self.broker.initial_capital
-        if daily_pnl < -initial * (self.max_risk_pct / 100):
-            result["reason"] = f"Gunluk risk limiti asildi ({daily_pnl:.2f} TL)"
+        # K246: Aktif zaman penceresine gore dinamik max pozisyon
+        time_max_pos = self._get_time_based_max_positions()
+        open_pos = len(self.broker.get_open_positions())
+        if open_pos >= time_max_pos:
+            result["reason"] = f"Zaman penceresi max pozisyon limiti ({time_max_pos})"
+            return result
+
+        # K246: EOD pozisyon kapatma kontrolu
+        if self.time_manager.should_close_positions():
+            result["reason"] = "Kapanis oncesi — yeni pozisyon ACMA (K247)"
             return result
 
         # Paper trade ac
@@ -428,6 +460,12 @@ class SignalEngine:
             print(f"SINYAL: {reason}")
             return [{"market_closed": True, "reason": reason}]
 
+        # K246-K248: Zaman penceresi kontrolu
+        can_trade_time, time_reason = self._check_time_window()
+        if not can_trade_time:
+            print(f"SINYAL: {time_reason}")
+            return [{"market_closed": True, "reason": time_reason}]
+
         results = []
         fallback_count = 0
 
@@ -465,6 +503,11 @@ class SignalEngine:
         if not is_open:
             return [{"market_closed": True, "reason": reason}]
 
+        # K246-K248: Zaman penceresi kontrolu
+        can_trade_time, time_reason = self._check_time_window()
+        if not can_trade_time:
+            return [{"market_closed": True, "reason": time_reason}]
+
         results = []
         for sym in symbols:
             should_rotate, rotation_reason = self.rotator.should_rotate(sym)
@@ -499,12 +542,28 @@ class SignalEngine:
         """
         Birden fazla sembolu tara ve sinyal uret.
         Tatil/haftasonu/piyasa kapali ise bilgi ver ve cik.
+        K246-K248: Zaman bazli pencere kontrolu entegre.
         Returns: sinyal sonuclari listesi
         """
         is_open, reason = self._check_market_open()
         if not is_open:
             print(f"SINYAL: {reason}")
             return [{"market_closed": True, "reason": reason}]
+
+        # K246-K248: Zaman penceresi kontrolu
+        can_trade_time, time_reason = self._check_time_window()
+        if not can_trade_time:
+            print(f"SINYAL: {time_reason}")
+            return [{"market_closed": True, "reason": time_reason}]
+
+        # K246: Optimal trading onerisini goster
+        suggestion = self.time_manager.suggest_optimal_trading_time()
+        if suggestion["can_trade_now"]:
+            print(
+                f"ZAMAN: Aktif pencere={suggestion['current_window']} | "
+                f"Risk carpani={suggestion['risk_multiplier']} | "
+                f"Max pozisyon={suggestion['max_positions']}"
+            )
 
         results = []
         for sym in symbols:

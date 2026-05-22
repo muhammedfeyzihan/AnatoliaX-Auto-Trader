@@ -85,6 +85,7 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 - **K204-K237** — Uretim seviyesi modulleri (risk motoru, async event bus, pozisyon yasam dongusu, exchange adapter, emir yoneticisi, strateji kayit defteri, walk-forward optimizasyon, kalici ajan hafizasi, AI rejim detektoru, gozlemlenebilirlik dashboardu, deterministik replay, sifreli secret yonetimi, latency export, portfoy orkestrasyonu, Monte Carlo risk, crash recovery, feature store, aciklanabilir AI, CI/CD).
 - **K238-K242** — Maksimum optimizasyon (hizli cache, asenkron paralel fetch, vektorize backtest, paralel tarayici, hizli tick depolama).
 - **K243-K245** — Manipülasyon fallback ve çoklu piyasa geçisi (manipülasyon tespiti sonrasi BIST -> Kripto -> Forex otomatik geçis, dinamik sembol rotasyonu).
+- **K246-K248** — Zaman bazli trading pencereleri ve uyari sistemi (8 pencere, dinamik risk carpani, EOD pozisyon kapatma, ogle arasi kacinma).
 
 Tum kurallar: `KURALLAR/` dizini.
 
@@ -264,6 +265,24 @@ python -c "from PYTHON.execution.manipulation_fallback import ManipulationFallba
 python -c "from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator; rot=DynamicSymbolRotator(); rot.record_rotation('THYAO','GARAN','Test'); print(rot.get_rotation_history())"
 ```
 
+### Zaman Bazli Trading (K246-K248)
+```bash
+# Aktif zaman penceresi ve trading durumu
+python PYTHON/main.py --time-check
+
+# Detayli zaman ozeti
+python PYTHON/main.py --time-summary
+
+# Dogrudan Python
+python -c "from PYTHON.common.time_rules import TimeBasedTradingManager; tm=TimeBasedTradingManager(); print(tm.get_summary())"
+
+# Optimal trading onerisi
+python -c "from PYTHON.common.time_rules import TimeBasedTradingManager; tm=TimeBasedTradingManager(); s=tm.suggest_optimal_trading_time(); print(s)"
+
+# Uyari kontrolu
+python -c "from PYTHON.common.time_rules import TimeBasedTradingManager; tm=TimeBasedTradingManager(); alerts=tm.check_and_alert(); print([a.message for a in alerts])"
+```
+
 ---
 
 ## Test
@@ -274,7 +293,7 @@ pytest tests/ -v
 pytest tests/ --cov=. --cov-report=html
 ```
 
-**Mevcut:** 995+ test, %80+ coverage.
+**Mevcut:** 1054+ test, %80+ coverage.
 
 ---
 

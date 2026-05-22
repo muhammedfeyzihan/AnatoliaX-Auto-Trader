@@ -328,6 +328,10 @@ def main():
     parser.add_argument("--gold-capital", type=float, default=100_000.0, help="Gold Mining baslangic sermayesi")
     parser.add_argument("--gold-scan", type=str, metavar="SYMBOLS", help="Gold Mining sembol listesi (virgulle ayrilmis)")
 
+    # K246-K248: Zaman bazli trading kontrolu
+    parser.add_argument("--time-check", action="store_true", help="Aktif zaman penceresi ve trading durumunu goster")
+    parser.add_argument("--time-summary", action="store_true", help="Zaman bazli trading ozetini goster")
+
     args = parser.parse_args()
 
     if args.add_user:
@@ -423,6 +427,38 @@ def main():
 
     if args.agent_trust:
         run_agent_trust()
+
+    # K246-K248: Zaman bazli trading kontrolu
+    if args.time_check:
+        from PYTHON.common.time_rules import TimeBasedTradingManager
+        tm = TimeBasedTradingManager()
+        suggestion = tm.suggest_optimal_trading_time()
+        print("\n[ZAMAN KONTROLU]")
+        print(f"  Aktif Pencere: {suggestion['current_window']}")
+        print(f"  Trading: {'ACIK' if suggestion['can_trade_now'] else 'KAPALI'}")
+        print(f"  Risk Carpani: {suggestion.get('risk_multiplier', 0.0)}")
+        print(f"  Max Pozisyon: {suggestion.get('max_positions', 0)}")
+        print(f"  Neden: {suggestion['reason']}")
+        if suggestion.get('next_window'):
+            print(f"  Sonraki Pencere: {suggestion['next_window']} ({suggestion['minutes_until']} dk)")
+        alerts = tm.check_and_alert()
+        if alerts:
+            print(f"  Uyarilar: {len(alerts)}")
+            for a in alerts:
+                print(f"    [{a.level.value.upper()}] {a.message}")
+
+    if args.time_summary:
+        from PYTHON.common.time_rules import TimeBasedTradingManager
+        tm = TimeBasedTradingManager()
+        summary = tm.get_summary()
+        print("\n[ZAMAN OZETI]")
+        for k, v in summary.items():
+            if k == "optimal_trading_suggestion":
+                print(f"  {k}:")
+                for sk, sv in v.items():
+                    print(f"    {sk}: {sv}")
+            else:
+                print(f"  {k}: {v}")
 
     if args.gold_mining or args.gold_scan:
         symbols = [s.strip().upper() for s in args.gold_scan.split(",")] if args.gold_scan else BIST_UNIVERSE
