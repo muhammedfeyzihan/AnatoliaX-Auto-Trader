@@ -16,8 +16,22 @@ class TestAdaptiveLearner:
         learner = AdaptiveLearner(features=["ema9", "rsi"])
         learner.fit_incremental({"ema9": 0.5, "rsi": 60.0}, y=0.02)
         pred = learner.predict({"ema9": 0.5, "rsi": 60.0})
-        # If river is available, pred may be a float; otherwise None
-        assert pred is None or isinstance(pred, float)
+        assert isinstance(pred, float)
+
+    def test_predict_before_fit(self):
+        learner = AdaptiveLearner(features=["ema9", "rsi"])
+        pred = learner.predict({"ema9": 0.5, "rsi": 60.0})
+        assert pred is None
+
+    def test_sgd_fallback_learns(self):
+        learner = AdaptiveLearner(features=["x"], learning_rate=0.1)
+        # y = 2*x + 1
+        for _ in range(200):
+            learner.fit_incremental({"x": 1.0}, y=3.0)
+            learner.fit_incremental({"x": 2.0}, y=5.0)
+        pred = learner.predict({"x": 3.0})
+        assert isinstance(pred, float)
+        assert 6.5 < pred < 7.5  # Should converge near 7.0
 
     def test_detect_drift_true(self):
         learner = AdaptiveLearner(features=["f1"], drift_threshold=0.01)

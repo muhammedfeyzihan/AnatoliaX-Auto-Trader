@@ -64,9 +64,43 @@ class BISTRegulatoryChecker:
     def __init__(self, vbts_measures: Optional[List[VBTSMeasure]] = None):
         self.vbts_registry: Dict[str, List[VBTSMeasure]] = {}
         self._circuit_states: Dict[str, CircuitBreakerState] = {}
+        # Net long positions per symbol (positive = long, negative = short)
+        self._positions: Dict[str, float] = {}
         if vbts_measures:
             for m in vbts_measures:
                 self.vbts_registry.setdefault(m.symbol, []).append(m)
+
+    # ── Pozisyon Takibi (Short Selling Kontrolü) ──────────
+
+    def update_position(self, symbol: str, side: str, size: float) -> None:
+        """İşlem sonrası pozisyonu güncelle."""
+        sym = symbol.upper()
+        current = self._positions.get(sym, 0.0)
+        if side == "BUY":
+            self._positions[sym] = current + size
+        elif side == "SELL":
+            self._positions[sym] = current - size
+
+    def get_position(self, symbol: str) -> float:
+        """Sembolün mevcut net pozisyonunu döner."""
+        return self._positions.get(symbol.upper(), 0.0)
+
+    def check_short_selling(self, symbol: str, side: str, size: float) -> dict:
+        """
+        BIST spot piyasada açığa satış yasak.
+        SELL emri mevcut pozisyondan büyükse short selling oluşur.
+        """
+        if side != "SELL":
+            return {"allowed": True, "reason": "Not a sell order"}
+        current = self.get_position(symbol)
+        if current <= 0:
+            return {"allowed": False, "reason": f"No long position to sell. Current: {current}"}
+        if size > current:
+            return {
+                "allowed": False,
+                "reason": f"Sell size {size} exceeds long position {current}. Short selling banned on BIST spot.",
+            }
+        return {"allowed": True, "reason": "Closing existing long position"}
 
     # ── VBTS ───────────────────────────────────────────────
 
@@ -220,6 +254,7 @@ class BISTRegulatoryChecker:
         position_value: float,
         cash: float,
         side: Literal["BUY", "SELL"],
+        size: float = 0.0,
     ) -> dict:
         """Bir işlem öncesi tüm BIST regülasyonlarını kontrol et."""
         errors = []
@@ -245,10 +280,9 @@ class BISTRegulatoryChecker:
             errors.append(f"Stock CB: {stock_cb.reason}")
 
         # Short selling
-        if side == "SELL" and not self.is_short_selling_allowed(symbol):
-            # Bu kontrol açığa satış değil, mevcut pozisyon satışı ise geçerli.
-            # Basitçe: spot piyasada yeni short pozisyon açılamaz.
-            pass
+        short_check = self.check_short_selling(symbol, side, size)
+        if not short_check["allowed"]:
+            errors.append(short_check["reason"])
 
         # Order/trade ratio
         otr = self.check_order_trade_ratio(orders_today, trades_today)

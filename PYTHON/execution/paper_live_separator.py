@@ -148,35 +148,65 @@ class PaperLiveSeparator:
 
     # ── PnL Reconciliation (K180) ────────────────────────
 
+    def _pnl(self, outcome: ExecutionOutcome) -> float:
+        """Bir outcome'un PnL'ini hesapla."""
+        if outcome.side == "BUY":
+            return (outcome.filled_price - outcome.expected_price) * outcome.size
+        return (outcome.expected_price - outcome.filled_price) * outcome.size
+
     def reconcile(self) -> dict:
         """
         Paper vs Live PnL karşılaştırması.
+        Aynı signal_id ile paper/live outcome'ları eşleştirir.
         """
         if not self._paper_outcomes or not self._live_outcomes:
-            return {"difference_pct": None, "alert": False, "reason": "No data"}
+            return {"difference_pct": None, "alert": False, "reason": "No data", "pairs": []}
 
-        paper_pnl = sum(
-            (o.filled_price - o.expected_price) * o.size if o.side == "BUY" else (o.expected_price - o.filled_price) * o.size
-            for o in self._paper_outcomes
-        )
-        live_pnl = sum(
-            (o.filled_price - o.expected_price) * o.size if o.side == "BUY" else (o.expected_price - o.filled_price) * o.size
-            for o in self._live_outcomes
-        )
+        paper_by_id = {o.signal_id: o for o in self._paper_outcomes}
+        live_by_id = {o.signal_id: o for o in self._live_outcomes}
 
-        if paper_pnl == 0:
-            diff_pct = 0.0 if live_pnl == 0 else float("inf")
+        pairs = []
+        total_paper_pnl = 0.0
+        total_live_pnl = 0.0
+        mismatches = 0
+
+        for sid in set(paper_by_id.keys()) | set(live_by_id.keys()):
+            paper_o = paper_by_id.get(sid)
+            live_o = live_by_id.get(sid)
+            if paper_o and live_o:
+                paper_pnl = self._pnl(paper_o)
+                live_pnl = self._pnl(live_o)
+                total_paper_pnl += paper_pnl
+                total_live_pnl += live_pnl
+                if paper_pnl != 0:
+                    diff_pct = abs((live_pnl - paper_pnl) / paper_pnl)
+                else:
+                    diff_pct = abs(live_pnl) * 100 if live_pnl != 0 else 0.0
+                pairs.append({
+                    "signal_id": sid,
+                    "paper_pnl": round(paper_pnl, 4),
+                    "live_pnl": round(live_pnl, 4),
+                    "diff_pct": round(diff_pct * 100, 4),
+                    "alert": diff_pct > 0.01,
+                })
+            else:
+                mismatches += 1
+
+        if total_paper_pnl == 0:
+            overall_diff_pct = 0.0 if total_live_pnl == 0 else float("inf")
         else:
-            diff_pct = abs((live_pnl - paper_pnl) / paper_pnl)
+            overall_diff_pct = abs((total_live_pnl - total_paper_pnl) / total_paper_pnl)
 
-        alert = diff_pct > 0.01  # > 1% difference
+        alert = overall_diff_pct > 0.01  # > 1% difference
 
         return {
-            "paper_pnl": round(paper_pnl, 2),
-            "live_pnl": round(live_pnl, 2),
-            "difference_pct": round(diff_pct * 100, 4),
+            "paper_pnl": round(total_paper_pnl, 2),
+            "live_pnl": round(total_live_pnl, 2),
+            "difference_pct": round(overall_diff_pct * 100, 4),
             "alert": alert,
-            "reason": f"Paper/Live PnL diff {diff_pct*100:.2f}%" if alert else "PnL aligned",
+            "reason": f"Paper/Live PnL diff {overall_diff_pct*100:.2f}%" if alert else "PnL aligned",
+            "pairs": pairs,
+            "mismatches": mismatches,
         }
 
     # ── EQS Calculation (K182-K183) ──────────────────────

@@ -79,6 +79,35 @@ class TestPaperLiveSeparator:
         sep = PaperLiveSeparator()
         result = sep.reconcile()
         assert result["difference_pct"] is None
+        assert result["pairs"] == []
+
+    def test_reconcile_pairs_by_signal_id(self):
+        sep = PaperLiveSeparator()
+        s1 = {"id": "s1", "symbol": "THYAO", "side": "BUY", "size": 10, "price": 100.0}
+        s2 = {"id": "s2", "symbol": "GARAN", "side": "BUY", "size": 5, "price": 50.0}
+        sep.run_paper(s1)
+        sep.run_paper(s2)
+        sep.run_live(s1, filled_price=100.0, latency_ms=50.0)
+        sep.run_live(s2, filled_price=51.0, latency_ms=60.0)  # 2% slippage for s2
+        result = sep.reconcile()
+        assert len(result["pairs"]) == 2
+        # s1 should be aligned
+        s1_pair = next(p for p in result["pairs"] if p["signal_id"] == "s1")
+        assert s1_pair["alert"] is False
+        # s2 should alert (2% slippage > 1% threshold)
+        s2_pair = next(p for p in result["pairs"] if p["signal_id"] == "s2")
+        assert s2_pair["alert"] is True
+
+    def test_reconcile_mismatch(self):
+        sep = PaperLiveSeparator()
+        s1 = {"id": "s1", "symbol": "THYAO", "side": "BUY", "size": 10, "price": 100.0}
+        sep.run_paper(s1)
+        # No live for s1, live for s2 only
+        s2 = {"id": "s2", "symbol": "GARAN", "side": "BUY", "size": 5, "price": 50.0}
+        sep.run_live(s2, filled_price=50.0, latency_ms=50.0)
+        result = sep.reconcile()
+        assert result["mismatches"] == 2
+        assert len(result["pairs"]) == 0
 
     def test_calculate_eqs(self):
         sep = PaperLiveSeparator()

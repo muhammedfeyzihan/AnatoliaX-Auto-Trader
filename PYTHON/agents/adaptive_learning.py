@@ -22,14 +22,20 @@ class AdaptiveLearner:
     Falls back to simple per-feature weighting if river is not available.
     """
 
-    def __init__(self, features: List[str], drift_threshold: float = 0.05):
+    def __init__(self, features: List[str], drift_threshold: float = 0.05, learning_rate: float = 0.01):
         self.features = features
         self.drift_threshold = drift_threshold
+        self.learning_rate = learning_rate
         self._weights: Dict[str, FeatureWeight] = {f: FeatureWeight(f) for f in features}
         self._pnl_history: List[float] = []
         self._drift_detected = False
         self._samples_since_drift = 0
         self._model_ready = False
+
+        # Pure-Python fallback: online linear regression (SGD)
+        self._coef: Dict[str, float] = {f: 0.0 for f in features}
+        self._intercept: float = 0.0
+        self._sample_count: int = 0
 
         # Try to use river for true incremental learning
         self._river = None
@@ -54,15 +60,27 @@ class AdaptiveLearner:
         if self._river:
             self._river_model.learn_one(X, y)
             self._model_ready = True
-        else:
-            # Fallback: simple moving average of feature-target correlation
-            pass
+            return
+
+        # Pure-Python fallback: online SGD linear regression
+        pred = sum(self._coef.get(k, 0.0) * v for k, v in X.items()) + self._intercept
+        error = (y - pred) * sample_weight
+        lr = self.learning_rate / (1 + self._sample_count * 0.0001)  # decay
+        for k, v in X.items():
+            if k in self._coef:
+                self._coef[k] += lr * error * v
+        self._intercept += lr * error
+        self._sample_count += 1
+        self._model_ready = True
 
     def predict(self, X: Dict[str, float]) -> Optional[float]:
         """Tahmin yap."""
-        if self._river and self._model_ready:
+        if not self._model_ready:
+            return None
+        if self._river:
             return self._river_model.predict_one(X)
-        return None
+        # Pure-Python fallback prediction
+        return sum(self._coef.get(k, 0.0) * v for k, v in X.items()) + self._intercept
 
     # ── Concept Drift Detection (K176) ─────────────────────
 
@@ -135,6 +153,9 @@ class AdaptiveLearner:
         self._drift_detected = False
         self._samples_since_drift = 0
         self._model_ready = False
+        self._coef = {f: 0.0 for f in self.features}
+        self._intercept = 0.0
+        self._sample_count = 0
         if self._river:
             try:
                 from river import linear_model, preprocessing, compose

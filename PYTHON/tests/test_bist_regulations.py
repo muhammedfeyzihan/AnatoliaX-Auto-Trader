@@ -169,3 +169,48 @@ class TestBISTRegulatoryChecker:
         )
         assert result["valid"] is False
         assert any("Price" in e for e in result["errors"])
+
+    def test_position_tracking(self):
+        checker = BISTRegulatoryChecker()
+        assert checker.get_position("THYAO") == 0.0
+        checker.update_position("THYAO", "BUY", 100)
+        assert checker.get_position("THYAO") == 100.0
+        checker.update_position("THYAO", "SELL", 30)
+        assert checker.get_position("THYAO") == 70.0
+
+    def test_short_selling_no_position(self):
+        checker = BISTRegulatoryChecker()
+        result = checker.check_short_selling("THYAO", "SELL", 10)
+        assert result["allowed"] is False
+        assert "No long position" in result["reason"]
+
+    def test_short_selling_exceeds_position(self):
+        checker = BISTRegulatoryChecker()
+        checker.update_position("THYAO", "BUY", 50)
+        result = checker.check_short_selling("THYAO", "SELL", 60)
+        assert result["allowed"] is False
+        assert "exceeds long position" in result["reason"]
+
+    def test_short_selling_closing_position(self):
+        checker = BISTRegulatoryChecker()
+        checker.update_position("THYAO", "BUY", 50)
+        result = checker.check_short_selling("THYAO", "SELL", 30)
+        assert result["allowed"] is True
+
+    def test_validate_trade_short_selling_blocked(self):
+        checker = BISTRegulatoryChecker()
+        result = checker.validate_trade(
+            symbol="THYAO",
+            price=105.0,
+            reference_price=100.0,
+            index_level=10000,
+            index_previous_close=10000,
+            orders_today=30,
+            trades_today=10,
+            position_value=0,
+            cash=25_000,
+            side="SELL",
+            size=10,
+        )
+        assert result["valid"] is False
+        assert any("short" in e.lower() or "No long" in e for e in result["errors"])
