@@ -7,7 +7,7 @@
 | **Versiyon** | 3.2 |
 | **Tarih** | 2026-05-22 |
 | **Ajanlar** | 3 (Sinyal / Risk / Strateji) + Telegram |
-| **Test** | 648+ test, %80+ coverage |
+| **Test** | 792+ test, %80+ coverage |
 | **Lisans** | MIT |
 
 ---
@@ -26,6 +26,8 @@ AnatoliaX, BIST 30/50/100 hisseleri icin gelistirilmis event-driven, cok ajanli 
 **Gold Mining Stratejisi** (v3.2) — Kademeli tier sistemi: MS → S1 → M1 → M5 → M15 → H1 → D1. Otomatik tier geçişi, fallback, ve 7 zaman dilimli profesyonel scalping.
 
 **Nautilus Trader Entegrasyonu** (v3.1, opsiyonel) — Event-driven MessageBus, PreTradeRiskEngine, FillModel, InstrumentProvider patternleri.
+
+**Enterprise Modülleri** (v3.2) — BIST regülasyon uyumluluğu, davranışsal finans kontrolleri, BIST özel slippage, gerçekçi maliyet simülasyonu, OOS validasyon, temel analiz filtresi, piyasa mikro yapısı, CVaR ensemble optimizasyonu, online learning, paper/live ayrımı, ileri trade analitikleri, gelişmiş pozisyon ölçekleme.
 
 ---
 
@@ -54,13 +56,25 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 
 ---
 
-## Kritik Kurallar (K1-K141)
+## Kritik Kurallar (K1-K196)
 
 - **K91** — TradingView birincil, Bigpara ikincil, biquote yardimci.
 - **K92** — "Yalan asla yok." Her fiyat yani kaynak ve zaman damgasi.
 - **K94** — Max pozisyon/hisse %2, gunluk max kayip %3, R:R min 1:2.
 - **K141** — Piyasa kapali = islem yok. `BISTCalendar` kontrolu zorunlu.
 - **K143** — Emir validasyonu zorunlu (`OrderValidator`).
+- **K142-K148** — BIST regülasyon uyumluluğu (VBTS, devre kesici, short selling yasak).
+- **K149-K154** — Davranışsal finans kontrolleri (FOMO, loss aversion, cooldown).
+- **K155-K158** — BIST özel slippage modeli.
+- **K159-K162** — OOS validasyon (walk-forward, overfitting tespiti).
+- **K163-K166** — Temel analiz filtresi (P/E, P/B, KAP olayları).
+- **K167-K170** — Piyasa mikro yapısı (order book, market impact, VWAP).
+- **K171-K174** — Ensemble optimizasyonu (CVaR, korelasyon, rejim ağırlıkları).
+- **K175-K178** — Online learning ve concept drift.
+- **K179-K183** — Paper/live ayrımı ve Execution Quality Score.
+- **K184-K188** — İleri trade analitikleri (Calmar, Omega, streak analysis).
+- **K189-K192** — Gerçekçi maliyet simülasyonu (BIST, Takasbank, brokerage).
+- **K193-K196** — Gelişmiş pozisyon ölçekleme (Kelly, Optimal f, vol targeting).
 
 Tum kurallar: `KURALLAR/` dizini.
 
@@ -126,6 +140,27 @@ python PYTHON/main.py --gold-mining
 python PYTHON/main.py --gold-scan THYAO,GARAN,ASELS --gold-tier M1 --gold-capital 50000
 ```
 
+### Yeni Enterprise Modülleri
+```bash
+# BIST regülasyon kontrolü
+python -c "from PYTHON.risk.bist_regulations import BISTRegulatoryChecker; print(BISTRegulatoryChecker().validate_trade(symbol='THYAO', price=105, reference_price=100, index_level=10000, index_previous_close=10000, orders_today=30, trades_today=10, position_value=100000, cash=25000, side='BUY'))"
+
+# Davranışsal finans kontrolü
+python -c "from PYTHON.risk.behavioral_finance import BehavioralFinanceGuard; print(BehavioralFinanceGuard().can_trade({}))"
+
+# Temel analiz filtresi
+python -c "from PYTHON.analytics.fundamental_filter import FundamentalFilter, FundamentalData; f=FundamentalFilter(); f.set_sector_benchmark('BANKA', pe=8, pb=1, ev_ebitda=6); print(f.score(FundamentalData('GARAN','BANKA',pe=7,pb=0.9,ev_ebitda=5,net_profit_growth_3y=0.1)))"
+
+# Ensemble CVaR optimizasyonu
+python -c "from PYTHON.strategy.ensemble_optimizer import EnsembleOptimizer; import pandas as pd, numpy as np; opt=EnsembleOptimizer(); df=pd.DataFrame({'a':np.random.normal(0.001,0.02,100),'b':np.random.normal(0.001,0.02,100)}); print(opt.cvar_optimize(df))"
+
+# Paper/Live reconciliation
+python -c "from PYTHON.execution.paper_live_separator import PaperLiveSeparator; sep=PaperLiveSeparator(); sep.run_paper({'symbol':'THYAO','side':'BUY','size':10,'price':100}); sep.run_live({'symbol':'THYAO','side':'BUY','size':10,'price':100}, filled_price=100.2, latency_ms=50); print(sep.reconcile())"
+
+# OOS Walk-Forward validasyon
+python -c "from PYTHON.backtest.oos_validator import OOSValidator; import pandas as pd, numpy as np; val=OOSValidator(); df=pd.DataFrame({'close':100+np.cumsum(np.random.randn(200)*0.5),'high':101+np.cumsum(np.random.randn(200)*0.5),'low':99+np.cumsum(np.random.randn(200)*0.5)}); print(val.regime_split_backtest(df, lambda d: {'sharpe':0.5}))"
+```
+
 ---
 
 ## Test
@@ -160,21 +195,21 @@ AnatoliaX-Trading-System/
 ├── PYTHON/
 │   ├── main.py                    # CLI orchestrator
 │   ├── requirements.txt
-│   ├── backtest/                  # Vektorize + event-driven backtest
+│   ├── backtest/                  # Vektorize + event-driven backtest + OOS + microstructure
 │   ├── paper_trading/             # Paper broker + signal engine
 │   ├── hft/                       # HFT modulu (tick-level)
 │   ├── data/                      # Fetcher, catalog, instrument provider
-│   ├── risk/                      # Position, Account, PreTradeRiskEngine
-│   ├── execution/                 # UnifiedExecutionEngine, order types
-│   ├── agents/                    # Orchestrator, Q-learning memory
-│   ├── analytics/               # Volume anomaly, BB+volume combo
+│   ├── risk/                      # Position, Account, PreTradeRiskEngine, BIST regs, behavioral, sizing
+│   ├── execution/                 # UnifiedExecutionEngine, order types, paper/live separator
+│   ├── agents/                    # Orchestrator, Q-learning memory, adaptive learning
+│   ├── analytics/                 # Volume anomaly, BB+volume combo, fundamental filter, trade analytics
 │   ├── memory/                    # ChromaDB embedding
 │   ├── telegram/                  # Reporter bot
 │   ├── observability/             # JSON logging, Prometheus metrics
 │   ├── anatoliax_grpc/            # gRPC server/client
 │   ├── adapters/                  # NautilusAdapter (opsiyonel)
 │   ├── common/                    # MessageBus, events, validators
-│   └── tests/                     # 551+ pytest
+│   └── tests/                     # 792+ pytest
 ├── SCRIPTS/                       # Node.js motor (legacy/opsiyonel)
 ├── KURALLAR/                      # K1-K141 kurallar
 ├── AJANLAR/                       # Ajan kurallari
