@@ -47,36 +47,59 @@ def momentum_spike_signal(df: pd.DataFrame, threshold: float = 0.02) -> pd.Serie
     return spike.astype(int)
 
 
-def combined_signal(df: pd.DataFrame) -> pd.Series:
+def combined_signal(df: pd.DataFrame, indicators_needed: list[str] | None = None) -> pd.DataFrame:
     """
     Tum sinyalleri birlestirir (agirlikli).
     SIGNAL = EMA(0.20) + RSI(0.20) + Hacim(0.20) + BB(0.15) + VWAP(0.15) + MACD(0.10)
     Skor > 70 = STRONG BUY, 55-70 = BUY, 40-55 = WAIT, < 40 = REJECT
+
+    indicators_needed: Sadece belirtilen indikatörleri hesapla.
+        ['ema','rsi','macd','bb','vwap','volume'] — None = hepsi
     """
-    df = indicators.apply_all(df)
+    # Lazy indicator computation: only compute what's needed
+    needed = set(indicators_needed or ["ema", "rsi", "macd", "bb", "vwap", "volume"])
+
+    if "ema" in needed:
+        df = indicators.ema(df, periods=[9, 21])
+    if "rsi" in needed:
+        df = indicators.rsi(df)
+    if "macd" in needed:
+        df = indicators.macd(df)
+    if "bb" in needed:
+        df = indicators.bollinger(df)
+    if "vwap" in needed:
+        df = indicators.vwap(df)
+    if "volume" in needed or "bb" in needed:
+        df = indicators.volume_profile(df)
 
     scores = pd.Series(0.0, index=df.index)
 
     # EMA uyum (EMA9 > EMA21)
-    scores += (df["EMA9"] > df["EMA21"]).astype(float) * 20
+    if "ema" in needed and "EMA9" in df.columns and "EMA21" in df.columns:
+        scores += (df["EMA9"] > df["EMA21"]).astype(float) * 20
 
     # RSI momentum (30-70 arasi optimal)
-    rsi_ok = (df["RSI"] >= 45) & (df["RSI"] <= 65)
-    scores += rsi_ok.astype(float) * 20
+    if "rsi" in needed and "RSI" in df.columns:
+        rsi_ok = (df["RSI"] >= 45) & (df["RSI"] <= 65)
+        scores += rsi_ok.astype(float) * 20
 
     # Hacim patlamasi (Z > 2.5)
-    scores += (df["Vol_ZScore"] > 2.5).astype(float) * 20
+    if "volume" in needed and "Vol_ZScore" in df.columns:
+        scores += (df["Vol_ZScore"] > 2.5).astype(float) * 20
 
     # Bollinger squeeze
-    scores += (df["BB_Squeeze"] == True).astype(float) * 15
+    if "bb" in needed and "BB_Squeeze" in df.columns:
+        scores += (df["BB_Squeeze"] == True).astype(float) * 15
 
     # VWAP uzerinde
-    vwap_ok = (df["close"] > df["VWAP"]) & ((df["close"] - df["VWAP"]) / df["VWAP"] < 0.02)
-    scores += vwap_ok.astype(float) * 15
+    if "vwap" in needed and "VWAP" in df.columns:
+        vwap_ok = (df["close"] > df["VWAP"]) & ((df["close"] - df["VWAP"]) / df["VWAP"] < 0.02)
+        scores += vwap_ok.astype(float) * 15
 
     # MACD histogram pozitif
-    macd_ok = df["MACD_Hist"] > 0
-    scores += macd_ok.astype(float) * 10
+    if "macd" in needed and "MACD_Hist" in df.columns:
+        macd_ok = df["MACD_Hist"] > 0
+        scores += macd_ok.astype(float) * 10
 
     df["Signal_Score"] = scores
     df["Signal"] = np.where(scores >= 70, 2, np.where(scores >= 55, 1, 0))

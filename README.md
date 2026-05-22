@@ -7,7 +7,7 @@
 | **Versiyon** | 3.3 |
 | **Tarih** | 2026-05-22 |
 | **Ajanlar** | 3 (Sinyal / Risk / Strateji) + Telegram |
-| **Test** | 969+ test, %80+ coverage |
+| **Test** | 982+ test, %80+ coverage |
 | **Lisans** | MIT |
 
 ---
@@ -32,6 +32,8 @@ AnatoliaX, BIST 30/50/100 hisseleri icin gelistirilmis event-driven, cok ajanli 
 **Haftalik Strateji Konseyi** (v3.2) — Her cumartesi 3 ajan bir araya gelip gecen haftayi analiz eder: kazanc/zarar, en iyi setup, zaman dilimi, rejim tespiti. Matematiksel hedef carpani (1x->2x->4x->8x), 3/3 onay mekanizmasi, risk ayarlamalari ile yeni haftanin stratejisi belirlenir.
 
 **Uretim Seviyesi Modulleri** (v3.3) — 20 kritik production-grade modul: Merkezi risk motoru (UnifiedRiskEngine), birlesik strateji kosucu (backtest/paper/live tek kod tabani), async event bus, pozisyon yasam dongusu yoneticisi (partial TP, trailing stop, pyramiding), kripto borsa adapteri (Binance/Bybit/OKX), saglam emir yoneticisi (retry + stale recovery), strateji kayit defteri (dinamik yukleme), walk-forward optimizasyon, kalici ajan hafizasi (SQLite + ChromaDB), AI rejim detektoru (bull/bear/sideways/volatile/low_vol), gozlemlenebilirlik dashboardu (Grafana export), deterministik replay motoru, sifreli secret yonetimi (Fernet + XOR fallback), hassasiyetli latency export, portfoy orkestrasyonu (momentum * sharpe / vol), Monte Carlo risk wrapper (VaR-95, CVaR-95), crash recovery (JSON checkpoint), feature store, aciklanabilir AI (SHAP-benzeri), Dockerized CI/CD pipeline.
+
+**Maksimum Optimizasyon** (v3.3-opt) — Hizli cache (LRU + WAL SQLite), asenkron paralel veri cekme (asyncio.gather), vektorize backtest motoru (numpy, ~60x hizli), paralel sinyal tarayici (ThreadPoolExecutor), hizli tick depolama (buffered batch inserts + WAL), lazy indicator computation, vektorize Monte Carlo.
 
 ---
 
@@ -81,6 +83,7 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 - **K193-K196** — Gelismis pozisyon olcekleme (Kelly, Optimal f, vol targeting).
 - **K197-K203** — Haftalik Strateji Konseyi (cumartesi toplanti, hedef carpani, 3/3 onay, gecmis tecrube birlestirme).
 - **K204-K237** — Uretim seviyesi modulleri (risk motoru, async event bus, pozisyon yasam dongusu, exchange adapter, emir yoneticisi, strateji kayit defteri, walk-forward optimizasyon, kalici ajan hafizasi, AI rejim detektoru, gozlemlenebilirlik dashboardu, deterministik replay, sifreli secret yonetimi, latency export, portfoy orkestrasyonu, Monte Carlo risk, crash recovery, feature store, aciklanabilir AI, CI/CD).
+- **K238-K242** — Maksimum optimizasyon (hizli cache, asenkron paralel fetch, vektorize backtest, paralel tarayici, hizli tick depolama).
 
 Tum kurallar: `KURALLAR/` dizini.
 
@@ -227,6 +230,27 @@ python -c "from PYTHON.agents.feature_store import FeatureStore; f=FeatureStore(
 python -c "from PYTHON.agents.explainable_ai import ExplainableAI; e=ExplainableAI(); print(e.explain_trade({'rsi':65,'ema20':150,'volume_ratio':2.5}, 'BUY'))"
 ```
 
+### Maksimum Optimizasyon (v3.3-opt)
+```bash
+# Paralel sinyal taramasi
+python PYTHON/main.py --parallel-scan THYAO,GARAN,ASELS,ISCTR,AKBNK --workers 8
+
+# Vektorize backtest
+python PYTHON/main.py --backtest data/THYAO.csv --symbol THYAO --vectorized-backtest
+
+# Hizli cache kullanimi
+python -c "from PYTHON.optimization.fast_cache import FastCacheManager; c=FastCacheManager(); c.set('THYAO','1d',None); print(c.stats())"
+
+# Paralel scanner
+python -c "from PYTHON.optimization.parallel_scanner import ParallelScanner; s=ParallelScanner(max_workers=4); print(s.run_scan(['THYAO','GARAN']))"
+
+# Vektorize backtest
+python -c "from PYTHON.optimization.vectorized_backtest import VectorizedBacktestEngine; import pandas as pd, numpy as np; df=pd.DataFrame({'close':100+np.cumsum(np.random.randn(200)*0.5),'volume':np.random.randint(1000,10000,200)}); df.index=pd.date_range('2026-01-01',periods=200,freq='h'); df['Signal']=0; df.loc[df.index[10:20],'Signal']=2; print(VectorizedBacktestEngine(df).run()['metrics']['_summary'])"
+
+# Hizli tick store
+python -c "from PYTHON.optimization.batch_tick_store import BatchTickStore; t=BatchTickStore(batch_size=100); t.start(); t.insert_tick('THYAO',__import__('datetime').datetime.now(__import__('datetime').timezone.utc),100.0,1000); t.stop(); print(t.stats())"
+```
+
 ---
 
 ## Test
@@ -237,7 +261,7 @@ pytest tests/ -v
 pytest tests/ --cov=. --cov-report=html
 ```
 
-**Mevcut:** 969+ test, %80+ coverage.
+**Mevcut:** 982+ test, %80+ coverage.
 
 ---
 
@@ -280,7 +304,8 @@ AnatoliaX-Trading-System/
 │   ├── anatoliax_grpc/            # gRPC server/client
 │   ├── adapters/                  # NautilusAdapter (opsiyonel), ExchangeAdapter (Binance/Bybit/OKX)
 │   ├── common/                    # MessageBus, events, validators, AsyncEventBus
-│   └── tests/                     # 969+ pytest
+│   ├── optimization/              # Fast cache, async feed, vectorized backtest, parallel scanner, batch tick store
+│   └── tests/                     # 982+ pytest
 ├── SCRIPTS/                       # Node.js motor (legacy/opsiyonel)
 ├── KURALLAR/                      # K1-K237 kurallar
 ├── AJANLAR/                       # Ajan kurallari

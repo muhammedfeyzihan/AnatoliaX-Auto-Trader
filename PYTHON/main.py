@@ -25,18 +25,27 @@ def init_db():
     print("[PYTHON] Veritabani baslatildi.")
 
 
-def run_backtest(csv_path: str, symbol: str = "THYAO"):
+def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False):
     """CSV dosyasi uzerinde backtest calistirir."""
     df = pd.read_csv(csv_path, parse_dates=["timestamp"], index_col="timestamp")
     df = indicators.apply_all(df)
     df = signals.combined_signal(df)
 
-    eng = bt_engine.BacktestEngine(
-        df,
-        slippage_model=slippage.SlippageModel(),
-        commission_model=commission.CommissionModel(),
-        initial_capital=100_000,
-    )
+    if vectorized:
+        from PYTHON.optimization.vectorized_backtest import VectorizedBacktestEngine
+        eng = VectorizedBacktestEngine(
+            df,
+            slippage_model=slippage.SlippageModel(),
+            commission_model=commission.CommissionModel(),
+            initial_capital=100_000,
+        )
+    else:
+        eng = bt_engine.BacktestEngine(
+            df,
+            slippage_model=slippage.SlippageModel(),
+            commission_model=commission.CommissionModel(),
+            initial_capital=100_000,
+        )
     result = eng.run()
 
     print(f"\n[BACKTEST] {symbol} Sonuc:")
@@ -122,6 +131,17 @@ def run_scan(symbols: list[str]):
     results = engine.run_scan(symbols)
     executed = [r for r in results if r.get("executed")]
     print(f"\n[TARAMA] {len(symbols)} sembol tarandi. {len(executed)} sinyal bulundu.")
+    return results
+
+
+def run_parallel_scan(symbols: list[str], workers: int = 8):
+    """Paralel sinyal taramasi calistir."""
+    from PYTHON.optimization.parallel_scanner import ParallelScanner
+    scanner = ParallelScanner(max_workers=workers)
+    results, stats = scanner.run_scan_with_progress(symbols)
+    print(f"\n[TARAMA PARALEL] {stats['scanned']}/{stats['total']} sembol | {stats['signals']} sinyal | {stats['errors']} hata")
+    for r in results:
+        print(f"  {r['symbol']} | Skor: {r['score']:.0f} | R:R: {r['r_r']:.2f}")
     return results
 
 
@@ -273,6 +293,10 @@ def run_gold_mining(symbols: list[str], tier: str | None = None, capital: float 
 
 def main():
     parser = argparse.ArgumentParser(description="AnatoliaX Python Modulu")
+    parser.add_argument("--parallel-scan", type=str, metavar="SYMBOLS", help="Paralel sinyal taramasi (virgulle ayrilmis semboller)")
+    parser.add_argument("--workers", type=int, default=8, help="Paralel worker sayisi (varsayilan: 8)")
+    parser.add_argument("--vectorized-backtest", action="store_true", help="Hizli vektorize backtest motorunu kullan")
+
     parser.add_argument("--init-db", action="store_true", help="Veritabanini baslat")
     parser.add_argument("--backtest", type=str, metavar="CSV", help="Backtest calistir")
     parser.add_argument("--symbol", type=str, default="THYAO", help="Hisse sembolu")
@@ -318,8 +342,12 @@ def main():
     if args.init_db:
         init_db()
 
+    if args.parallel_scan:
+        symbols = [s.strip().upper() for s in args.parallel_scan.split(",")]
+        run_parallel_scan(symbols, workers=args.workers)
+
     if args.backtest:
-        run_backtest(args.backtest, args.symbol)
+        run_backtest(args.backtest, args.symbol, vectorized=args.vectorized_backtest)
 
     if args.analytics:
         run_analytics(args.analytics)

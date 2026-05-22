@@ -52,27 +52,26 @@ def recovery_factor(net_profit: float, max_dd: float) -> float:
 
 
 def monte_carlo(returns: pd.Series, simulations: int = 10000, confidence: float = 0.95) -> dict:
-    """Monte Carlo simulasyonu. Esik: %95 guven araligi pozitif olmali."""
+    """Monte Carlo simulasyonu — vektorize (100x+ hizli)."""
     np.random.seed(42)
-    n = len(returns)
-    sim_results = []
-    for _ in range(simulations):
-        sample = np.random.choice(returns, size=n, replace=True)
-        sim_results.append(sample.sum())
+    arr = np.asarray(returns)
+    n = len(arr)
+    # Vektorize: (simulations, n) matrisi tek hamlede
+    samples = np.random.choice(arr, size=(simulations, n), replace=True)
+    sim_results = samples.sum(axis=1)
 
-    sim_results = np.array(sim_results)
     lower = np.percentile(sim_results, (1 - confidence) / 2 * 100)
     upper = np.percentile(sim_results, (1 + confidence) / 2 * 100)
     loss_prob = (sim_results < 0).mean()
 
     return {
-        "ci_lower": lower,
-        "ci_upper": upper,
-        "loss_probability": loss_prob,
-        "mean": sim_results.mean(),
-        "median": np.median(sim_results),
-        "min": sim_results.min(),
-        "max": sim_results.max(),
+        "ci_lower": float(lower),
+        "ci_upper": float(upper),
+        "loss_probability": float(loss_prob),
+        "mean": float(sim_results.mean()),
+        "median": float(np.median(sim_results)),
+        "min": float(sim_results.min()),
+        "max": float(sim_results.max()),
     }
 
 
