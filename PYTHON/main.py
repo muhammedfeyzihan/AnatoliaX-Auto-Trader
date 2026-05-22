@@ -317,6 +317,12 @@ def main():
     parser.add_argument("--manipulation-scan", type=str, metavar="SYMBOLS", help="Manipülasyon taramasi (virgulle ayrilmis semboller)")
     parser.add_argument("--agent-trust", action="store_true", help="Agent trust skorlarini goster")
 
+    # K243-K244: Manipülasyon fallback ve dinamik rotasyon
+    parser.add_argument("--fallback-scan", type=str, metavar="SYMBOLS", help="Manipülasyon tespiti sonrasi otomatik fallback ile tarama")
+    parser.add_argument("--auto-rotate-scan", type=str, metavar="SYMBOLS", help="Dinamik sembol rotasyonu ile tarama")
+    parser.add_argument("--enable-crypto-fallback", action="store_true", help="Manipülasyon sonrasi kripto piyasasina gecis aktif")
+    parser.add_argument("--enable-forex-fallback", action="store_true", help="Manipülasyon sonrasi forex piyasasina gecis aktif")
+
     parser.add_argument("--gold-mining", action="store_true", help="Gold Mining kademeli stratejisini calistir")
     parser.add_argument("--gold-tier", type=str, default=None, choices=["MS", "S1", "M1", "M5", "M15", "H1", "D1"], help="Gold Mining baslangic tier'i (varsayilan: MS)")
     parser.add_argument("--gold-capital", type=float, default=100_000.0, help="Gold Mining baslangic sermayesi")
@@ -385,6 +391,35 @@ def main():
     if args.manipulation_scan:
         symbols = [s.strip().upper() for s in args.manipulation_scan.split(",")]
         run_manipulation_scan(symbols)
+
+    # K243-K244: Fallback ve dinamik rotasyon
+    if args.fallback_scan:
+        symbols = [s.strip().upper() for s in args.fallback_scan.split(",")]
+        from PYTHON.paper_trading.signal_engine import SignalEngine
+        engine = SignalEngine(
+            enable_fallback=True,
+            enable_crypto=args.enable_crypto_fallback,
+            enable_forex=args.enable_forex_fallback,
+        )
+        results = engine.run_scan_with_fallback(symbols)
+        executed = [r for r in results if r.get("executed")]
+        print(f"\n[FALLBACK TARAMA] {len(symbols)} sembol | {len(executed)} islem | Blacklist: {list(engine.get_fallback_blacklist().keys())}")
+
+    if args.auto_rotate_scan:
+        symbols = [s.strip().upper() for s in args.auto_rotate_scan.split(",")]
+        from PYTHON.paper_trading.signal_engine import SignalEngine
+        from PYTHON.data.instrument_provider import BIST_UNIVERSE
+        engine = SignalEngine(
+            enable_fallback=True,
+            enable_auto_rotate=True,
+            bist_universe=BIST_UNIVERSE,
+        )
+        results = engine.run_dynamic_rotation_scan(symbols)
+        executed = [r for r in results if r.get("executed")]
+        hist = engine.get_rotation_history()
+        print(f"\n[ROTASYON TARAMA] {len(symbols)} sembol | {len(executed)} islem | {len(hist)} rotasyon")
+        for h in hist:
+            print(f"  {h['from']} -> {h['to']} | {h['reason']}")
 
     if args.agent_trust:
         run_agent_trust()

@@ -42,6 +42,8 @@ from PYTHON.paper_trading.models import PaperSignal
 from PYTHON.manipulation.multi_tf_detector import MultiTFManipDetector
 from PYTHON.manipulation.agent_trust_scorer import AgentTrustScorer
 from PYTHON.manipulation.consensus_engine import ByzantineConsensus
+from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter
+from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator
 
 
 class SignalEngine:
@@ -49,6 +51,9 @@ class SignalEngine:
     Canli sinyal uretim motoru.
     Paper trading aktifse sanal emir verir.
     Aktif degilse sadece sinyal kaydeder (forward test modu).
+
+    v3.3+: Manipülasyon tespiti sonrasi otomatik fallback (BIST -> Kripto -> Forex)
+    v3.3+: Dinamik sembol rotasyonu (en iyi alternatife gecis)
     """
 
     def __init__(
@@ -58,6 +63,9 @@ class SignalEngine:
         max_positions: int = 5,
         max_risk_pct: float = 10.0,
         enable_manipulation_check: bool = True,
+        enable_fallback: bool = True,
+        enable_auto_rotate: bool = False,
+        bist_universe: list[str] | None = None,
     ):
         self.paper_trading = paper_trading if paper_trading is not None else (
             os.getenv("AX_PAPER_TRADING", "false").lower() == "true"
@@ -85,6 +93,17 @@ class SignalEngine:
         self.manip_detector = MultiTFManipDetector()
         self.trust_scorer = AgentTrustScorer()
         self.consensus = ByzantineConsensus()
+        # Fallback ve rotasyon
+        self.enable_fallback = enable_fallback
+        self.fallback_router = ManipulationFallbackRouter(
+            enable_crypto=True,
+            enable_forex=True,
+        )
+        self.rotator = DynamicSymbolRotator(
+            bist_universe=bist_universe or [],
+            fallback_router=self.fallback_router,
+            enable_auto_rotate=enable_auto_rotate,
+        )
 
     def _check_market_open(self) -> tuple[bool, str]:
         """Piyasa acik mi kontrol et. Tatil/haftasonu bilgisi dondur."""
@@ -262,6 +281,13 @@ class SignalEngine:
                 score -= manip_result.threat_score * 0.5
                 print(f"SINYAL: {symbol} manipülasyon tespit edildi ({manip_result.reason}), skor dusuruldu ({score:.0f})")
                 if score < self.signal_threshold:
+                    # K243: Fallback — alternatif piyasalara veya hisselere gecis
+                    if self.enable_fallback:
+                        fb = self.fallback_router.fallback(symbol)
+                        if fb.fallback_symbol:
+                            print(f"SINYAL: {symbol} -> FALLBACK {fb.fallback_symbol} ({fb.fallback_market})")
+                            # Yeni sembolu analiz et
+                            return self.analyze_symbol(fb.fallback_symbol, interval, period)
                     return None
 
         signal_dict = {
@@ -391,6 +417,83 @@ class SignalEngine:
         session.close()
 
         return result
+
+    def run_scan_with_fallback(self, symbols: list[str]) -> list[dict]:
+        """
+        K243-K244: Manipülasyon tespiti sonrasi otomatik fallback ile tarama.
+        Returns: sinyal sonuclari listesi
+        """
+        is_open, reason = self._check_market_open()
+        if not is_open:
+            print(f"SINYAL: {reason}")
+            return [{"market_closed": True, "reason": reason}]
+
+        results = []
+        fallback_count = 0
+
+        for sym in symbols:
+            signal = self.analyze_symbol(sym)
+            if signal:
+                result = self.execute_signal(signal)
+                results.append(result)
+                print(
+                    f"SINYAL: {sym} | Skor: {signal['score']:.0f} | "
+                    f"R:R: {signal['r_r']:.2f} | Kelly: {signal['kelly']:.3f} | "
+                    f"Durum: {result['reason']}"
+                )
+            else:
+                # Fallback denendi mi kontrol et (analyze_symbol iceride fallback yapar)
+                # Sadece blacklist'e alinanlari logla
+                bl = self.fallback_router.get_blacklist()
+                if sym.upper() in bl:
+                    fallback_count += 1
+
+        if fallback_count > 0:
+            print(f"SINYAL: {fallback_count} sembolde manipülasyon tespit edildi, fallback calisti")
+
+        return results
+
+    def run_dynamic_rotation_scan(self, symbols: list[str]) -> list[dict]:
+        """
+        K244: Dinamik sembol rotasyonu ile tarama.
+        Her sembol icin rotasyon gerekip gerekmedigini kontrol eder.
+        """
+        # Once tum sembollerin skorunu guncelle
+        self.rotator.update_scores(symbols)
+
+        is_open, reason = self._check_market_open()
+        if not is_open:
+            return [{"market_closed": True, "reason": reason}]
+
+        results = []
+        for sym in symbols:
+            should_rotate, rotation_reason = self.rotator.should_rotate(sym)
+            if should_rotate:
+                target = self.rotator.get_rotation_target(sym)
+                if target and target.fallback_symbol:
+                    print(f"ROTASYON: {sym} -> {target.fallback_symbol} | Neden: {rotation_reason}")
+                    self.rotator.record_rotation(sym, target.fallback_symbol, rotation_reason)
+                    sym = target.fallback_symbol
+
+            signal = self.analyze_symbol(sym)
+            if signal:
+                result = self.execute_signal(signal)
+                results.append(result)
+                print(
+                    f"SINYAL: {sym} | Skor: {signal['score']:.0f} | "
+                    f"R:R: {signal['r_r']:.2f} | Kelly: {signal['kelly']:.3f} | "
+                    f"Durum: {result['reason']}"
+                )
+
+        return results
+
+    def get_fallback_blacklist(self) -> dict:
+        """Kara listedeki manipule sembolleri dondur."""
+        return self.fallback_router.get_blacklist()
+
+    def get_rotation_history(self) -> list[dict]:
+        """Rotasyon tarihcesini dondur."""
+        return self.rotator.get_rotation_history()
 
     def run_scan(self, symbols: list[str]) -> list[dict]:
         """

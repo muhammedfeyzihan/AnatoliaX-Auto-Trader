@@ -84,6 +84,7 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 - **K197-K203** — Haftalik Strateji Konseyi (cumartesi toplanti, hedef carpani, 3/3 onay, gecmis tecrube birlestirme).
 - **K204-K237** — Uretim seviyesi modulleri (risk motoru, async event bus, pozisyon yasam dongusu, exchange adapter, emir yoneticisi, strateji kayit defteri, walk-forward optimizasyon, kalici ajan hafizasi, AI rejim detektoru, gozlemlenebilirlik dashboardu, deterministik replay, sifreli secret yonetimi, latency export, portfoy orkestrasyonu, Monte Carlo risk, crash recovery, feature store, aciklanabilir AI, CI/CD).
 - **K238-K242** — Maksimum optimizasyon (hizli cache, asenkron paralel fetch, vektorize backtest, paralel tarayici, hizli tick depolama).
+- **K243-K245** — Manipülasyon fallback ve çoklu piyasa geçisi (manipülasyon tespiti sonrasi BIST -> Kripto -> Forex otomatik geçis, dinamik sembol rotasyonu).
 
 Tum kurallar: `KURALLAR/` dizini.
 
@@ -249,6 +250,18 @@ python -c "from PYTHON.optimization.vectorized_backtest import VectorizedBacktes
 
 # Hizli tick store
 python -c "from PYTHON.optimization.batch_tick_store import BatchTickStore; t=BatchTickStore(batch_size=100); t.start(); t.insert_tick('THYAO',__import__('datetime').datetime.now(__import__('datetime').timezone.utc),100.0,1000); t.stop(); print(t.stats())"
+
+# Manipülasyon fallback (BIST -> Kripto -> Forex)
+python PYTHON/main.py --fallback-scan THYAO,GARAN,ASELS --enable-crypto-fallback
+
+# Dinamik sembol rotasyonu
+python PYTHON/main.py --auto-rotate-scan THYAO,GARAN,ASELS
+
+# Fallback motoru dogrudan
+python -c "from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter; r=ManipulationFallbackRouter(); r.blacklist_symbol('THYAO'); print(r.fallback('THYAO'))"
+
+# Dinamik rotator dogrudan
+python -c "from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator; rot=DynamicSymbolRotator(); rot.record_rotation('THYAO','GARAN','Test'); print(rot.get_rotation_history())"
 ```
 
 ---
@@ -261,7 +274,7 @@ pytest tests/ -v
 pytest tests/ --cov=. --cov-report=html
 ```
 
-**Mevcut:** 982+ test, %80+ coverage.
+**Mevcut:** 995+ test, %80+ coverage.
 
 ---
 
@@ -296,7 +309,7 @@ AnatoliaX-Trading-System/
 │   ├── hft/                       # HFT modulu (tick-level)
 │   ├── data/                      # Fetcher, catalog, instrument provider
 │   ├── risk/                      # Position, Account, PreTradeRiskEngine, BIST regs, behavioral, sizing, unified risk engine, encrypted secrets
-│   ├── execution/                 # UnifiedExecutionEngine, order types, paper/live separator, unified strategy runner, position lifecycle, order manager v2, crash recovery, latency precision
+│   ├── execution/                 # UnifiedExecutionEngine, order types, paper/live separator, unified strategy runner, position lifecycle, order manager v2, crash recovery, latency precision, manipulation fallback
 │   ├── agents/                    # Orchestrator, Q-learning memory, adaptive learning, persistent memory, AI regime detector, explainable AI, feature store
 │   ├── analytics/                 # Volume anomaly, BB+volume combo, fundamental filter, market microstructure, trade analytics
 │   ├── telegram/                  # Reporter bot
@@ -307,7 +320,7 @@ AnatoliaX-Trading-System/
 │   ├── optimization/              # Fast cache, async feed, vectorized backtest, parallel scanner, batch tick store
 │   └── tests/                     # 982+ pytest
 ├── SCRIPTS/                       # Node.js motor (legacy/opsiyonel)
-├── KURALLAR/                      # K1-K237 kurallar
+├── KURALLAR/                      # K1-K245 kurallar
 ├── AJANLAR/                       # Ajan kurallari
 ├── STRATEJILER/                   # Strateji dokumanlari
 └── CONFIG/                        # Yapilandirma
