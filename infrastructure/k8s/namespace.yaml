@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: anatoliax
+  labels:
+    app.kubernetes.io/name: anatoliax
+    app.kubernetes.io/version: "3.0"
