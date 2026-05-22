@@ -4,10 +4,10 @@
 
 | | |
 |---|---|
-| **Versiyon** | 3.2 |
+| **Versiyon** | 3.3 |
 | **Tarih** | 2026-05-22 |
 | **Ajanlar** | 3 (Sinyal / Risk / Strateji) + Telegram |
-| **Test** | 801+ test, %83+ coverage |
+| **Test** | 969+ test, %80+ coverage |
 | **Lisans** | MIT |
 
 ---
@@ -23,13 +23,15 @@ AnatoliaX, BIST 30/50/100 hisseleri icin gelistirilmis event-driven, cok ajanli 
 
 **HFT Modulu** (v3.1) — 1-dakika ve 1-saniye momentum yakalama, tick-level backtest, latency tracking.
 
-**Gold Mining Stratejisi** (v3.2) — Kademeli tier sistemi: MS → S1 → M1 → M5 → M15 → H1 → D1. Otomatik tier geçişi, fallback, ve 7 zaman dilimli profesyonel scalping.
+**Gold Mining Stratejisi** (v3.2) — Kademeli tier sistemi: MS -> S1 -> M1 -> M5 -> M15 -> H1 -> D1. Otomatik tier gecisi, fallback, ve 7 zaman dilimli profesyonel scalping.
 
 **Nautilus Trader Entegrasyonu** (v3.1, opsiyonel) — Event-driven MessageBus, PreTradeRiskEngine, FillModel, InstrumentProvider patternleri.
 
-**Enterprise Modülleri** (v3.2) — BIST regülasyon uyumluluğu, davranışsal finans kontrolleri, BIST özel slippage, gerçekçi maliyet simülasyonu, OOS validasyon, temel analiz filtresi, piyasa mikro yapısı, CVaR ensemble optimizasyonu, online learning, paper/live ayrımı, ileri trade analitikleri, gelişmiş pozisyon ölçekleme.
+**Enterprise Modulleri** (v3.2) — BIST regülasyon uyumlulugu, davranissal finans kontrolleri, BIST ozel slippage, gercekci maliyet simulasyonu, OOS validasyon, temel analiz filtresi, piyasa mikro yapisi, CVaR ensemble optimizasyonu, online learning, paper/live ayrimi, ileri trade analitikleri, gelismis pozisyon olcekleme.
 
-**Haftalık Strateji Konseyi** (v3.2) — Her cumartesi 3 ajan bir araya gelip geçen haftayı analiz eder: kazanç/zarar, en iyi setup, zaman dilimi, rejim tespiti. Matematiksel hedef çarpanı (1x→2x→4x→8x), 3/3 onay mekanizması, risk ayarlamaları ile yeni haftanın stratejisi belirlenir.
+**Haftalik Strateji Konseyi** (v3.2) — Her cumartesi 3 ajan bir araya gelip gecen haftayi analiz eder: kazanc/zarar, en iyi setup, zaman dilimi, rejim tespiti. Matematiksel hedef carpani (1x->2x->4x->8x), 3/3 onay mekanizmasi, risk ayarlamalari ile yeni haftanin stratejisi belirlenir.
+
+**Uretim Seviyesi Modulleri** (v3.3) — 20 kritik production-grade modul: Merkezi risk motoru (UnifiedRiskEngine), birlesik strateji kosucu (backtest/paper/live tek kod tabani), async event bus, pozisyon yasam dongusu yoneticisi (partial TP, trailing stop, pyramiding), kripto borsa adapteri (Binance/Bybit/OKX), saglam emir yoneticisi (retry + stale recovery), strateji kayit defteri (dinamik yukleme), walk-forward optimizasyon, kalici ajan hafizasi (SQLite + ChromaDB), AI rejim detektoru (bull/bear/sideways/volatile/low_vol), gozlemlenebilirlik dashboardu (Grafana export), deterministik replay motoru, sifreli secret yonetimi (Fernet + XOR fallback), hassasiyetli latency export, portfoy orkestrasyonu (momentum * sharpe / vol), Monte Carlo risk wrapper (VaR-95, CVaR-95), crash recovery (JSON checkpoint), feature store, aciklanabilir AI (SHAP-benzeri), Dockerized CI/CD pipeline.
 
 ---
 
@@ -58,26 +60,27 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 
 ---
 
-## Kritik Kurallar (K1-K196)
+## Kritik Kurallar (K1-K237)
 
 - **K91** — TradingView birincil, Bigpara ikincil, biquote yardimci.
 - **K92** — "Yalan asla yok." Her fiyat yani kaynak ve zaman damgasi.
 - **K94** — Max pozisyon/hisse %2, gunluk max kayip %3, R:R min 1:2.
 - **K141** — Piyasa kapali = islem yok. `BISTCalendar` kontrolu zorunlu.
 - **K143** — Emir validasyonu zorunlu (`OrderValidator`).
-- **K142-K148** — BIST regülasyon uyumluluğu (VBTS, devre kesici, short selling yasak).
-- **K149-K154** — Davranışsal finans kontrolleri (FOMO, loss aversion, cooldown).
-- **K155-K158** — BIST özel slippage modeli.
+- **K142-K148** — BIST regülasyon uyumlulugu (VBTS, devre kesici, short selling yasak).
+- **K149-K154** — Davranissal finans kontrolleri (FOMO, loss aversion, cooldown).
+- **K155-K158** — BIST ozel slippage modeli.
 - **K159-K162** — OOS validasyon (walk-forward, overfitting tespiti).
-- **K163-K166** — Temel analiz filtresi (P/E, P/B, KAP olayları).
-- **K167-K170** — Piyasa mikro yapısı (order book, market impact, VWAP).
-- **K171-K174** — Ensemble optimizasyonu (CVaR, korelasyon, rejim ağırlıkları).
+- **K163-K166** — Temel analiz filtresi (P/E, P/B, KAP olaylari).
+- **K167-K170** — Piyasa mikro yapisi (order book, market impact, VWAP).
+- **K171-K174** — Ensemble optimizasyonu (CVaR, korelasyon, rejim agirliklari).
 - **K175-K178** — Online learning ve concept drift.
-- **K179-K183** — Paper/live ayrımı ve Execution Quality Score.
-- **K184-K188** — İleri trade analitikleri (Calmar, Omega, streak analysis).
-- **K189-K192** — Gerçekçi maliyet simülasyonu (BIST, Takasbank, brokerage).
-- **K193-K196** — Gelişmiş pozisyon ölçekleme (Kelly, Optimal f, vol targeting).
-- **K197-K203** — Haftalık Strateji Konseyi (cumartesi toplantı, hedef çarpanı, 3/3 onay, geçmiş tecrübe birleştirme).
+- **K179-K183** — Paper/live ayrimi ve Execution Quality Score.
+- **K184-K188** — Ileri trade analitikleri (Calmar, Omega, streak analysis).
+- **K189-K192** — Gercekci maliyet simulasyonu (BIST, Takasbank, brokerage).
+- **K193-K196** — Gelismis pozisyon olcekleme (Kelly, Optimal f, vol targeting).
+- **K197-K203** — Haftalik Strateji Konseyi (cumartesi toplanti, hedef carpani, 3/3 onay, gecmis tecrube birlestirme).
+- **K204-K237** — Uretim seviyesi modulleri (risk motoru, async event bus, pozisyon yasam dongusu, exchange adapter, emir yoneticisi, strateji kayit defteri, walk-forward optimizasyon, kalici ajan hafizasi, AI rejim detektoru, gozlemlenebilirlik dashboardu, deterministik replay, sifreli secret yonetimi, latency export, portfoy orkestrasyonu, Monte Carlo risk, crash recovery, feature store, aciklanabilir AI, CI/CD).
 
 Tum kurallar: `KURALLAR/` dizini.
 
@@ -148,7 +151,7 @@ python PYTHON/main.py --gold-scan THYAO,GARAN,ASELS --gold-tier M1 --gold-capita
 # BIST regülasyon kontrolü
 python -c "from PYTHON.risk.bist_regulations import BISTRegulatoryChecker; print(BISTRegulatoryChecker().validate_trade(symbol='THYAO', price=105, reference_price=100, index_level=10000, index_previous_close=10000, orders_today=30, trades_today=10, position_value=100000, cash=25000, side='BUY'))"
 
-# Davranışsal finans kontrolü
+# Davranissal finans kontrolü
 python -c "from PYTHON.risk.behavioral_finance import BehavioralFinanceGuard; print(BehavioralFinanceGuard().can_trade({}))"
 
 # Temel analiz filtresi
@@ -164,6 +167,66 @@ python -c "from PYTHON.execution.paper_live_separator import PaperLiveSeparator;
 python -c "from PYTHON.backtest.oos_validator import OOSValidator; import pandas as pd, numpy as np; val=OOSValidator(); df=pd.DataFrame({'close':100+np.cumsum(np.random.randn(200)*0.5),'high':101+np.cumsum(np.random.randn(200)*0.5),'low':99+np.cumsum(np.random.randn(200)*0.5)}); print(val.regime_split_backtest(df, lambda d: {'sharpe':0.5}))"
 ```
 
+### Uretim Seviyesi Modülleri (v3.3)
+```bash
+# Merkezi risk motoru
+python -c "from PYTHON.risk.unified_risk_engine import UnifiedRiskEngine; e=UnifiedRiskEngine(capital=100000); e.update_capital(100000); print(e.check({'symbol':'THYAO','side':'BUY','size':100,'price':95,'sl':90}))"
+
+# Birlesik strateji kosucu (backtest modu)
+python -c "from PYTHON.execution.unified_strategy_runner import UnifiedStrategyRunner, ExecutionMode, ExecutionContext; r=UnifiedStrategyRunner(); ctx=ExecutionContext(mode=ExecutionMode.BACKTEST, capital=100000); def strat(c,p): return {'symbol':'THYAO','side':'BUY','size':10,'price':100,'sl':95}; print(r.run(ctx, strat, {}))"
+
+# Async Event Bus
+python -c "import asyncio; from PYTHON.common.async_event_bus import AsyncEventBus; bus=AsyncEventBus(); asyncio.run(bus.publish('test', {'x':1})); asyncio.run(bus.wait_until_empty()); print(bus.get_stats())"
+
+# Pozisyon yasam dongusu
+python -c "from PYTHON.execution.position_lifecycle import PositionLifecycleManager; m=PositionLifecycleManager(); m.open_position('THYAO', 100, 10, sl=95); m.update_price(106); print(m.get_stage())"
+
+# Kripto borsa adapteri (mock)
+python -c "from PYTHON.adapters.exchange_adapter import ExchangeAdapter; a=ExchangeAdapter('binance'); print(a.get_ticker('BTCUSDT'))"
+
+# Saglam emir yoneticisi
+python -c "from PYTHON.execution.order_manager_v2 import OrderManagerV2; o=OrderManagerV2(); print(o.submit({'symbol':'THYAO','side':'BUY','size':10,'price':100}, current_price=100))"
+
+# Strateji kayit defteri (dinamik yukleme)
+python -c "from PYTHON.strategy.strategy_registry import StrategyRegistry; r=StrategyRegistry(); print(r.list_strategies())"
+
+# Walk-forward optimizasyon
+python -c "from PYTHON.backtest.walk_forward_optimizer import WalkForwardOptimizer; import pandas as pd, numpy as np; w=WalkForwardOptimizer(); df=pd.DataFrame({'close':100+np.cumsum(np.random.randn(200)*0.5),'high':101+np.cumsum(np.random.randn(200)*0.5),'low':99+np.cumsum(np.random.randn(200)*0.5)}); print(w.optimize(df, lambda d,p: {'sharpe':0.5}, {'lookback':[10,20]}))"
+
+# Kalici ajan hafizasi
+python -c "from PYTHON.agents.persistent_memory import PersistentAgentMemory; m=PersistentAgentMemory(); m.store('Sinyal', 'THYAO al', {'confidence':0.8}); print(m.search('THYAO'))"
+
+# AI rejim detektoru
+python -c "from PYTHON.agents.ai_regime_detector import AIRegimeDetector; import pandas as pd, numpy as np; d=AIRegimeDetector(); close=100+np.linspace(0,200,100)+30*np.sin(np.linspace(0,4*np.pi,100)); df=pd.DataFrame({'close':close,'high':close+1,'low':close-1}); print(d.predict(df))"
+
+# Gozlemlenebilirlik dashboardu
+python -c "from PYTHON.observability.dashboard import ObservabilityDashboard; d=ObservabilityDashboard(); print(d.export_grafana())"
+
+# Deterministik replay motoru
+python -c "from PYTHON.backtest.replay_engine import DeterministicReplayEngine; import pandas as pd, numpy as np; e=DeterministicReplayEngine(); df=pd.DataFrame({'price':100+np.cumsum(np.random.randn(50)*0.5)}); e.load_df(df); print(e.step())"
+
+# Sifreli secret yonetimi
+python -c "import os; os.environ['MASTER_KEY']='test-key-32-bytes-long!!!!!'; from PYTHON.risk.encrypted_secrets import EncryptedSecretManager; s=EncryptedSecretManager(); s.set('API_KEY','secret123'); print(s.get('API_KEY'))"
+
+# Hassasiyetli latency export
+python -c "from PYTHON.execution.latency_precision import LatencyPrecisionExport; l=LatencyPrecisionExport(); print(l.export_json())"
+
+# Portfoy orkestrasyonu
+python -c "from PYTHON.strategy.portfolio_orchestrator import PortfolioOrchestrator; p=PortfolioOrchestrator(total_capital=100000); print(p.allocate([{'name':'trend','sharpe':1.5,'recent_pnl':5000,'volatility':0.15},{'name':'mean_rev','sharpe':0.8,'recent_pnl':2000,'volatility':0.10}]))"
+
+# Monte Carlo risk wrapper
+python -c "from PYTHON.backtest.monte_carlo_risk import MonteCarloRiskWrapper; import numpy as np; m=MonteCarloRiskWrapper(); print(m.analyze(np.random.normal(0.001,0.02,200)))"
+
+# Crash recovery
+python -c "from PYTHON.execution.crash_recovery import CrashRecoveryManager; c=CrashRecoveryManager(); c.checkpoint({'positions':[{'symbol':'THYAO','size':10}]}, tag='pre_market'); print(c.list_checkpoints())"
+
+# Feature store
+python -c "from PYTHON.agents.feature_store import FeatureStore; f=FeatureStore(); f.store('THYAO','rsi',65.5); print(f.get_latest('THYAO','rsi'))"
+
+# Aciklanabilir AI
+python -c "from PYTHON.agents.explainable_ai import ExplainableAI; e=ExplainableAI(); print(e.explain_trade({'rsi':65,'ema20':150,'volume_ratio':2.5}, 'BUY'))"
+```
+
 ---
 
 ## Test
@@ -174,12 +237,15 @@ pytest tests/ -v
 pytest tests/ --cov=. --cov-report=html
 ```
 
+**Mevcut:** 969+ test, %80+ coverage.
+
 ---
 
 ## Guvenlik
 
 - **Asla** API key/token kodda yazmayin — `.env` kullanin.
 - `risk/secret_manager.py` ile maskeleme ve validasyon.
+- `risk/encrypted_secrets.py` ile Fernet sifreleme (fallback XOR+base64) ve TTL rotation.
 - gRPC TLS opsiyonel (`GRPC_TLS_CERT`, `GRPC_TLS_KEY`).
 - Cache SHA-256 + pickle (ic veri, dis kaynaktan gelmez).
 
@@ -195,26 +261,28 @@ AnatoliaX-Trading-System/
 ├── .gitignore
 ├── docker-compose.yml
 ├── Dockerfile
+├── .github/
+│   └── workflows/
+│       └── ci.yml                 # CI/CD pipeline (K223)
 ├── PYTHON/
 │   ├── main.py                    # CLI orchestrator
 │   ├── requirements.txt
-│   ├── backtest/                  # Vektorize + event-driven backtest + OOS + microstructure
+│   ├── backtest/                  # Vektorize + event-driven backtest + OOS + microstructure + replay + Monte Carlo + walk-forward
 │   ├── paper_trading/             # Paper broker + signal engine
 │   ├── hft/                       # HFT modulu (tick-level)
 │   ├── data/                      # Fetcher, catalog, instrument provider
-│   ├── risk/                      # Position, Account, PreTradeRiskEngine, BIST regs, behavioral, sizing
-│   ├── execution/                 # UnifiedExecutionEngine, order types, paper/live separator
-│   ├── agents/                    # Orchestrator, Q-learning memory, adaptive learning
-│   ├── analytics/                 # Volume anomaly, BB+volume combo, fundamental filter, trade analytics
-│   ├── memory/                    # ChromaDB embedding
+│   ├── risk/                      # Position, Account, PreTradeRiskEngine, BIST regs, behavioral, sizing, unified risk engine, encrypted secrets
+│   ├── execution/                 # UnifiedExecutionEngine, order types, paper/live separator, unified strategy runner, position lifecycle, order manager v2, crash recovery, latency precision
+│   ├── agents/                    # Orchestrator, Q-learning memory, adaptive learning, persistent memory, AI regime detector, explainable AI, feature store
+│   ├── analytics/                 # Volume anomaly, BB+volume combo, fundamental filter, market microstructure, trade analytics
 │   ├── telegram/                  # Reporter bot
-│   ├── observability/             # JSON logging, Prometheus metrics
+│   ├── observability/             # JSON logging, Prometheus metrics, Grafana dashboard export
 │   ├── anatoliax_grpc/            # gRPC server/client
-│   ├── adapters/                  # NautilusAdapter (opsiyonel)
-│   ├── common/                    # MessageBus, events, validators
-│   └── tests/                     # 792+ pytest
+│   ├── adapters/                  # NautilusAdapter (opsiyonel), ExchangeAdapter (Binance/Bybit/OKX)
+│   ├── common/                    # MessageBus, events, validators, AsyncEventBus
+│   └── tests/                     # 969+ pytest
 ├── SCRIPTS/                       # Node.js motor (legacy/opsiyonel)
-├── KURALLAR/                      # K1-K141 kurallar
+├── KURALLAR/                      # K1-K237 kurallar
 ├── AJANLAR/                       # Ajan kurallari
 ├── STRATEJILER/                   # Strateji dokumanlari
 └── CONFIG/                        # Yapilandirma
