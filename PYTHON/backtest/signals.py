@@ -1,10 +1,12 @@
 """
 signals.py — Sinyal uretimi (teknik indikator kombinasyonlari)
 EMA Cross, RSI Extreme, BB Squeeze + Volume, VWAP Bounce, Momentum Spike
+v3.3+: SignalConfig entegrasyonu — regime-uyarlanabilir agirliklar ve esikler
 """
 import pandas as pd
 import numpy as np
 from . import indicators
+from PYTHON.strategy.parameter_registry import SignalConfig
 
 
 def ema_cross_signal(df: pd.DataFrame) -> pd.Series:
@@ -22,20 +24,20 @@ def rsi_extreme_signal(df: pd.DataFrame, oversold: float = 30, overbought: float
     return oversold_exit.astype(int)
 
 
-def bb_squeeze_volume_signal(df: pd.DataFrame) -> pd.Series:
+def bb_squeeze_volume_signal(df: pd.DataFrame, volume_z: float = 2.5) -> pd.Series:
     """Bollinger squeeze + hacim patlamasi kombinasyonu."""
     df = indicators.bollinger(df)
     df = indicators.volume_profile(df)
     squeeze = df["BB_Squeeze"] == True
-    volume_spike = df["Vol_ZScore"] > 2.5
+    volume_spike = df["Vol_ZScore"] > volume_z
     return (squeeze & volume_spike).astype(int)
 
 
-def vwap_bounce_signal(df: pd.DataFrame) -> pd.Series:
+def vwap_bounce_signal(df: pd.DataFrame, deviation_max: float = 0.02) -> pd.Series:
     """Fiyat VWAP yakinindan yukari donus."""
     df = indicators.vwap(df)
     deviation = (df["close"] - df["VWAP"]) / df["VWAP"]
-    bounce = (deviation > 0) & (deviation < 0.02) & (df["close"] > df["close"].shift(1))
+    bounce = (deviation > 0) & (deviation < deviation_max) & (df["close"] > df["close"].shift(1))
     return bounce.astype(int)
 
 
@@ -47,15 +49,22 @@ def momentum_spike_signal(df: pd.DataFrame, threshold: float = 0.02) -> pd.Serie
     return spike.astype(int)
 
 
-def combined_signal(df: pd.DataFrame, indicators_needed: list[str] | None = None) -> pd.DataFrame:
+def combined_signal(df: pd.DataFrame, indicators_needed: list[str] | None = None, config: SignalConfig | None = None) -> pd.DataFrame:
     """
     Tum sinyalleri birlestirir (agirlikli).
-    SIGNAL = EMA(0.20) + RSI(0.20) + Hacim(0.20) + BB(0.15) + VWAP(0.15) + MACD(0.10)
-    Skor > 70 = STRONG BUY, 55-70 = BUY, 40-55 = WAIT, < 40 = REJECT
+    v3.3+: SignalConfig ile regime-uyarlanabilir agirliklar ve esikler.
+
+    SIGNAL = EMA(ema_weight*100) + RSI(rsi_weight*100) + Hacim(volume_weight*100)
+           + BB(bb_weight*100) + VWAP(vwap_weight*100) + MACD(macd_weight*100)
+    Skor > score_strong = STRONG BUY, score_moderate-score_strong = BUY,
+    score_weak-score_moderate = WAIT, < score_weak = REJECT
 
     indicators_needed: Sadece belirtilen indikatörleri hesapla.
         ['ema','rsi','macd','bb','vwap','volume'] — None = hepsi
+    config: SignalConfig — None = default degerler
     """
+    cfg = config or SignalConfig()
+
     # Lazy indicator computation: only compute what's needed
     needed = set(indicators_needed or ["ema", "rsi", "macd", "bb", "vwap", "volume"])
 
@@ -76,31 +85,31 @@ def combined_signal(df: pd.DataFrame, indicators_needed: list[str] | None = None
 
     # EMA uyum (EMA9 > EMA21)
     if "ema" in needed and "EMA9" in df.columns and "EMA21" in df.columns:
-        scores += (df["EMA9"] > df["EMA21"]).astype(float) * 20
+        scores += (df["EMA9"] > df["EMA21"]).astype(float) * (cfg.ema_weight * 100)
 
-    # RSI momentum (30-70 arasi optimal)
+    # RSI momentum (regime-adaptive thresholds)
     if "rsi" in needed and "RSI" in df.columns:
-        rsi_ok = (df["RSI"] >= 45) & (df["RSI"] <= 65)
-        scores += rsi_ok.astype(float) * 20
+        rsi_ok = (df["RSI"] >= cfg.rsi_lower) & (df["RSI"] <= cfg.rsi_upper)
+        scores += rsi_ok.astype(float) * (cfg.rsi_weight * 100)
 
-    # Hacim patlamasi (Z > 2.5)
+    # Hacim patlamasi (regime-adaptive Z threshold)
     if "volume" in needed and "Vol_ZScore" in df.columns:
-        scores += (df["Vol_ZScore"] > 2.5).astype(float) * 20
+        scores += (df["Vol_ZScore"] > cfg.volume_z_threshold).astype(float) * (cfg.volume_weight * 100)
 
     # Bollinger squeeze
     if "bb" in needed and "BB_Squeeze" in df.columns:
-        scores += (df["BB_Squeeze"] == True).astype(float) * 15
+        scores += (df["BB_Squeeze"] == True).astype(float) * (cfg.bb_weight * 100)
 
-    # VWAP uzerinde
+    # VWAP uzerinde (regime-adaptive deviation)
     if "vwap" in needed and "VWAP" in df.columns:
-        vwap_ok = (df["close"] > df["VWAP"]) & ((df["close"] - df["VWAP"]) / df["VWAP"] < 0.02)
-        scores += vwap_ok.astype(float) * 15
+        vwap_ok = (df["close"] > df["VWAP"]) & ((df["close"] - df["VWAP"]) / df["VWAP"] < cfg.vwap_deviation_max)
+        scores += vwap_ok.astype(float) * (cfg.vwap_weight * 100)
 
     # MACD histogram pozitif
     if "macd" in needed and "MACD_Hist" in df.columns:
         macd_ok = df["MACD_Hist"] > 0
-        scores += macd_ok.astype(float) * 10
+        scores += macd_ok.astype(float) * (cfg.macd_weight * 100)
 
     df["Signal_Score"] = scores
-    df["Signal"] = np.where(scores >= 70, 2, np.where(scores >= 55, 1, 0))
+    df["Signal"] = np.where(scores >= cfg.score_strong, 2, np.where(scores >= cfg.score_moderate, 1, 0))
     return df

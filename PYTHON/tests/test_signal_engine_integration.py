@@ -81,8 +81,8 @@ def _passthrough_apply_all(df):
     return df
 
 
-def _passthrough_combined_signal(df):
-    df["SIGNAL_SCORE"] = 85.0
+def _passthrough_combined_signal(df, indicators_needed=None, config=None):
+    df["Signal_Score"] = 85.0
     df["Signal"] = 3
     return df
 
@@ -116,9 +116,14 @@ class TestSignalEngineIntegration:
         assert "macro_score" in signal
         assert "news_sentiment" in signal
 
-    def test_bear_regime_lowers_score_below_threshold(self, engine):
+    def test_bear_regime_lowers_score_below_threshold(self, engine, monkeypatch):
         engine.macro_fetcher = DummyMacroFetcher("BEAR")
-        engine.signal_threshold = 80.0  # 85 - 10 = 75, esik 80 -> None
+        # K95: Registry'den BEAR config alinir; test icin sabit degerler kullan
+        from PYTHON.strategy.parameter_registry import SignalConfig
+        monkeypatch.setattr(
+            engine, "_get_signal_config",
+            lambda symbol=None: SignalConfig(score_strong=80.0, bear_penalty=-10.0)
+        )
         signal = engine.analyze_symbol("THYAO")
         assert signal is None  # BEAR piyasasi score'u dusurur, esik alti
 

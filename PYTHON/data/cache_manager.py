@@ -13,9 +13,10 @@ Kullanim:
 
 import os
 import sqlite3
-import json
+import gzip
 import pickle
 import hashlib
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
@@ -30,12 +31,26 @@ class CacheManager:
     SQLite tabanli veri cache manager.
     - Her sembol + interval + tarih kombinasyonu icin bir kayit.
     - TTL: Varsayilan 1 saat (3600 sn).
-    - Binary pickle ile DataFrame saklanir.
+    - Binary pickle + gzip compression ile DataFrame saklanir (K97).
+    - Thread-local persistent connection (K97).
     """
 
     def __init__(self, ttl_seconds: int = 3600):
         self.ttl = ttl_seconds
+        self._local = threading.local()
         self._init_db()
+
+    def _get_conn(self):
+        """Thread-local persistent SQLite connection (K97)."""
+        if not hasattr(self._local, "conn") or self._local.conn is None:
+            self._local.conn = sqlite3.connect(str(CACHE_DB), check_same_thread=False)
+        return self._local.conn
+
+    def close(self):
+        """Thread-local connection'lari kapat."""
+        if hasattr(self._local, "conn") and self._local.conn is not None:
+            self._local.conn.close()
+            self._local.conn = None
 
     def _init_db(self):
         conn = sqlite3.connect(str(CACHE_DB))
@@ -62,14 +77,13 @@ class CacheManager:
     def get(self, symbol: str, interval: str, source: str = "default") -> pd.DataFrame | None:
         """Cache'den veri al. TTL gecmisse None doner."""
         key = self._make_key(symbol, interval, source)
-        conn = sqlite3.connect(str(CACHE_DB))
+        conn = self._get_conn()
         c = conn.cursor()
         c.execute(
             "SELECT data, expires_at FROM data_cache WHERE key = ?",
             (key,),
         )
         row = c.fetchone()
-        conn.close()
 
         if row is None:
             return None
@@ -80,7 +94,8 @@ class CacheManager:
             return None  # TTL gecti
 
         try:
-            df = pickle.loads(data_blob)
+            # gzip decompression (K97)
+            df = pickle.loads(gzip.decompress(data_blob))
             if isinstance(df, pd.DataFrame):
                 return df
         except Exception:
@@ -88,13 +103,14 @@ class CacheManager:
         return None
 
     def set(self, symbol: str, interval: str, df: pd.DataFrame, source: str = "default") -> None:
-        """DataFrame'i cache'e kaydet."""
+        """DataFrame'i cache'e kaydet. gzip compression (K97)."""
         key = self._make_key(symbol, interval, source)
         now = datetime.now()
         expires = now + timedelta(seconds=self.ttl)
-        blob = pickle.dumps(df)
+        # gzip compression reduces SQLite BLOB size (K97)
+        blob = gzip.compress(pickle.dumps(df, protocol=pickle.HIGHEST_PROTOCOL))
 
-        conn = sqlite3.connect(str(CACHE_DB))
+        conn = self._get_conn()
         c = conn.cursor()
         c.execute(
             """INSERT OR REPLACE INTO data_cache
@@ -103,29 +119,34 @@ class CacheManager:
             (key, symbol, interval, source, now.isoformat(), expires.isoformat(), blob),
         )
         conn.commit()
-        conn.close()
 
     def clear(self, symbol: str | None = None) -> None:
         """Sembol bazli veya tum cache'i temizle."""
-        conn = sqlite3.connect(str(CACHE_DB))
+        conn = self._get_conn()
         c = conn.cursor()
         if symbol:
             c.execute("DELETE FROM data_cache WHERE symbol = ?", (symbol,))
         else:
             c.execute("DELETE FROM data_cache")
         conn.commit()
-        conn.close()
 
     def stats(self) -> dict:
-        """Cache istatistikleri."""
-        conn = sqlite3.connect(str(CACHE_DB))
+        """Cache istatistikleri + expired row eviction (K97)."""
+        conn = self._get_conn()
         c = conn.cursor()
         c.execute("SELECT COUNT(*), COUNT(DISTINCT symbol) FROM data_cache")
         total, unique = c.fetchone()
+
+        now_iso = datetime.now().isoformat()
         c.execute(
             "SELECT COUNT(*) FROM data_cache WHERE expires_at < ?",
-            (datetime.now().isoformat(),),
+            (now_iso,),
         )
         expired = c.fetchone()[0]
-        conn.close()
+
+        # Evict expired rows during stats call (K97)
+        if expired > 0:
+            c.execute("DELETE FROM data_cache WHERE expires_at < ?", (now_iso,))
+            conn.commit()
+
         return {"total_entries": total, "unique_symbols": unique, "expired": expired}

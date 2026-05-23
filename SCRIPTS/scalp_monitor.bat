@@ -6,8 +6,8 @@ REM Calistirma: scalping_monitor.bat [saat]
 setlocal EnableDelayedExpansion
 
 REM === KONFIGURASYON ===
-set SCRIPTS_DIR=C:\Users\feyzi\.openclaw\scripts
-set LOG_DIR=C:\Users\feyzi\.openclaw\logs
+set SCRIPTS_DIR=%USERPROFILE%\.openclaw\scripts
+set LOG_DIR=%USERPROFILE%\.openclaw\logs
 set NODE_PATH=C:\Program Files\nodejs\node.exe
 set ENGINE=%SCRIPTS_DIR%\scalping_engine.js
 

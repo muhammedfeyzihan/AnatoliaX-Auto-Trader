@@ -24,6 +24,7 @@ import os
 import pandas as pd
 from datetime import datetime
 from typing import Literal
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from PYTHON.data.yahoo_fetcher import YahooFetcher
 from PYTHON.data.tradingview_scraper import TradingViewScraper
@@ -127,15 +128,34 @@ class FeedAggregator:
         symbols: list[str],
         interval: str = "1d",
         period: str = "6mo",
+        max_workers: int = 8,
     ) -> dict[str, pd.DataFrame]:
-        """Birden fazla sembol icin veri cek."""
-        results = {}
-        for sym in symbols:
+        """Birden fazla sembol icin paralel veri cek (K97)."""
+        results: dict[str, pd.DataFrame] = {}
+        if not symbols:
+            return results
+        if len(symbols) == 1:
             try:
-                results[sym] = self.fetch(sym, interval=interval, period=period)
+                results[symbols[0]] = self.fetch(symbols[0], interval=interval, period=period)
             except Exception as e:
-                results[sym] = pd.DataFrame()
+                results[symbols[0]] = pd.DataFrame()
+                print(f"UYARI: {symbols[0]} aggregator basarisiz: {e}")
+            return results
+
+        # Paralel fetch with ThreadPoolExecutor
+        def _fetch_one(sym: str) -> tuple[str, pd.DataFrame]:
+            try:
+                df = self.fetch(sym, interval=interval, period=period)
+                return sym, df
+            except Exception as e:
                 print(f"UYARI: {sym} aggregator basarisiz: {e}")
+                return sym, pd.DataFrame()
+
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as executor:
+            futures = {executor.submit(_fetch_one, sym): sym for sym in symbols}
+            for future in as_completed(futures):
+                sym, df = future.result()
+                results[sym] = df
         return results
 
     def validate_multi_source(

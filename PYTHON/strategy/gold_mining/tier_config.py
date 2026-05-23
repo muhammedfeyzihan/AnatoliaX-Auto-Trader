@@ -29,7 +29,7 @@ class TierConfig:
     description: str = ""
 
 
-# Tier progression: MS → S1 → M1 → M5 → M15 → H1 → D1
+# Tier progression: MS → S1 → M1 → M5 → M15 → M30 → H1 → H2 → D1
 TIER_DEFINITIONS = [
     TierConfig(
         name="MS",
@@ -97,6 +97,19 @@ TIER_DEFINITIONS = [
         description="15-minute multi-agent swing. Full 3-agent council with consensus.",
     ),
     TierConfig(
+        name="M30",
+        interval_seconds=1800.0,
+        target_profit_pct=(2.5, 7.0),
+        holding_seconds=(1800.0, 7200.0),
+        max_agents=3,
+        min_capital=37_500.0,   # 37,500 TL profit needed
+        required_consecutive_wins=3,
+        required_win_rate=0.60,
+        slippage_tolerance=0.006,
+        strategy_module="PYTHON.strategy.gold_mining.m30_strategy",
+        description="30-minute trend continuation. EMA 13/34 + 3-agent consensus with ParameterRegistry.",
+    ),
+    TierConfig(
         name="H1",
         interval_seconds=3600.0,
         target_profit_pct=(2.0, 6.0),
@@ -108,6 +121,19 @@ TIER_DEFINITIONS = [
         slippage_tolerance=0.008,
         strategy_module="PYTHON.strategy.gold_mining.h1_strategy",
         description="1-hour trend strategy. EMA 9/21 + MACD + 3-agent consensus.",
+    ),
+    TierConfig(
+        name="H2",
+        interval_seconds=7200.0,
+        target_profit_pct=(4.0, 10.0),
+        holding_seconds=(7200.0, 28800.0),
+        max_agents=3,
+        min_capital=75_000.0,   # 75,000 TL profit needed
+        required_consecutive_wins=2,
+        required_win_rate=0.62,
+        slippage_tolerance=0.009,
+        strategy_module="PYTHON.strategy.gold_mining.h2_strategy",
+        description="2-hour macro trend. EMA 21/55 + RSI + BB + 3-agent consensus with ParameterRegistry.",
     ),
     TierConfig(
         name="D1",

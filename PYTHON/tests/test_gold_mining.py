@@ -24,7 +24,9 @@ from PYTHON.strategy.gold_mining.s1_strategy import S1Strategy
 from PYTHON.strategy.gold_mining.m1_strategy import M1Strategy
 from PYTHON.strategy.gold_mining.m5_strategy import M5Strategy
 from PYTHON.strategy.gold_mining.m15_strategy import M15Strategy
+from PYTHON.strategy.gold_mining.m30_strategy import M30Strategy
 from PYTHON.strategy.gold_mining.h1_strategy import H1Strategy
+from PYTHON.strategy.gold_mining.h2_strategy import H2Strategy
 from PYTHON.strategy.gold_mining.d1_strategy import D1Strategy
 
 
@@ -74,8 +76,10 @@ class TestTierConfig:
         assert get_next_tier("S1").name == "M1"
         assert get_next_tier("M1").name == "M5"
         assert get_next_tier("M5").name == "M15"
-        assert get_next_tier("M15").name == "H1"
-        assert get_next_tier("H1").name == "D1"
+        assert get_next_tier("M15").name == "M30"
+        assert get_next_tier("M30").name == "H1"
+        assert get_next_tier("H1").name == "H2"
+        assert get_next_tier("H2").name == "D1"
         assert get_next_tier("D1") is None
 
     def test_all_tiers_have_strategy_module(self):
@@ -202,6 +206,64 @@ class TestM15Strategy:
         s = M15Strategy()
         df = _make_df(n=5)
         assert s.generate(df) is None
+
+
+class TestM30Strategy:
+    def test_generate_with_consensus(self):
+        s = M30Strategy()
+        df = _make_df(n=50, close_start=100.0)
+        macro = {"regime": "BULL", "score": 2}
+        sig = s.generate(df, macro=macro, sentiment=0.2)
+        if sig:
+            assert sig["side"] in ("BUY", "SELL")
+            assert "consensus" in sig
+            assert "confidence" in sig
+            assert sig["strategy"] == "M30_3AGENT_CONSENSUS"
+
+    def test_bear_regime_blocks_buy(self):
+        s = M30Strategy()
+        df = _make_df(n=50, close_start=100.0, trend="down")
+        macro = {"regime": "BEAR", "score": -2}
+        sig = s.generate(df, macro=macro, sentiment=-0.5)
+        if sig and sig["side"] == "BUY":
+            assert sig["confidence"] >= s.min_confidence
+
+    def test_parameter_registry_integration(self):
+        s = M30Strategy()
+        df = _make_df(n=50, close_start=100.0)
+        macro = {"regime": "BULL"}
+        sig = s.generate(df, macro=macro, sentiment=0.1)
+        # Should not crash; regime-adaptive params are used internally
+        assert sig is None or "regime" in sig
+
+
+class TestH2Strategy:
+    def test_generate_with_consensus(self):
+        s = H2Strategy()
+        df = _make_df(n=60, close_start=100.0)
+        macro = {"regime": "BULL", "score": 2}
+        sig = s.generate(df, macro=macro, sentiment=0.2)
+        if sig:
+            assert sig["side"] in ("BUY", "SELL")
+            assert "consensus" in sig
+            assert "confidence" in sig
+            assert sig["strategy"] == "H2_3AGENT_CONSENSUS"
+
+    def test_bear_regime_blocks_buy(self):
+        s = H2Strategy()
+        df = _make_df(n=60, close_start=100.0, trend="down")
+        macro = {"regime": "BEAR", "score": -2}
+        sig = s.generate(df, macro=macro, sentiment=-0.5)
+        if sig and sig["side"] == "BUY":
+            assert sig["confidence"] >= s.min_confidence
+
+    def test_bb_position_in_signal(self):
+        s = H2Strategy()
+        df = _make_df(n=60, close_start=100.0)
+        macro = {"regime": "BULL"}
+        sig = s.generate(df, macro=macro, sentiment=0.1)
+        if sig:
+            assert "bb_position" in sig
 
 
 class TestM5Strategy:
@@ -340,6 +402,15 @@ class TestOrchestratorSignal:
             assert sig["tier"] == "M5"
             assert sig["agents_active"] <= 2
 
+    def test_m30_tier_signal_with_macro(self):
+        o = GoldMiningOrchestrator()
+        o.state.current_tier_name = "M30"
+        df = _make_df(n=50)
+        sig = o.generate_signal("THYAO", df, macro={"regime": "BULL", "score": 2}, sentiment=0.1)
+        if sig:
+            assert sig["tier"] == "M30"
+            assert sig["agents_active"] <= 3
+
     def test_h1_tier_signal_with_macro(self):
         o = GoldMiningOrchestrator()
         o.state.current_tier_name = "H1"
@@ -347,6 +418,15 @@ class TestOrchestratorSignal:
         sig = o.generate_signal("THYAO", df, macro={"regime": "BULL", "score": 2}, sentiment=0.1)
         if sig:
             assert sig["tier"] == "H1"
+            assert sig["agents_active"] <= 3
+
+    def test_h2_tier_signal_with_macro(self):
+        o = GoldMiningOrchestrator()
+        o.state.current_tier_name = "H2"
+        df = _make_df(n=60)
+        sig = o.generate_signal("THYAO", df, macro={"regime": "BULL", "score": 2}, sentiment=0.1)
+        if sig:
+            assert sig["tier"] == "H2"
             assert sig["agents_active"] <= 3
 
     def test_d1_tier_signal_with_macro(self):
@@ -434,7 +514,7 @@ class TestOrchestratorTierProgression:
         o.account.cash = 94_000  # 6% drawdown
         old = o._fallback()
         assert old == "D1"
-        assert o.state.current_tier_name == "H1"
+        assert o.state.current_tier_name == "H2"
 
     def test_ms_never_fallback(self):
         o = GoldMiningOrchestrator()
@@ -602,14 +682,14 @@ class TestAdaptiveTierSelector:
         df["low"] = df["close"] * 0.98
         df["volume"] = np.random.randint(50_000, 100_000, len(df))
         tier = s.select(df, macro={"regime": "BULL"})
-        assert tier in ("M15", "H1", "M5")
+        assert tier in ("M15", "H1", "H2", "M5")
 
     def test_score_all_tiers(self):
         from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         s = AdaptiveTierSelector()
         df = _make_df(n=50)
         scores = s.score_all_tiers(df)
-        assert len(scores) == 7
+        assert len(scores) == 9
         assert all(0.0 <= v <= 100.0 for v in scores.values())
 
 

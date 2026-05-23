@@ -5,7 +5,7 @@ auto-marketplace'tan entegre edilmistir.
 Kullanim:
     from PYTHON.telegram.subscription_manager import SubscriptionManager
     sm = SubscriptionManager()
-    sm.add_subscription(user_id="8141424379", symbol="THYAO", condition={"type": "price_above", "value": 105.0})
+    sm.add_subscription(user_id="YOUR_CHAT_ID_HERE", symbol="THYAO", condition={"type": "price_above", "value": 105.0})
     triggers = sm.check_subscriptions(symbol="THYAO", current_price=106.0)
 """
 import sys
@@ -224,7 +224,7 @@ class SubscriptionManager:
 
 if __name__ == "__main__":
     sm = SubscriptionManager()
-    sid = sm.add_subscription("8141424379", "THYAO", {"type": "price_above", "value": 105.0})
+    sid = sm.add_subscription("YOUR_CHAT_ID_HERE", "THYAO", {"type": "price_above", "value": 105.0})
     print("Subscription ID:", sid)
     triggers = sm.check_subscriptions("THYAO", current_price=106.0)
     print("Triggers:", triggers)

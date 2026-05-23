@@ -1,8 +1,8 @@
 # GOLD_MINING.md — Altın Madeni Stratejisi Kuralları
 
-**Versiyon:** 2.0  
-**Tarih:** 2026-05-22  
-**Amaç:** En hızlı ve en garanti yoldan profesyonel para kazanma. Kademeli ajan aktivasyonu ile riski minimize eder, verimi maksimize eder.
+**Versiyon:** 3.0  
+**Tarih:** 2026-05-23  
+**Amaç:** En hızlı ve en garanti yoldan profesyonel para kazanma. Kademeli ajan aktivasyonu ile riski minimize eder, verimi maksimize eder. Tüm borsa hisseleri, forex ve kripto paralar için geçerlidir.
 
 ---
 
@@ -19,7 +19,7 @@
 
 ---
 
-## 2. Tier Sistemi (MS → S1 → M1 → M5 → M15 → H1 → D1)
+## 2. Tier Sistemi (MS → S1 → M1 → M5 → M15 → M30 → H1 → H2 → D1)
 
 | Tier | Zaman Dilimi | Hedef Kar | Tutma Süresi | Ajan Sayısı | Min Sermaye | Kazanma Serisi | Min WR |
 |------|-------------|-----------|-------------|-------------|-------------|----------------|--------|
@@ -28,7 +28,9 @@
 | **M1** | 1 dakika | %0.3–1.0 | 30–120 sn | 2 | 5.000 TL | 5 | %55 |
 | **M5** | 5 dakika | %0.8–2.0 | 2–10 dk | 2 | 12.000 TL | 4 | %57 |
 | **M15** | 15 dakika | %1.5–5.0 | 5–30 dk | 3 | 25.000 TL | 3 | %60 |
+| **M30** | 30 dakika | %2.5–7.0 | 30 dk–2 saat | 3 | 37.500 TL | 3 | %60 |
 | **H1** | 1 saat | %2.0–6.0 | 1–4 saat | 3 | 50.000 TL | 3 | %60 |
+| **H2** | 2 saat | %4.0–10.0 | 2–8 saat | 3 | 75.000 TL | 2 | %62 |
 | **D1** | 1 gün | %5.0–15.0 | 1–5 gün | 3 | 100.000 TL | 2 | %62 |
 
 **Tier Geçişi (Graduation):**
@@ -54,7 +56,9 @@
 | **M1** | Sinyal (EMA 3/8 cross + hacim) | Risk (RSI onay) | — |
 | **M5** | Sinyal (EMA 5/13 cross + hacim) | Risk (RSI + ATR vol) | — |
 | **M15** | Sinyal (EMA 9/21 cross + hacim) | Risk (Makro rejim + sentiment) | Strateji (Confidence + Consensus) |
+| **M30** | Sinyal (EMA 13/34 cross + hacim) | Risk (Makro rejim + adaptive RSI) | Strateji (Confidence + Consensus + ParameterRegistry) |
 | **H1** | Sinyal (EMA 9/21 + MACD hist) | Risk (ATR + makro rejim) | Strateji (Confidence + Consensus) |
+| **H2** | Sinyal (EMA 21/55 + RSI + BB) | Risk (Makro + sektör korelasyonu) | Strateji (Confidence + Kelly + Consensus + ParameterRegistry) |
 | **D1** | Sinyal (EMA 21/50 + RSI + BB) | Risk (Makro + sektör korelasyonu) | Strateji (Confidence + Kelly + Consensus) |
 
 **Byzantine Consensus (M15, H1, D1):**
@@ -71,9 +75,10 @@
 | Piyasa Koşulu | Önerilen Tier | Neden |
 |---------------|---------------|-------|
 | Yüksek volatilite + yüksek hacim | M5 / S1 | Hızlı hareketleri yakalar |
-| Orta volatilite + net trend | M15 / H1 | Trend takibi optimum |
+| Orta volatilite + net trend | M15 / M30 / H1 | Trend takibi optimum |
 | Düşük volatilite + yatay | M1 / S1 | Mean-reversion veya bekle |
-| Güçlü trend (ADX > 30) | H1 / D1 | Büyük hareketleri yakalar |
+| Güçlü trend (ADX > 35) | H2 / D1 | Büyük hareketleri yakalar |
+| Güçlü trend (ADX 30-35) | H1 / M30 | Orta ölçekli trend yakalama |
 | Ayı piyasası + düşük hacim | M1 / MS | Küçük scalp fırsatları |
 
 **Kullanım:**
@@ -113,7 +118,9 @@ engine.manual_exit("THYAO", exit_price=95.0, reason="ZARAR_DUR")
 - **M1:** SL %0.30, TP %0.50
 - **M5:** SL %0.80, TP %1.50
 - **M15:** SL %1.50, TP %3.00
+- **M30:** SL %2.00, TP %4.00 (ATR-based adaptive via ParameterRegistry)
 - **H1:** SL %2.00, TP %4.00
+- **H2:** SL %3.00, TP %6.00 (ATR-based adaptive via ParameterRegistry)
 - **D1:** SL %4.00, TP %10.00
 
 ### 6.3 Risk Kapıları (Risk Gates)

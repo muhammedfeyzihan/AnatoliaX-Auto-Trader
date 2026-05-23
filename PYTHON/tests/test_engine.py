@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from PYTHON.backtest.engine import BacktestEngine
 from PYTHON.backtest.indicators import apply_all
+from PYTHON.strategy.parameter_registry import SignalConfig
 
 
 class TestBacktestEngine:
@@ -107,6 +108,16 @@ class TestBacktestEngine:
         result = engine.run()
         assert "trades" in result
         assert isinstance(result["trades"], pd.DataFrame)
+
+    def test_signal_config_adaptive(self):
+        df = self._load_and_prepare()
+        cfg = SignalConfig(ema_weight=0.25, rsi_weight=0.15, score_strong=65.0)
+        engine = BacktestEngine(df, signal_config=cfg)
+        result = engine.run()
+        assert "trades" in result
+        assert "metrics" in result
+        assert "lessons" in result
+        assert result["final_capital"] == engine.current_capital
 
 
 if __name__ == "__main__":

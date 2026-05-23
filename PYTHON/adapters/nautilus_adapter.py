@@ -17,6 +17,7 @@ Not: Nautilus kurulu degilse graceful fallback — mevcut AnatoliaX motoru calis
 """
 import os
 import sys
+import time
 from pathlib import Path
 _module_dir = Path(__file__).resolve().parent
 while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
@@ -91,6 +92,77 @@ class NautilusAdapter:
             "precision": 2,
             "min_size": 1,
         }
+
+    # ------------------------------------------------------------------
+    # Deterministic replay engine
+    # ------------------------------------------------------------------
+    def replay_start(self, ticks: list[dict], initial_state: Optional[dict] = None) -> dict:
+        """
+        Start a deterministic replay session.
+        ticks: list of {"timestamp": str, "price": float, "volume": float, "side": str}
+        initial_state: optional starting portfolio state
+        Returns replay session metadata.
+        """
+        self._replay_log: list[dict] = []
+        self._replay_state = initial_state or {"cash": 100_000.0, "positions": {}, "trades": 0}
+        self._replay_ticks = list(ticks)
+        self._replay_idx = 0
+        return {
+            "session_id": f"replay_{id(self)}_{int(time.time())}",
+            "tick_count": len(ticks),
+            "initial_state": self._replay_state.copy(),
+            "provider": "nautilus_replay",
+        }
+
+    def replay_step(self) -> Optional[dict]:
+        """Process one tick in the replay. Returns fill event or None."""
+        if not hasattr(self, "_replay_ticks") or self._replay_idx >= len(self._replay_ticks):
+            return None
+        tick = self._replay_ticks[self._replay_idx]
+        self._replay_idx += 1
+        event = {
+            "idx": self._replay_idx,
+            "timestamp": tick.get("timestamp"),
+            "price": tick.get("price"),
+            "volume": tick.get("volume"),
+            "state_before": self._replay_state.copy(),
+        }
+        # Update state deterministically
+        price = tick.get("price", 0.0)
+        if price > 0:
+            for sym, pos in self._replay_state.get("positions", {}).items():
+                pos["mkt_price"] = price
+                pos["unrealized"] = (price - pos.get("entry", price)) * pos.get("qty", 0)
+        event["state_after"] = self._replay_state.copy()
+        self._replay_log.append(event)
+        return event
+
+    def replay_validate(self, expected_state: dict, tolerance: float = 1e-9) -> dict:
+        """Validate replay state against expected state."""
+        mismatches = []
+        for key, expected in expected_state.items():
+            actual = self._replay_state.get(key)
+            if isinstance(expected, float) and isinstance(actual, float):
+                if abs(expected - actual) > tolerance:
+                    mismatches.append(f"{key}: expected {expected}, got {actual}")
+            elif expected != actual:
+                mismatches.append(f"{key}: expected {expected}, got {actual}")
+        return {
+            "valid": len(mismatches) == 0,
+            "mismatches": mismatches,
+            "final_state": self._replay_state.copy(),
+            "ticks_processed": self._replay_idx,
+        }
+
+    def state_checksum(self) -> str:
+        """Return a deterministic checksum of current replay state."""
+        import hashlib, json
+        state = getattr(self, "_replay_state", {})
+        payload = json.dumps(state, sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+    def get_replay_log(self) -> list[dict]:
+        return list(getattr(self, "_replay_log", []))
 
     def _fallback_order(self, symbol: str, side: str, size: int, price: Optional[float] = None) -> dict:
         """Nautilus yoksa mevcut PaperBroker'a yonlendir."""

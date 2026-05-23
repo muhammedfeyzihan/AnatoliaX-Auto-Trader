@@ -192,6 +192,57 @@ Sistem otomatik olarak her rapor oncesi piyasa rejimini tespit eder:
     └── memory.md             <- Gunluk notlar
 ```
 
+## 🔒 K275-K279: AJAN KONSEY KURALI (Kesin — Asla İhlal Etme)
+
+### K275: Dinamik Ajan Sayısı
+Sistemde tanımlı **tüm ajanlar varsayılan olarak aktiftir** (maksimum hız için):
+1. **Sinyal Ajanı** — Teknik analiz, haber, manipülasyon tespiti
+2. **Risk Ajanı** — Risk hesaplama, makro analiz, portföy kontrolü
+3. **Strateji Ajanı** — Konsey lideri, nihai karar, raporlama
+4. **Haber Ajanı** — Makro veri ve haber akışı izleme
+5. **Kara Kuğu Ajanı** — Aşırı senaryo ve piyasa çöküşü öngörüsü
+6. **İcra Ajanı** — Emir yönetimi ve slippage kontrolü
+
+Ajan sayısı = `min(CPU çekirdek sayısı, mevcut ajan sayısı)`. Cross-platform uyumluluk için ThreadPoolExecutor kullanılır.
+
+### K276: Konsey Toplantısı (Her İşlem Öncesi)
+Her işlem öncesi **tüm ajanlar toplanır**. İki mod desteklenir:
+
+**Mod A — Tek Aşama (varsayılan):** Tüm 6 ajan aynı anda (paralel) çalışır.
+**Mod B — Kademeli 3-3:**
+- Phase 1: Sinyal + Risk + Haber (paralel, ham analiz)
+- Phase 2: Kara Kuğu + İcra + Strateji (paralel, Phase 1 sonuçlarını görerek)
+- Phase 2 agent'ları Phase 1'in oy eğilimini ve confidence ortalamasını kullanabilir
+
+- Toplantı süresi: **maksimum 200ms** (hız optimizasyonu)
+- Oylama: Her ajan bağımsız karar verir
+- Sonuç: Çoğunluk onayı = RAPORA AL, 1+ RED = BLOK
+- Strateji Ajanı tie-breaker ve veto hakkına sahiptir
+
+### K277: Paralel Çalışma ve Hız
+Tüm ajanlar **paralel** çalışır (tek aşamada veya kademeli):
+- Mod A: 6 ajan eşzamanlı → toplam süre **< 500ms**
+- Mod B: 3+3 iki aşama → toplam süre **< 500ms** (her aşama ~1-2ms)
+- Kademeli mod, CPU çekirdek sayısı düşükse (≤3) GIL contention'ı azaltır
+- Council meeting her işlemde çalıştırılmalıdır (opsiyonel değil)
+
+### K278: Cross-Platform Uyumluluk
+- **Windows:** ThreadPoolExecutor (ProcessPoolExecutor pickle sorunları nedeniyle kullanılmaz)
+- **Linux/macOS:** ThreadPoolExecutor varsayılan; ProcessPoolExecutor opsiyonel (GIL bypass)
+- `os.cpu_count()` platform bağımsız çalışır
+- Tüm path'ler `pathlib.Path` ile yönetilir
+- Threading kodu GIL-aware yazılmalıdır
+
+### K279: Hız Optimizasyonu
+- `max_workers = min(os.cpu_count() or 4, len(personas))`
+- Executor init'te bir kez oluşturulur, reuse edilir
+- Vote computation `staticmethod` ile pickle-free parallel execution sağlar
+- Timeout: Her ajan için **300ms** (toplantı toplamı < 500ms)
+
+**İhlal:** Toplantısız işlem, seri (sequential) çalıştırma, platform-desteklenmeyen executor = SİSTEM RED
+
+---
+
 ## 🚀 GITHUB
 
 - Repo: `infostr3773-sketch/mastero`

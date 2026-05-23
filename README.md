@@ -7,7 +7,7 @@
 | **Versiyon** | 3.3 |
 | **Tarih** | 2026-05-22 |
 | **Ajanlar** | 3 (Sinyal / Risk / Strateji) + Telegram |
-| **Test** | 982+ test, %80+ coverage |
+| **Test** | 1001+ test, %80+ coverage |
 | **Lisans** | MIT |
 
 ---
@@ -85,6 +85,7 @@ Veri Kaynaklari (Yahoo, TradingView, Bigpara, KAP)
 - **K204-K237** — Uretim seviyesi modulleri (risk motoru, async event bus, pozisyon yasam dongusu, exchange adapter, emir yoneticisi, strateji kayit defteri, walk-forward optimizasyon, kalici ajan hafizasi, AI rejim detektoru, gozlemlenebilirlik dashboardu, deterministik replay, sifreli secret yonetimi, latency export, portfoy orkestrasyonu, Monte Carlo risk, crash recovery, feature store, aciklanabilir AI, CI/CD).
 - **K238-K242** — Maksimum optimizasyon (hizli cache, asenkron paralel fetch, vektorize backtest, paralel tarayici, hizli tick depolama).
 - **K243-K245** — Manipülasyon fallback ve çoklu piyasa geçisi (manipülasyon tespiti sonrasi BIST -> Kripto -> Forex otomatik geçis, dinamik sembol rotasyonu).
+- **K95** — Parameter Registry: Regime-adaptive sinyal agirliklari, esikler, ATR multipliers, Kelly varsayimlari, macro/news penalty'ler. `ParameterRegistry.get_signal_config(regime, symbol)` ile dinamik parametre uzayi.
 - **K246-K248** — Zaman bazli trading pencereleri ve uyari sistemi (8 pencere, dinamik risk carpani, EOD pozisyon kapatma, ogle arasi kacinma).
 
 Tum kurallar: `KURALLAR/` dizini.
@@ -128,6 +129,9 @@ python PYTHON/main.py --scan-all
 ### Backtest
 ```bash
 python PYTHON/main.py --backtest data/THYAO.csv --symbol THYAO
+# Regime-adaptive backtest (K95)
+python PYTHON/main.py --backtest data/THYAO.csv --symbol THYAO --regime bull
+python PYTHON/main.py --backtest data/THYAO.csv --symbol THYAO --regime bear
 ```
 
 ### Portfoy Monitörü

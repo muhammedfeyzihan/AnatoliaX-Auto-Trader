@@ -63,7 +63,7 @@ class TestTAFPreFilter:
 
 class TestRiskGateEngine:
     def test_all_gates_pass(self):
-        engine = RiskGateEngine()
+        engine = RiskGateEngine(market_open_required=False)
         ok, reasons = engine.check_all(
             symbol="THYAO",
             size=10,

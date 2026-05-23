@@ -19,6 +19,7 @@ from PYTHON.backtest.signals import (
     vwap_bounce_signal,
     momentum_spike_signal,
 )
+from PYTHON.strategy.parameter_registry import SignalConfig
 
 
 class TestSignals:
@@ -106,6 +107,25 @@ class TestSignals:
         df = self._make_df(50)
         s = momentum_spike_signal(df)
         assert isinstance(s, pd.Series)
+
+    def test_combined_signal_with_config(self):
+        df = self._load_and_prepare()
+        cfg = SignalConfig(ema_weight=0.30, rsi_weight=0.10, score_strong=65.0, score_moderate=50.0)
+        df = combined_signal(df, config=cfg)
+        assert "Signal_Score" in df.columns
+        assert "Signal" in df.columns
+        # With different weights, scores should still be in valid range
+        scores = df["Signal_Score"].dropna()
+        assert (scores >= 0).all()
+        assert (scores <= 100).all()
+
+    def test_combined_signal_bull_config(self):
+        df = self._load_and_prepare()
+        cfg = SignalConfig(ema_weight=0.25, rsi_upper=75.0, volume_z_threshold=2.0)
+        df = combined_signal(df, config=cfg)
+        assert "Signal_Score" in df.columns
+        # Higher RSI upper bound should allow more RSI-ok signals
+        assert "Signal" in df.columns
 
 
 if __name__ == "__main__":

@@ -25,11 +25,19 @@ def init_db():
     print("[PYTHON] Veritabani baslatildi.")
 
 
-def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False):
-    """CSV dosyasi uzerinde backtest calistirir."""
+def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False, regime: str | None = None):
+    """CSV dosyasi uzerinde backtest calistirir.
+    v3.3+: Regime-adaptive backtest destegi (K95).
+    """
+    from PYTHON.strategy.parameter_registry import get_registry
+
+    reg = get_registry()
+    cfg = reg.get_signal_config(regime=regime or "sideways", symbol=symbol)
+    risk_cfg = reg.get_risk_config(regime=regime or "sideways")
+
     df = pd.read_csv(csv_path, parse_dates=["timestamp"], index_col="timestamp")
     df = indicators.apply_all(df)
-    df = signals.combined_signal(df)
+    df = signals.combined_signal(df, config=cfg)
 
     if vectorized:
         from PYTHON.optimization.vectorized_backtest import VectorizedBacktestEngine
@@ -38,6 +46,7 @@ def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False)
             slippage_model=slippage.SlippageModel(),
             commission_model=commission.CommissionModel(),
             initial_capital=100_000,
+            position_size_pct=risk_cfg.position_size_pct,
         )
     else:
         eng = bt_engine.BacktestEngine(
@@ -45,14 +54,17 @@ def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False)
             slippage_model=slippage.SlippageModel(),
             commission_model=commission.CommissionModel(),
             initial_capital=100_000,
+            position_size_pct=risk_cfg.position_size_pct,
+            signal_config=cfg,
         )
     result = eng.run()
 
-    print(f"\n[BACKTEST] {symbol} Sonuc:")
+    print(f"\n[BACKTEST] {symbol} | Regime: {regime or 'sideways'} | Config: adaptive (K95)")
     print(f"  Baslangic Sermayesi: 100,000 TL")
     print(f"  Bitis Sermayesi: {result['final_capital']:.2f} TL")
     print(f"  Toplam Getiri: %{result['total_return']*100:.2f}")
     print(f"  Islem Sayisi: {len(result['trades'])}")
+    print(f"  Pozisyon Buyuklugu: %{risk_cfg.position_size_pct*100:.2f}")
 
     # Metrikler
     m = risk_metrics.calculate_portfolio_metrics(result["trades"], result["equity"]["equity"])
@@ -300,6 +312,7 @@ def main():
     parser.add_argument("--init-db", action="store_true", help="Veritabanini baslat")
     parser.add_argument("--backtest", type=str, metavar="CSV", help="Backtest calistir")
     parser.add_argument("--symbol", type=str, default="THYAO", help="Hisse sembolu")
+    parser.add_argument("--regime", type=str, default=None, choices=["bull", "bear", "sideways", "volatile", "low_vol"], help="Backtest regime (K95 adaptive)")
     parser.add_argument("--analytics", type=str, metavar="CSV", help="Analitik calistir")
     parser.add_argument("--monitor", action="store_true", help="Portfoy monitörü")
     parser.add_argument("--chroma-demo", action="store_true", help="ChromaDB demo")
@@ -332,6 +345,27 @@ def main():
     parser.add_argument("--time-check", action="store_true", help="Aktif zaman penceresi ve trading durumunu goster")
     parser.add_argument("--time-summary", action="store_true", help="Zaman bazli trading ozetini goster")
 
+    # v3.3 Integration orchestrator (Nautilus + Hummingbot + OpenClaw + Hermes)
+    parser.add_argument("--integration-health", action="store_true", help="Entegrasyon saglik kontrolu (Nautilus/Hummingbot/OpenClaw/Hermes)")
+    parser.add_argument("--adapter-status", action="store_true", help="Tum adapter durumlarini goster")
+    parser.add_argument("--replay-validate", type=str, metavar="CSV", help="Deterministic replay validasyonu (tick CSV)")
+    parser.add_argument("--replay-tolerance", type=float, default=1e-9, help="Replay validasyon toleransi")
+    parser.add_argument("--integration-execute", type=str, metavar="JSON", help="Sinyal JSON'i ile entegrasyonlu emir calistir")
+
+    # Omega Protocol (Master Strategy)
+    parser.add_argument("--omega-protocol", type=str, metavar="CSV", help="Omega Protocol master stratejisi calistir (CSV dosyasi)")
+    parser.add_argument("--omega-campaign", type=str, metavar="SYMBOLS", help="Omega 20-gunluk kampanya (virgulle ayrilmis semboller)")
+    parser.add_argument("--omega-capital", type=float, default=1_000.0, help="Omega baslangic sermayesi (varsayilan: 1000)")
+
+    # Tiered Growth Protocol (Daily return targets)
+    parser.add_argument("--tiered-protocol", type=str, metavar="CSV", help="Tiered Growth Protocol calistir (CSV dosyasi)")
+    parser.add_argument("--tiered-tier", type=str, default="PCT_5",
+                        choices=["PCT_1", "PCT_3", "PCT_5", "PCT_8", "PCT_10", "PCT_13", "PCT_15", "PCT_18", "PCT_20", "PCT_100"],
+                        help="Gunluk getiri hedefi (varsayilan: PCT_5)")
+    parser.add_argument("--tiered-capital", type=float, default=10_000.0, help="Tiered baslangic sermayesi (varsayilan: 10000)")
+    parser.add_argument("--tiered-scan", type=str, metavar="SYMBOLS", help="Tiered ile coklu sembol tarama")
+    parser.add_argument("--tiered-table", action="store_true", help="Tum tierlerin karsilastirma tablosunu goster")
+
     args = parser.parse_args()
 
     if args.add_user:
@@ -357,7 +391,7 @@ def main():
         run_parallel_scan(symbols, workers=args.workers)
 
     if args.backtest:
-        run_backtest(args.backtest, args.symbol, vectorized=args.vectorized_backtest)
+        run_backtest(args.backtest, args.symbol, vectorized=args.vectorized_backtest, regime=args.regime)
 
     if args.analytics:
         run_analytics(args.analytics)
@@ -463,6 +497,134 @@ def main():
     if args.gold_mining or args.gold_scan:
         symbols = [s.strip().upper() for s in args.gold_scan.split(",")] if args.gold_scan else BIST_UNIVERSE
         run_gold_mining(symbols, tier=args.gold_tier, capital=args.gold_capital)
+
+    # v3.3 Integration orchestrator
+    if args.integration_health or args.adapter_status:
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        orch = IntegrationOrchestrator()
+        health = orch.initialize()
+        print("\n[INTEGRATION] Saglik Durumu:")
+        for subsystem, data in health.items():
+            if subsystem == "ok":
+                continue
+            print(f"  {subsystem.upper()}: {data}")
+
+    if args.replay_validate:
+        import json
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        tick_df = pd.read_csv(args.replay_validate, parse_dates=["timestamp"])
+        ticks = tick_df.to_dict("records")
+        result = orch.replay_validate(ticks, expected_state={"cash": 100_000.0}, tolerance=args.replay_tolerance)
+        print("\n[REPLAY] Validasyon Sonucu:")
+        print(f"  Valid: {result['valid']}")
+        print(f"  Checksum: {result['checksum']}")
+        print(f"  Ticks: {result['ticks_processed']}")
+        if result.get("mismatches"):
+            print(f"  Mismatches: {result['mismatches']}")
+
+    if args.integration_execute:
+        import json
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        signal = json.loads(args.integration_execute)
+        res = orch.execute_signal(signal)
+        print("\n[INTEGRATION] Emir Sonucu:")
+        print(f"  OK: {res.ok}")
+        print(f"  Order ID: {res.order_id}")
+        print(f"  Provider: {res.provider}")
+        print(f"  Error: {res.error}")
+
+    if args.omega_protocol:
+        import pandas as pd
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol
+        df = pd.read_csv(args.omega_protocol, parse_dates=["timestamp"], index_col="timestamp")
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        proto = OmegaProtocol(initial_capital=args.omega_capital)
+        signal = proto.evaluate(df, symbol=args.symbol)
+        print("\n[OMEGA PROTOCOL] Degerlendirme:")
+        if signal:
+            print(f"  Sinyal: {signal.side} {signal.symbol}")
+            print(f"  Entry: {signal.entry_price:.2f} | SL: {signal.stop_loss:.2f} | TP: {signal.take_profit:.2f}")
+            print(f"  Size: {signal.size:.2f} | Kelly: {signal.kelly_fraction:.2%} | R:R: {signal.rr:.2f}")
+            print(f"  Confidence: {signal.confidence:.0f}% | Regime: {signal.regime}")
+            print(f"  Capital: {proto.current_capital:,.2f} | Target: {proto.params['target_capital']:,.0f}")
+            # Auto-execute through orchestrator
+            exec_res = orch.run_omega_protocol(
+                df=df.to_dict(), symbol=args.symbol,
+                p_win=0.55, avg_win=2.0, avg_loss=1.0,
+            )
+            print(f"  Execution OK: {exec_res['ok']} | Provider: {exec_res['execution']['provider']}")
+        else:
+            print("  Sinyel yok (BLOK)")
+            print(f"  Capital: {proto.current_capital:,.2f} | Drawdown: {proto._drawdown:.2f}%")
+
+    if args.omega_campaign:
+        symbols = [s.strip().upper() for s in args.omega_campaign.split(",")]
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from PYTHON.data.feed_aggregator import FeedAggregator
+        feed = FeedAggregator()
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        report = orch.run_omega_campaign(
+            symbols=symbols,
+            bars_provider=lambda sym: feed.fetch(sym, interval="15m", period="5d"),
+            higher_tf_provider=lambda sym: feed.fetch(sym, interval="1h", period="15d"),
+        )
+        print("\n[OMEGA CAMPAIGN] Sonuc:")
+        print(f"  Baslangic: {report['initial_capital']:,.0f} TL")
+        print(f"  Bitis: {report['final_capital']:,.2f} TL")
+        print(f"  Hedef: {report['target_capital']:,.0f} TL")
+        print(f"  Gun: {report['days_elapsed']} / {report['total_trades']} islem")
+        print(f"  Return: {report['return_multiple']:.1f}x | Max DD: {report['max_drawdown_pct']:.1f}%")
+        for d in report.get("daily_log", [])[-5:]:
+            print(f"    Day {d['day']}: {d['capital']:,.0f} TL | PnL: {d['day_pnl']:,.0f} | Trades: {d['trades']}")
+
+    if args.tiered_table:
+        from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol
+        proto = TieredGrowthProtocol(initial_capital=args.tiered_capital)
+        df = proto.get_tier_comparison_table(capital=args.tiered_capital)
+        print("\n[TIERED] Gunluk Getiri Hedefi — Aylik Karsilastirma Tablosu")
+        print(df.to_string(index=False))
+
+    if args.tiered_protocol:
+        import pandas as pd
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        df = pd.read_csv(args.tiered_protocol, parse_dates=["timestamp"], index_col="timestamp")
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        res = orch.run_tiered_protocol(
+            df=df.to_dict(), symbol=args.symbol, tier=args.tiered_tier,
+        )
+        print(f"\n[TIERED PROTOCOL] Tier: {args.tiered_tier}")
+        print(f"  OK: {res['ok']} | Symbol: {res.get('symbol', args.symbol)}")
+        proj = res.get("projection", {})
+        if proj:
+            print(f"  Aylik Hedef: %{proj.get('total_return_pct', 0):.1f}")
+            print(f"  Beklenen Sermaye: {proj.get('final_capital', 0):,.0f} TL")
+            print(f"  Kazanma Orani Gerekli: {proj.get('win_rate_needed', 0):.0%}")
+            print(f"  Max DD: {proj.get('max_expected_dd_pct', 0):.1f}%")
+            print(f"  Risk of Ruin: {proj.get('risk_of_ruin', 0):.4f}")
+
+    if args.tiered_scan:
+        symbols = [s.strip().upper() for s in args.tiered_scan.split(",")]
+        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from PYTHON.data.feed_aggregator import FeedAggregator
+        feed = FeedAggregator()
+        orch = IntegrationOrchestrator()
+        orch.initialize()
+        results = orch.run_tiered_scan(
+            symbols=symbols, tier=args.tiered_tier,
+            bars_provider=lambda sym: feed.fetch(sym, interval="15m", period="5d"),
+        )
+        print(f"\n[TIERED SCAN] {len(symbols)} sembol | {len(results)} sinyal | Tier: {args.tiered_tier}")
+        for r in results[:5]:
+            sig = r.get("signal", {})
+            print(f"  {r['symbol']} | {sig.get('side', '')} @ {sig.get('entry_price', 0):.2f} | Conf: {sig.get('confidence', 0):.0f}%")
 
     if len(sys.argv) == 1:
         parser.print_help()

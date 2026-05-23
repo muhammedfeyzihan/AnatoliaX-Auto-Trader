@@ -60,7 +60,8 @@ def atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
     high_low = df["high"] - df["low"]
     high_close = np.abs(df["high"] - df["close"].shift())
     low_close = np.abs(df["low"] - df["close"].shift())
-    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    # np.maximum avoids intermediate DataFrame allocation (K97)
+    tr = np.maximum(np.maximum(high_low, high_close), low_close)
     df["ATR"] = tr.rolling(window=period).mean()
     return df
 

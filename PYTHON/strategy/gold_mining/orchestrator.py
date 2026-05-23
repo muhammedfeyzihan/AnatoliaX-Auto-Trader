@@ -31,7 +31,9 @@ from PYTHON.strategy.gold_mining.s1_strategy import S1Strategy
 from PYTHON.strategy.gold_mining.m1_strategy import M1Strategy
 from PYTHON.strategy.gold_mining.m5_strategy import M5Strategy
 from PYTHON.strategy.gold_mining.m15_strategy import M15Strategy
+from PYTHON.strategy.gold_mining.m30_strategy import M30Strategy
 from PYTHON.strategy.gold_mining.h1_strategy import H1Strategy
+from PYTHON.strategy.gold_mining.h2_strategy import H2Strategy
 from PYTHON.strategy.gold_mining.d1_strategy import D1Strategy
 from PYTHON.risk.position import Position
 from PYTHON.risk.account import Account
@@ -129,7 +131,9 @@ class GoldMiningOrchestrator:
             "M1": M1Strategy(),
             "M5": M5Strategy(),
             "M15": M15Strategy(),
+            "M30": M30Strategy(),
             "H1": H1Strategy(),
+            "H2": H2Strategy(),
             "D1": D1Strategy(),
         }
 
@@ -211,7 +215,9 @@ class GoldMiningOrchestrator:
             "M1": "1m",
             "M5": "5m",
             "M15": "15m",
+            "M30": "30m",
             "H1": "1h",
+            "H2": "2h",
             "D1": "1d",
         }
         return mapping.get(tier_name, "1m")
@@ -282,7 +288,7 @@ class GoldMiningOrchestrator:
                 confirmed = strategy.confirm_secondary(df, signal)
                 if not confirmed:
                     signal = None
-        elif tier.name in ("M15", "H1", "D1"):
+        elif tier.name in ("M15", "M30", "H1", "H2", "D1"):
             signal = strategy.generate(df, macro=macro or {"regime": "NEUTRAL", "score": 1}, sentiment=sentiment)
         else:
             return None

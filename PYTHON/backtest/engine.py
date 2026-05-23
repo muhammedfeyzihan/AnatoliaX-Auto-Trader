@@ -7,11 +7,13 @@ import pandas as pd
 import numpy as np
 from typing import Callable, Optional
 from . import indicators, signals, slippage, commission, performance
+from PYTHON.strategy.parameter_registry import SignalConfig
 
 
 class BacktestEngine:
     """
     Pandas DataFrame uzerinde calisan vektorize backtest motoru.
+    v3.3+: SignalConfig entegrasyonu ile regime-adaptive backtest (K95).
 
     Kullanim:
         engine = BacktestEngine(df, signal_func=signals.combined_signal)
@@ -35,9 +37,11 @@ class BacktestEngine:
         use_advanced_stops: bool = False,
         stop_type: str = "fixed",  # "fixed" | "trailing" | "chandelier" | "time"
         stop_params: dict | None = None,
+        signal_config: SignalConfig | None = None,
     ):
         self.df = df.copy()
         self.signal_func = signal_func or signals.combined_signal
+        self.signal_config = signal_config
         self.slippage = slippage_model or slippage.SlippageModel()
         self.commission = commission_model or commission.CommissionModel()
         self.initial_capital = initial_capital
@@ -62,13 +66,20 @@ class BacktestEngine:
 
     def run(self) -> dict:
         """Backtest'i calistirir."""
-        self.df = self.signal_func(self.df)
+        if self.signal_config is not None:
+            self.df = self.signal_func(self.df, config=self.signal_config)
+        else:
+            self.df = self.signal_func(self.df)
 
-        for i, row in self.df.iterrows():
-            self._process_bar(i, row)
+        # itertuples is ~40x faster than iterrows (K97)
+        last_row = None
+        for row in self.df.itertuples(index=True):
+            last_row = row
+            self._process_bar(row)
 
         # Acik pozisyonlari kapat
-        self._close_all(row)
+        if last_row is not None:
+            self._close_all(last_row)
 
         trades_df = pd.DataFrame(self.trades)
         equity_df = pd.DataFrame(self.equity_curve, columns=["timestamp", "equity"]).set_index("timestamp")
@@ -85,9 +96,13 @@ class BacktestEngine:
             "lessons": lessons,
         }
 
-    def _process_bar(self, idx, row):
+    def _process_bar(self, row):
+        # row is a namedtuple from itertuples (K97 optimization)
+        idx = row.Index
+        row_time = idx if isinstance(idx, pd.Timestamp) else pd.Timestamp(idx)
+
         # Gun degisimi kontrolu
-        date = pd.Timestamp(row.name).date() if isinstance(row.name, pd.Timestamp) else None
+        date = row_time.date()
         if date and date != self.current_date:
             self.current_date = date
             self.daily_pnl = 0.0
@@ -96,18 +111,19 @@ class BacktestEngine:
         self._check_exits(idx, row)
 
         # Yeni sinyal?
-        if row.get("Signal", 0) >= 1 and len(self.open_positions) < self.max_positions:
+        signal = getattr(row, "Signal", 0)
+        if signal >= 1 and len(self.open_positions) < self.max_positions:
             self._enter_position(idx, row)
 
         # Equity kaydet
-        self.equity_curve.append((row.name, self.current_capital))
+        self.equity_curve.append((idx, self.current_capital))
 
     def _enter_position(self, idx, row):
-        price = row["close"]
+        price = row.close
         size = (self.current_capital * self.position_size_pct) / price
 
         # Liquidity check
-        avg_volume = row.get("volume", size * 100)
+        avg_volume = getattr(row, "volume", size * 100)
         order_value = price * size
         if not self.slippage.check_liquidity(order_value, avg_volume, price):
             return  # Likidite yetersiz
@@ -159,9 +175,10 @@ class BacktestEngine:
         self.open_positions.append(pos)
 
     def _check_exits(self, idx, row):
-        price = row["close"]
+        price = row.close
         to_remove = []
-        current_time = pd.Timestamp(row.name) if isinstance(row.name, (pd.Timestamp, str)) else pd.Timestamp.now()
+        row_time = idx if isinstance(idx, pd.Timestamp) else pd.Timestamp(idx)
+        current_time = row_time if isinstance(row_time, pd.Timestamp) else pd.Timestamp.now()
 
         for pos in self.open_positions:
             # Gelişmiş stop güncelleme
@@ -208,14 +225,16 @@ class BacktestEngine:
             if pos["tp1_hit"] and price > pos["entry_price"]:
                 pos["sl"] = max(pos["sl"], pos["entry_price"])
 
-        for pos in to_remove:
-            self.open_positions.remove(pos)
+        # O(n) position removal instead of O(n^2) remove() in loop
+        if to_remove:
+            remove_ids = {id(p) for p in to_remove}
+            self.open_positions = [p for p in self.open_positions if id(p) not in remove_ids]
 
     def _partial_exit(self, idx, row, pos, pct, reason):
-        price = row["close"]
+        price = row.close
         size = pos["size"] * pct
         order_value = price * size
-        avg_volume = row.get("volume", size * 100)
+        avg_volume = getattr(row, "volume", size * 100)
         exit_price = self.slippage.apply(price, "SELL", order_value, avg_volume)
         comm = self.commission.calculate(exit_price, size)
 
@@ -237,10 +256,10 @@ class BacktestEngine:
         })
 
     def _exit_position(self, idx, row, pos, reason):
-        price = row["close"]
+        price = row.close
         size = pos["size"]
         order_value = price * size
-        avg_volume = row.get("volume", size * 100)
+        avg_volume = getattr(row, "volume", size * 100)
         exit_price = self.slippage.apply(price, "SELL", order_value, avg_volume)
         comm = self.commission.calculate(exit_price, size)
 
@@ -262,8 +281,9 @@ class BacktestEngine:
         })
 
     def _close_all(self, row):
+        last_idx = self.df.index[-1]
         for pos in self.open_positions[:]:
-            self._exit_position(len(self.df) - 1, row, pos, "CLOSE")
+            self._exit_position(last_idx, row, pos, "CLOSE")
         self.open_positions = []
 
     def generate_lessons(self) -> list[dict]:

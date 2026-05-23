@@ -3,12 +3,14 @@
 # Context: Son 10 mesaj hatirlanir (seninle konusur gibi)
 # Calistirma: powershell -WindowStyle Hidden -File "telegram_listener.ps1"
 
-$global:BotToken = "8571764853:AAEj1IrKrHU28b0kO7M3QQsB4MVd9_2O38I"
-$global:ChatId = "8141424379"
+$global:BotToken = $env:TELEGRAM_BOT_TOKEN
+if (-not $global:BotToken) { $global:BotToken = "YOUR_BOT_TOKEN_HERE" }
+$global:ChatId = $env:TELEGRAM_CHAT_ID
+if (-not $global:ChatId) { $global:ChatId = "YOUR_CHAT_ID_HERE" }
 $global:Offset = 0
-$global:LogFile = "C:\Users\feyzi\.openclaw\scripts\telegram_bot.log"
+$global:LogFile = "$PSScriptRoot\..\logs\telegram_bot.log"
 $global:OllamaUrl = "http://127.0.0.1:11434/api/chat"
-$global:Model = "kimi-k2.6:cloud"
+$global:Model = "gemma"
 
 # ============================================================
 # MESAJ GECMISI (CONTEXT/MEMORY) - Son 10 mesaj
@@ -734,7 +736,7 @@ Her cevabim canli uretilir, kayitli sabit metin degil. Size ozel analiz yaparim.
     # /test komutu
     if ($Text -match "^/test") {
         try {
-            $output = cd "C:\Users\feyzi\OneDrive\Masaüstü\AnatoliaX-Trading-System\PYTHON" && python -m pytest tests/ -q 2>&1
+            $output = cd "$PSScriptRoot\..\PYTHON" && python -m pytest tests/ -q 2>&1
             Send-TelegramMessage -Text "Test Sonuclari:`n$output"
         } catch {
             Send-TelegramMessage -Text "Test calistirma hatasi: $($_.Exception.Message)"

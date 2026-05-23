@@ -3,10 +3,10 @@ const { exec } = require('child_process');
 const fs = require('fs');
 
 const PORT = 3001;
-const OPENCLAW = '"C:\\Users\\feyzi\\AppData\\Roaming\\npm\\openclaw.cmd"';
-const TELEGRAM_BOT = '8571764853:AAEj1IrKrHU28b0kO7M3QQsB4MVd9_2O38I';
-const TELEGRAM_CHAT = '8141424379';
-const LOG_FILE = 'C:\\Users\\feyzi\\.openclaw\\scripts\\webhook.log';
+const OPENCLAW = process.env.OPENCLAW_CMD || 'openclaw';
+const TELEGRAM_BOT = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+const TELEGRAM_CHAT = process.env.TELEGRAM_CHAT_ID || 'YOUR_CHAT_ID_HERE';
+const LOG_FILE = process.env.LOG_FILE || './logs/webhook.log';
 
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}\n`;
@@ -58,7 +58,7 @@ const server = http.createServer(async (req, res) => {
   // API: System stats
   if (req.method === 'GET' && req.url === '/api/stats') {
     try {
-      const statsPath = 'C:\\Users\\feyzi\\.openclaw\\data\\istatistikler.json';
+      const statsPath = process.env.STATS_PATH || './data/istatistikler.json';
       const stats = fs.existsSync(statsPath) ? JSON.parse(fs.readFileSync(statsPath, 'utf8')) : {};
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true, stats }));
@@ -72,7 +72,7 @@ const server = http.createServer(async (req, res) => {
   // API: Market regime
   if (req.method === 'GET' && req.url === '/api/regime') {
     try {
-      const regimePath = 'C:\\Users\\feyzi\\.openclaw\\data\\piyasa_rejimi.json';
+      const regimePath = process.env.REGIME_PATH || './data/piyasa_rejimi.json';
       const regime = fs.existsSync(regimePath) ? JSON.parse(fs.readFileSync(regimePath, 'utf8')) : { son_rejim: 'belirsiz' };
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true, regime }));
@@ -90,7 +90,7 @@ const server = http.createServer(async (req, res) => {
     req.on('end', () => {
       try {
         const payload = JSON.parse(body);
-        const winRatePath = 'C:\\Users\\feyzi\\.openclaw\\scripts\\win_rate.js';
+        const winRatePath = process.env.WIN_RATE_PATH || './scripts/win_rate.js';
         if (fs.existsSync(winRatePath)) {
           const { ekleIslem } = require(winRatePath);
           const id = ekleIslem(payload);
@@ -147,6 +147,6 @@ server.listen(PORT, () => {
   log('========================================');
   log('AnatoliaX Webhook Server BASLADI');
   log(`Port: ${PORT}`);
-  log(`URL: https://sad-loops-grow.loca.lt/tradingview`);
+  log(`URL: ${process.env.WEBHOOK_URL || 'https://YOUR_TUNNEL_URL/tradingview'}`);
   log('========================================');
 });

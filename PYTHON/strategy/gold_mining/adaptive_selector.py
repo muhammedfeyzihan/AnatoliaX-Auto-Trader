@@ -169,14 +169,18 @@ class AdaptiveTierSelector:
         # Strong trend detected
         if adx > 30 and trend_strength > 0.005:
             if trend_up and regime in ("BULL", "NEUTRAL"):
-                return "H1" if adx > 35 else "M15"
+                if adx > 40:
+                    return "H2" if trend_strength > 0.008 else "H1"
+                return "M30" if adx > 35 else "M15"
             if trend_down and regime in ("BEAR", "NEUTRAL"):
-                return "H1" if adx > 35 else "M15"
+                if adx > 40:
+                    return "H2" if trend_strength > 0.008 else "H1"
+                return "M30" if adx > 35 else "M15"
 
-        # Moderate conditions → M5 or M15
+        # Moderate conditions → M5, M15, or M30
         if vol_spike:
-            return "M5"
-        return "M15"
+            return "M5" if atr_pct > 0.01 else "M15"
+        return "M30" if adx > 25 else "M15"
 
     def score_all_tiers(self, df: pd.DataFrame, macro: Optional[dict] = None) -> dict:
         """
@@ -205,23 +209,25 @@ class AdaptiveTierSelector:
                 score += 25 if 0.005 < atr_pct < 0.02 else 5
             elif t.name == "M15":
                 score += 20 if 0.003 < atr_pct < 0.015 else 5
-            elif t.name in ("H1", "D1"):
+            elif t.name == "M30":
+                score += 22 if 0.003 < atr_pct < 0.012 else 5
+            elif t.name in ("H1", "H2", "D1"):
                 score += 25 if adx > 30 and trend_strength > 0.003 else -5
 
             # Volume fit
             if vol_spike:
-                score += 10 if t.name in ("M1", "M5", "M15") else 5
+                score += 10 if t.name in ("M1", "M5", "M15", "M30") else 5
 
             # Trend fit
             if adx > self.adx_trend_threshold:
-                score += 15 if t.name in ("M15", "H1", "D1") else 0
+                score += 15 if t.name in ("M15", "M30", "H1", "H2", "D1") else 0
             else:
                 score += 15 if t.name in ("MS", "S1", "M1") else 0
 
             # Regime fit
-            if regime == "BEAR" and t.name in ("H1", "D1"):
+            if regime == "BEAR" and t.name in ("H1", "H2", "D1"):
                 score -= 10  # Long-term harder in bear
-            if regime == "BULL" and t.name in ("H1", "D1"):
+            if regime == "BULL" and t.name in ("H1", "H2", "D1"):
                 score += 10
 
             scores[t.name] = round(min(100.0, max(0.0, score)), 1)

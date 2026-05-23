@@ -216,7 +216,7 @@ GENEL: X/8 ONAY -> [ONAY / SINIRLI / RED]
          |-- Risk: Makro durum + risk analizi + matematiksel dogrulama (BIST, Dolar, ABD vadeliler, R:R, Kelly, VaR)
 09:15 ---- Konsey oylamasi (3/3 onay)
 09:20 ---- Strateji raporu derler
-09:25 ---- Rapor Telegram'a gonderilir (8141424379)
+09:25 ---- Rapor Telegram'a gonderilir (YOUR_CHAT_ID_HERE)
 ```
 
 **Rapor Format:**

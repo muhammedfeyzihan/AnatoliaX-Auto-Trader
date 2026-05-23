@@ -19,9 +19,10 @@ class TestCICDPipeline:
             pytest.skip("CI file not created yet")
 
     def test_docker_compose_exists(self):
-        path = Path("docker-compose.yml")
+        # Project root is two levels up from PYTHON/tests/
+        path = Path(__file__).resolve().parents[2] / "docker-compose.yml"
         assert path.exists()
 
     def test_dockerfile_exists(self):
-        path = Path("Dockerfile")
+        path = Path(__file__).resolve().parents[2] / "Dockerfile"
         assert path.exists()

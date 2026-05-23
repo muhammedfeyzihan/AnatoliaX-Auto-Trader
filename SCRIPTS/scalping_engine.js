@@ -25,8 +25,8 @@ const CONFIG = {
     logDir: path.join(__dirname, '..', 'logs'),
     reportDir: path.join(__dirname, '..', 'reports'),
     dataDir: path.join(__dirname, '..', 'data'),
-    telegramChatId: '8141424379',
-    telegramBotToken: '8571764853:AAEj1IrKrHU28b0kO7M3QQsB4MVd9_2O38I',
+    telegramChatId: process.env.TELEGRAM_CHAT_ID || 'YOUR_CHAT_ID_HERE',
+    telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE',
 };
 
 // BIST indeks listeleri

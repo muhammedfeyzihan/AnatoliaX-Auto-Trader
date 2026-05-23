@@ -27,6 +27,7 @@ if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 
@@ -45,6 +46,7 @@ from PYTHON.manipulation.consensus_engine import ByzantineConsensus
 from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter
 from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator
 from PYTHON.common.time_rules import TimeBasedTradingManager
+from PYTHON.strategy.parameter_registry import ParameterRegistry, get_registry, SignalConfig
 
 
 class SignalEngine:
@@ -108,6 +110,16 @@ class SignalEngine:
         # Zaman bazli trading yonetimi (K246-K248)
         self.time_manager = TimeBasedTradingManager()
         self._time_alerts_emitted: set = set()
+        # Parameter Registry — regime-adaptive parameters (K95)
+        self.registry = get_registry()
+        self._last_regime: str = "sideways"
+        # Validators — init once to avoid hot-path instantiation (K97)
+        from PYTHON.data.auto_validator import AutoValidator
+        from PYTHON.execution.order_validator import OrderValidator
+        self._auto_validator = AutoValidator()
+        self._order_validator = OrderValidator(max_size=1_000_000.0)
+        # Batch insert buffer (K97)
+        self._signal_buffer: list = []
 
     def _check_market_open(self) -> tuple[bool, str]:
         """Piyasa acik mi kontrol et. Tatil/haftasonu bilgisi dondur."""
@@ -189,6 +201,16 @@ class SignalEngine:
             self._macro_cache_time = now
         return self._macro_cache
 
+    def _get_signal_config(self, symbol: str | None = None) -> SignalConfig:
+        """Regime + symbol bazli adaptive SignalConfig dondur (K95)."""
+        macro = self._get_macro_regime()
+        regime = macro.get("regime", "NEUTRAL").lower()
+        if regime not in ("bull", "bear", "sideways", "volatile", "low_vol"):
+            regime = self._last_regime
+        else:
+            self._last_regime = regime
+        return self.registry.get_signal_config(regime=regime, symbol=symbol)
+
     def _get_news_sentiment(self) -> float:
         """Haber duygu analizi: -1 (negatif) ile +1 (pozitif) arasi skor."""
         now = datetime.now()
@@ -222,6 +244,7 @@ class SignalEngine:
     def analyze_symbol(self, symbol: str, interval: str = "1d", period: str = "3mo") -> dict | None:
         """
         Tek bir sembol icin teknik analiz + sinyal skoru.
+        v3.3+: ParameterRegistry ile regime-adaptive agirliklar ve esikler (K95).
         Returns: sinyal dict veya None (yeterli veri yoksa)
         """
         try:
@@ -234,30 +257,33 @@ class SignalEngine:
             print(f"SINYAL: {symbol} yetersiz veri ({len(df)} satir)")
             return None
 
-        # Indikatorler
+        # K95: Regime-adaptive config
+        cfg = self._get_signal_config(symbol=symbol)
+
+        # Indikatorler + sinyal (adaptive weights/thresholds)
         df = apply_all(df)
-        df = combined_signal(df)
+        df = combined_signal(df, config=cfg)
 
         last = df.iloc[-1]
-        score = last.get("SIGNAL_SCORE", 0)
+        score = last.get("Signal_Score", 0)
         signal = last.get("Signal", 0)
 
-        if score < self.signal_threshold or signal < 2:
+        if score < cfg.score_strong or signal < 2:
             return None  # Yeterince guclu sinyal yok
 
-        # SL / TP hesapla
+        # SL / TP hesapla (regime-adaptive ATR multipliers)
         entry = last["close"]
         atr = last.get("ATR", entry * 0.03)
-        sl = entry - (atr * 2)
-        tp1 = entry + (atr * 3)
-        tp2 = entry + (atr * 4)
+        sl = entry - (atr * cfg.atr_sl_mult)
+        tp1 = entry + (atr * cfg.atr_tp1_mult)
+        tp2 = entry + (atr * cfg.atr_tp2_mult)
 
         r_r = self._calculate_r_r(entry, sl, tp1)
         if r_r < 2.0:
             return None  # Kural D-3: R:R min 1:2
 
-        # Kelly (varsayimsal)
-        kelly = self._calculate_kelly(win_rate=0.6, avg_win=0.04, avg_loss=0.02)
+        # Kelly (regime-adaptive assumptions)
+        kelly = self._calculate_kelly(win_rate=cfg.kelly_win_rate, avg_win=cfg.kelly_avg_win, avg_loss=cfg.kelly_avg_loss)
         if kelly <= 0:
             return None  # Kelly <= 0 ise RED
 
@@ -268,9 +294,7 @@ class SignalEngine:
         mirofish = min(100, max(0, (rsi * 0.4) + (50 + macd_hist * 10) * 0.3 + (bb_position * 50) * 0.3))
 
         # AutoValidator: Canli fiyat dogrulamasi (K91)
-        from PYTHON.data.auto_validator import AutoValidator
-        validator = AutoValidator()
-        validation = validator.validate_symbol(
+        validation = self._auto_validator.validate_symbol(
             symbol=symbol,
             expected_price=entry,
             expected_sl=sl,
@@ -285,20 +309,20 @@ class SignalEngine:
         regime = macro.get("regime", "NEUTRAL")
         news_sentiment = self._get_news_sentiment()
 
-        # Ayi piyasasi veya cok negatif haberler: skor dusur
+        # Ayi piyasasi veya cok negatif haberler: adaptive skor dusur (K95)
         if regime == "BEAR":
-            score -= 10.0
+            score += cfg.bear_penalty
         elif regime == "NEUTRAL" and macro.get("score", 1) <= 1:
-            score -= 5.0
+            score += cfg.bear_penalty * 0.5
 
         if news_sentiment < -0.5:
-            score -= 8.0
+            score += cfg.news_severe_penalty
             print(f"SINYAL: {symbol} negatif haber sentiment ({news_sentiment:.2f}), skor dusuruldu")
         elif news_sentiment < -0.2:
-            score -= 4.0
+            score += cfg.news_moderate_penalty
 
-        if score < self.signal_threshold:
-            print(f"SINYAL: {symbol} makro/haber nedeniyle esik altina dustu ({score:.0f} < {self.signal_threshold})")
+        if score < cfg.score_strong:
+            print(f"SINYAL: {symbol} makro/haber nedeniyle esik altina dustu ({score:.0f} < {cfg.score_strong})")
             return None
 
         # Manipülasyon tespiti (çoklu zaman dilimi)
@@ -307,7 +331,7 @@ class SignalEngine:
             if manip_result and manip_result.is_manipulated:
                 score -= manip_result.threat_score * 0.5
                 print(f"SINYAL: {symbol} manipülasyon tespit edildi ({manip_result.reason}), skor dusuruldu ({score:.0f})")
-                if score < self.signal_threshold:
+                if score < cfg.score_strong:
                     # K243: Fallback — alternatif piyasalara veya hisselere gecis
                     if self.enable_fallback:
                         fb = self.fallback_router.fallback(symbol)
@@ -379,6 +403,7 @@ class SignalEngine:
         if self.paper_trading:
             # Pozisyon buyuklugu: Kelly bazli ama max %2
             kelly_pct = min(signal["kelly"] * 100, 2.0)
+            initial = self.broker.initial_capital
             size = (initial * (kelly_pct / 100)) / signal["entry"]
             size = int(size)
 
@@ -387,9 +412,7 @@ class SignalEngine:
                 return result
 
             # K143: Emir validasyonu zorunlu
-            from PYTHON.execution.order_validator import OrderValidator
-            order_validator = OrderValidator(max_size=1_000_000.0)
-            validation = order_validator.validate({
+            validation = self._order_validator.validate({
                 "symbol": signal["symbol"],
                 "side": "BUY",
                 "size": size,
@@ -424,8 +447,7 @@ class SignalEngine:
         else:
             result["reason"] = "Paper trading PASIF - sinyal kaydedildi"
 
-        # Sinyali kaydet (PaperSignal)
-        session = get_session()
+        # Sinyali kaydet (PaperSignal) — batch buffer (K97)
         ps = PaperSignal(
             symbol=signal["symbol"],
             signal_time=signal["timestamp"],
@@ -444,15 +466,29 @@ class SignalEngine:
             outcome="FILLED" if result["executed"] else "PENDING",
             notes=result["reason"],
         )
-        session.add(ps)
-        session.commit()
-        session.close()
-
+        self._signal_buffer.append(ps)
         return result
 
-    def run_scan_with_fallback(self, symbols: list[str]) -> list[dict]:
+    def _flush_signal_buffer(self):
+        """K97: Batch insert buffered PaperSignal records."""
+        if not self._signal_buffer:
+            return
+        session = get_session()
+        try:
+            for ps in self._signal_buffer:
+                session.add(ps)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            print(f"SINYAL: Batch insert hatasi: {e}")
+        finally:
+            session.close()
+            self._signal_buffer.clear()
+
+    def run_scan_with_fallback(self, symbols: list[str], max_workers: int = 4) -> list[dict]:
         """
         K243-K244: Manipülasyon tespiti sonrasi otomatik fallback ile tarama.
+        K97: Paralel analyze.
         Returns: sinyal sonuclari listesi
         """
         is_open, reason = self._check_market_open()
@@ -466,11 +502,17 @@ class SignalEngine:
             print(f"SINYAL: {time_reason}")
             return [{"market_closed": True, "reason": time_reason}]
 
+        # K97: Paralel symbol analysis
+        analyzed: list[dict | None] = []
+        if len(symbols) == 1 or max_workers <= 1:
+            analyzed = [self.analyze_symbol(sym) for sym in symbols]
+        else:
+            with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as executor:
+                analyzed = list(executor.map(self.analyze_symbol, symbols))
+
         results = []
         fallback_count = 0
-
-        for sym in symbols:
-            signal = self.analyze_symbol(sym)
+        for sym, signal in zip(symbols, analyzed):
             if signal:
                 result = self.execute_signal(signal)
                 results.append(result)
@@ -480,8 +522,6 @@ class SignalEngine:
                     f"Durum: {result['reason']}"
                 )
             else:
-                # Fallback denendi mi kontrol et (analyze_symbol iceride fallback yapar)
-                # Sadece blacklist'e alinanlari logla
                 bl = self.fallback_router.get_blacklist()
                 if sym.upper() in bl:
                     fallback_count += 1
@@ -489,12 +529,13 @@ class SignalEngine:
         if fallback_count > 0:
             print(f"SINYAL: {fallback_count} sembolde manipülasyon tespit edildi, fallback calisti")
 
+        self._flush_signal_buffer()
         return results
 
-    def run_dynamic_rotation_scan(self, symbols: list[str]) -> list[dict]:
+    def run_dynamic_rotation_scan(self, symbols: list[str], max_workers: int = 4) -> list[dict]:
         """
         K244: Dinamik sembol rotasyonu ile tarama.
-        Her sembol icin rotasyon gerekip gerekmedigini kontrol eder.
+        K97: Paralel analyze.
         """
         # Once tum sembollerin skorunu guncelle
         self.rotator.update_scores(symbols)
@@ -508,7 +549,8 @@ class SignalEngine:
         if not can_trade_time:
             return [{"market_closed": True, "reason": time_reason}]
 
-        results = []
+        # Rotasyon kararlarini once al (senkron, thread-safe degil)
+        rotated_symbols = []
         for sym in symbols:
             should_rotate, rotation_reason = self.rotator.should_rotate(sym)
             if should_rotate:
@@ -517,8 +559,18 @@ class SignalEngine:
                     print(f"ROTASYON: {sym} -> {target.fallback_symbol} | Neden: {rotation_reason}")
                     self.rotator.record_rotation(sym, target.fallback_symbol, rotation_reason)
                     sym = target.fallback_symbol
+            rotated_symbols.append(sym)
 
-            signal = self.analyze_symbol(sym)
+        # K97: Paralel symbol analysis
+        analyzed: list[dict | None] = []
+        if len(rotated_symbols) == 1 or max_workers <= 1:
+            analyzed = [self.analyze_symbol(sym) for sym in rotated_symbols]
+        else:
+            with ThreadPoolExecutor(max_workers=min(max_workers, len(rotated_symbols))) as executor:
+                analyzed = list(executor.map(self.analyze_symbol, rotated_symbols))
+
+        results = []
+        for sym, signal in zip(rotated_symbols, analyzed):
             if signal:
                 result = self.execute_signal(signal)
                 results.append(result)
@@ -528,6 +580,7 @@ class SignalEngine:
                     f"Durum: {result['reason']}"
                 )
 
+        self._flush_signal_buffer()
         return results
 
     def get_fallback_blacklist(self) -> dict:
@@ -538,11 +591,12 @@ class SignalEngine:
         """Rotasyon tarihcesini dondur."""
         return self.rotator.get_rotation_history()
 
-    def run_scan(self, symbols: list[str]) -> list[dict]:
+    def run_scan(self, symbols: list[str], max_workers: int = 4) -> list[dict]:
         """
         Birden fazla sembolu tara ve sinyal uret.
         Tatil/haftasonu/piyasa kapali ise bilgi ver ve cik.
         K246-K248: Zaman bazli pencere kontrolu entegre.
+        K97: Paralel analyze + batch DB insert.
         Returns: sinyal sonuclari listesi
         """
         is_open, reason = self._check_market_open()
@@ -565,9 +619,16 @@ class SignalEngine:
                 f"Max pozisyon={suggestion['max_positions']}"
             )
 
+        # K97: Paralel symbol analysis
+        analyzed: list[dict | None] = []
+        if len(symbols) == 1 or max_workers <= 1:
+            analyzed = [self.analyze_symbol(sym) for sym in symbols]
+        else:
+            with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as executor:
+                analyzed = list(executor.map(self.analyze_symbol, symbols))
+
         results = []
-        for sym in symbols:
-            signal = self.analyze_symbol(sym)
+        for sym, signal in zip(symbols, analyzed):
             if signal:
                 result = self.execute_signal(signal)
                 results.append(result)
@@ -576,6 +637,9 @@ class SignalEngine:
                     f"R:R: {signal['r_r']:.2f} | Kelly: {signal['kelly']:.3f} | "
                     f"Durum: {result['reason']}"
                 )
+
+        # K97: Flush any buffered signals to DB
+        self._flush_signal_buffer()
         return results
 
 

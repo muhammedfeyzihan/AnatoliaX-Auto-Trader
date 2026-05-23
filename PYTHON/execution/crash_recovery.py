@@ -70,3 +70,52 @@ class CrashRecoveryManager:
         self._state.clear()
         for f in self.checkpoint_dir.glob("checkpoint_*.json"):
             f.unlink()
+
+    # ------------------------------------------------------------------
+    # Self-healing recovery (v3.3+)
+    # ------------------------------------------------------------------
+    def self_heal(self, validators: List[Callable[[Dict], Tuple[bool, str]]]) -> dict:
+        """
+        Attempt auto-recovery with validation chain.
+        1. Load latest checkpoint
+        2. Run validators
+        3. If invalid, rollback to older checkpoint
+        4. If all fail, return safe defaults
+        """
+        files = sorted(self.checkpoint_dir.glob("checkpoint_*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        for f in files:
+            try:
+                with open(f, "r", encoding="utf-8") as fp:
+                    candidate = json.load(fp)
+                all_pass = True
+                reasons = []
+                for v in validators:
+                    ok, reason = v(candidate)
+                    if not ok:
+                        all_pass = False
+                        reasons.append(reason)
+                if all_pass:
+                    self._state = candidate
+                    return {"recovered": True, "from": str(f), "state": candidate, "validators": len(validators)}
+            except Exception:
+                continue
+        return {"recovered": False, "reason": "All checkpoints failed validation", "safe_defaults": True}
+
+    def validate_state_integrity(self, state: Dict) -> Tuple[bool, str]:
+        """Basic integrity check: equity > 0, no NaN, required keys present."""
+        equity = state.get("equity", 0.0)
+        if equity < 0:
+            return False, f"Negative equity {equity}"
+        if any(isinstance(v, float) and (v != v) for v in state.values()):  # NaN check
+            return False, "NaN values detected"
+        return True, "OK"
+
+    def get_recovery_stats(self) -> dict:
+        files = list(self.checkpoint_dir.glob("checkpoint_*.json"))
+        total_size = sum(f.stat().st_size for f in files)
+        return {
+            "checkpoint_count": len(files),
+            "total_size_bytes": total_size,
+            "last_save_age_sec": time.time() - self._last_save if self._last_save > 0 else None,
+            "state_keys": list(self._state.keys()),
+        }
