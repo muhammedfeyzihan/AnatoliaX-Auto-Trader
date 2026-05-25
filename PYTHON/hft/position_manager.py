@@ -5,8 +5,8 @@ Wraps Account/Position domain objects with HFT-specific logic.
 
 import time
 from typing import Dict, Optional
-from PYTHON.risk.account import Account
-from PYTHON.risk.position import Position
+from risk.account import Account
+from risk.position import Position
 
 
 class HFTPositionManager:

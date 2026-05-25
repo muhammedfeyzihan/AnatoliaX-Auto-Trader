@@ -3,7 +3,7 @@ ollama_client.py — Ollama API Client (Local, Token Yok)
 localhost:11434 uzerinden Gemma/Llama/Mistral calistirir.
 
 Kullanim:
-    from PYTHON.ai.ollama_client import OllamaClient
+    from ai.ollama_client import OllamaClient
     client = OllamaClient()
     response = client.generate("THYAO teknik analizi yap", model="gemma")
 """

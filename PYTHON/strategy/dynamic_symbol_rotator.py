@@ -25,10 +25,10 @@ import threading
 
 import pandas as pd
 
-from PYTHON.data.feed_aggregator import FeedAggregator
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import combined_signal
-from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter, FallbackResult
+from data.feed_aggregator import FeedAggregator
+from backtest.indicators import apply_all
+from backtest.signals import combined_signal
+from execution.manipulation_fallback import ManipulationFallbackRouter, FallbackResult
 
 
 @dataclass

@@ -3,7 +3,7 @@ AnatoliaX Data Cache Manager
 SQLite-based veri cache: Tekrar çekmeyi önle, rate limit koruma.
 
 Kullanim:
-    from PYTHON.data.cache_manager import CacheManager
+    from data.cache_manager import CacheManager
     cache = CacheManager(ttl_seconds=3600)
     df = cache.get("THYAO", "1d")
     if df is None:

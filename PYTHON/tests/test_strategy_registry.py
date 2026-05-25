@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.strategy.strategy_registry import StrategyRegistry, StrategyMeta
+from strategy.strategy_registry import StrategyRegistry, StrategyMeta
 
 
 class DummyStrategy:
@@ -30,7 +30,7 @@ class TestStrategyRegistry:
 
     def test_load_from_module(self):
         reg = StrategyRegistry()
-        meta = reg.load_from_module("PYTHON.tests.test_strategy_registry", "DummyStrategy")
+        meta = reg.load_from_module("tests.test_strategy_registry", "DummyStrategy")
         assert meta.name == "dummy"
         assert "dummy" in reg.list_strategies()
 

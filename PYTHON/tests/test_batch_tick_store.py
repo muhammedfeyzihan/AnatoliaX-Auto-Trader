@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.optimization.batch_tick_store import BatchTickStore
+from optimization.batch_tick_store import BatchTickStore
 
 
 class TestBatchTickStore:

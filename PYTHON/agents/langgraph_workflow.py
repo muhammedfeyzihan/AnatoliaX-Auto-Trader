@@ -3,7 +3,7 @@ langgraph_workflow.py — LangGraph tabanli ajan orkestrasyonu.
 tradingagents'tan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.agents.langgraph_workflow import AgentWorkflow
+    from agents.langgraph_workflow import AgentWorkflow
     wf = AgentWorkflow()
     result = wf.run(symbol="THYAO", context={"makro": "BOGA"})
 
@@ -30,9 +30,9 @@ except Exception:
     END = None
     LANGGRAPH_AVAILABLE = False
 
-from PYTHON.agents.orchestrator import AgentOrchestrator
-from PYTHON.agents.debate_panel import DebatePanel
-from PYTHON.agents.checkpoint import CheckpointManager
+from agents.orchestrator import AgentOrchestrator
+from agents.debate_panel import DebatePanel
+from agents.checkpoint import CheckpointManager
 
 
 @dataclass

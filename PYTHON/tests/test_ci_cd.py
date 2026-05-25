@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 class TestCICDPipeline:
     def test_workflow_file_exists(self):
-        path = Path(".github/workflows/ci.yml")
+        path = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "ci.yml"
         if path.exists():
             assert path.exists()
         else:

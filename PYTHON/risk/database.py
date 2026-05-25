@@ -5,7 +5,7 @@ Varsayilan SQLite, opsiyonel PostgreSQL (env var ile).
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from PYTHON.risk.models import Base
+from risk.models import Base
 
 # Singleton engine with connection pooling (K97)
 _ENGINE = None

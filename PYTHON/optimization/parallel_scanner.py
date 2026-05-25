@@ -8,7 +8,7 @@ Optimizations over sequential SignalEngine.run_scan():
 - Result aggregation with progress tracking
 
 Usage:
-    from PYTHON.optimization.parallel_scanner import ParallelScanner
+    from optimization.parallel_scanner import ParallelScanner
     scanner = ParallelScanner(max_workers=8)
     results = scanner.run_scan(["THYAO", "GARAN", "ASELS", ...])
 """
@@ -28,11 +28,11 @@ from typing import Callable, Optional
 
 import pandas as pd
 
-from PYTHON.data.market_calendar import BISTCalendar
-from PYTHON.data.feed_aggregator import FeedAggregator
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import combined_signal
-from PYTHON.paper_trading.paper_broker import PaperBroker
+from data.market_calendar import BISTCalendar
+from data.feed_aggregator import FeedAggregator
+from backtest.indicators import apply_all
+from backtest.signals import combined_signal
+from paper_trading.paper_broker import PaperBroker
 
 
 class ParallelScanner:

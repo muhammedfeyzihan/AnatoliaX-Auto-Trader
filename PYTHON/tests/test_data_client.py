@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.data_client import DataClient, YahooDataClient, FeedAggregatorDataClient
+from data.data_client import DataClient, YahooDataClient, FeedAggregatorDataClient
 
 
 class TestYahooDataClient:

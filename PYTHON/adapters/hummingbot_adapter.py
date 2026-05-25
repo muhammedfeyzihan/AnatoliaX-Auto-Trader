@@ -5,7 +5,7 @@ Provides unified exchange connectivity, market making, arbitrage detection,
 and liquidity provision. Falls back to PaperBroker when Hummingbot is unavailable.
 
 Usage:
-    from PYTHON.adapters.hummingbot_adapter import HummingbotAdapter
+    from adapters.hummingbot_adapter import HummingbotAdapter
     hb = HummingbotAdapter(exchange="binance")
     hb.place_market_order("THYAO", "BUY", 100)
     arb = hb.scan_arbitrage("THYAO", exchanges=["binance", "bybit"])
@@ -313,7 +313,7 @@ class HummingbotAdapter:
     # ------------------------------------------------------------------
     def _fallback_order(self, symbol: str, side: str, size: float, price: Optional[float] = None) -> dict:
         try:
-            from PYTHON.paper_trading.paper_broker import PaperBroker
+            from paper_trading.paper_broker import PaperBroker
             broker = PaperBroker()
             trade = broker.place_order(
                 symbol=symbol,

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.order_manager import OrderManager
+from execution.order_manager import OrderManager
 
 
 class TestOrderManager:

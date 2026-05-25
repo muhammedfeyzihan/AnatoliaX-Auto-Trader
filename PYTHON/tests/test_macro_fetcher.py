@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.macro_fetcher import MacroFetcher
+from data.macro_fetcher import MacroFetcher
 
 
 class TestMacroFetcher:
@@ -17,7 +17,7 @@ class TestMacroFetcher:
         mf = MacroFetcher()
         assert mf is not None
 
-    @patch("PYTHON.data.macro_fetcher.requests.Session.get")
+    @patch("data.macro_fetcher.requests.Session.get")
     def test_fetch_usdtry(self, mock_get):
         mock_get.return_value = MagicMock(
             status_code=200,
@@ -28,7 +28,7 @@ class TestMacroFetcher:
         assert result["value"] == 32.5
         assert result["indicator"] == "USDTRY"
 
-    @patch("PYTHON.data.macro_fetcher.requests.Session.get")
+    @patch("data.macro_fetcher.requests.Session.get")
     def test_fetch_usdtry_failure(self, mock_get):
         mock_get.side_effect = Exception("Timeout")
         mf = MacroFetcher()

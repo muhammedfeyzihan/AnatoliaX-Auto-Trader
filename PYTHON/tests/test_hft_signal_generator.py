@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.hft.signal_generator import m1_momentum_signal, s1_micro_scalp_signal, generate_signal_from_df
+from hft.signal_generator import m1_momentum_signal, s1_micro_scalp_signal, generate_signal_from_df
 
 
 class TestSignalGenerator:

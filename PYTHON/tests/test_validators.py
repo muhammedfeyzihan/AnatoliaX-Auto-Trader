@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.common.validators import (
+from common.validators import (
     validate_no_nan_inf,
     validate_price,
     validate_quantity,

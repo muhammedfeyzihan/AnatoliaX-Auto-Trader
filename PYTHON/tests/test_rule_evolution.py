@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.agents.rule_evolution import RuleEvolution
+from agents.rule_evolution import RuleEvolution
 
 
 def _make_td():

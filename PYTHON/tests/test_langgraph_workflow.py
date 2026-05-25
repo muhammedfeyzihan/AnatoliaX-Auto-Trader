@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.agents.langgraph_workflow import AgentWorkflow, AgentState, LANGGRAPH_AVAILABLE
+from agents.langgraph_workflow import AgentWorkflow, AgentState, LANGGRAPH_AVAILABLE
 
 
 class TestAgentWorkflow:
@@ -149,7 +149,7 @@ class TestAgentWorkflow:
 
     def test_build_graph_no_langgraph(self):
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr("PYTHON.agents.langgraph_workflow.LANGGRAPH_AVAILABLE", False)
+            mp.setattr("agents.langgraph_workflow.LANGGRAPH_AVAILABLE", False)
             wf = AgentWorkflow()
             assert wf._graph is None
 

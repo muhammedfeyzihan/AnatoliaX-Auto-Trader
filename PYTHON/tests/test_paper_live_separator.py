@@ -3,7 +3,7 @@ test_paper_live_separator.py — Paper/Live Separator Tests
 """
 
 import pytest
-from PYTHON.execution.paper_live_separator import (
+from execution.paper_live_separator import (
     PaperLiveSeparator,
     ExecutionQualityScore,
     ExecutionOutcome,

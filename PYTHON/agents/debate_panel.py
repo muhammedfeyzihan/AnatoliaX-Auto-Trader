@@ -3,7 +3,7 @@ debate_panel.py — Yapilandirilmis Bull/Bear tartisma paneli.
 tradingagents'tan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.agents.debate_panel import DebatePanel
+    from agents.debate_panel import DebatePanel
     panel = DebatePanel(symbol="THYAO")
     result = panel.debate(
         bull_args={"teknik": "AL", "haber": "pozitif", "ps": 85},
@@ -39,7 +39,7 @@ class DebatePanel:
         self.verbose = verbose
         self._transcript: list[dict] = []
         # Strateji Ajanı — Kimi/Bulut entegrasyonu
-        from PYTHON.ai.cloud_client import StrategyAgentAI
+        from ai.cloud_client import StrategyAgentAI
         self.ai_strategy = StrategyAgentAI()
 
     def debate(

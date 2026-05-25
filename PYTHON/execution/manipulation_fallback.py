@@ -21,10 +21,10 @@ from typing import Optional, List, Dict
 from dataclasses import dataclass
 import pandas as pd
 
-from PYTHON.data.feed_aggregator import FeedAggregator
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import combined_signal
-from PYTHON.manipulation.multi_tf_detector import MultiTFManipDetector
+from data.feed_aggregator import FeedAggregator
+from backtest.indicators import apply_all
+from backtest.signals import combined_signal
+from manipulation.multi_tf_detector import MultiTFManipDetector
 
 
 @dataclass
@@ -176,7 +176,7 @@ class ManipulationFallbackRouter:
         if not self.enable_crypto:
             return None
 
-        from PYTHON.adapters.exchange_adapter import ExchangeAdapter
+        from adapters.exchange_adapter import ExchangeAdapter
         adapter = ExchangeAdapter("binance")
 
         candidates = []
@@ -207,7 +207,7 @@ class ManipulationFallbackRouter:
         if not self.enable_forex:
             return None
 
-        from PYTHON.data.yahoo_fetcher import YahooFetcher
+        from data.yahoo_fetcher import YahooFetcher
         fetcher = YahooFetcher()
 
         candidates = []

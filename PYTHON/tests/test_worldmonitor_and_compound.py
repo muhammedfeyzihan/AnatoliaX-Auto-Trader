@@ -13,8 +13,8 @@ import pandas as pd
 import time
 from datetime import datetime, timezone, timedelta
 
-from PYTHON.adapters.worldmonitor_bridge import WorldMonitorBridge, NewsItem
-from PYTHON.strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
+from adapters.worldmonitor_bridge import WorldMonitorBridge, NewsItem
+from strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
 
 
 # ------------------------------------------------------------------
@@ -197,14 +197,14 @@ class TestCompoundGrowthProtocol:
 # ------------------------------------------------------------------
 class TestIntegrationWorldMonitorCompound:
     def test_worldmonitor_init(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         assert orch.worldmonitor is not None
         assert orch.health_check()["worldmonitor"]["active"] is True
 
     def test_compound_growth_not_initialized(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         res = orch.run_compound_growth_protocol({}, symbol="THYAO")
         assert res["ok"] is False

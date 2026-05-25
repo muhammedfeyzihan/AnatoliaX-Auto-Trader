@@ -10,7 +10,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.optimization.fast_cache import FastCacheManager
+from optimization.fast_cache import FastCacheManager
 
 
 class TestFastCacheManager:
@@ -18,13 +18,13 @@ class TestFastCacheManager:
         import uuid
         self.db = f"fast_cache_test_{uuid.uuid4().hex[:8]}.db"
         # Monkey-patch CACHE_DB for test isolation
-        import PYTHON.optimization.fast_cache as fc
+        import optimization.fast_cache as fc
         self._orig_db = fc.CACHE_DB
         fc.CACHE_DB = Path(self.db)
         self.cache = FastCacheManager(ttl_seconds=3600, memory_size=10)
 
     def teardown_method(self):
-        import PYTHON.optimization.fast_cache as fc
+        import optimization.fast_cache as fc
         fc.CACHE_DB = self._orig_db
         self.cache.close()
         if Path(self.db).exists():

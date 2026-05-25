@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.auth.rbac import RBACManager
-from PYTHON.auth.demo_user import ensure_demo_user, add_user_cli
+from auth.rbac import RBACManager
+from auth.demo_user import ensure_demo_user, add_user_cli
 
 
 class TestDemoUser:

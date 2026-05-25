@@ -8,7 +8,7 @@ from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter, FallbackResult
+from execution.manipulation_fallback import ManipulationFallbackRouter, FallbackResult
 
 
 class TestManipulationFallbackRouter:

@@ -90,8 +90,8 @@ def _passthrough_combined_signal(df, indicators_needed=None, config=None):
 @pytest.fixture
 def engine(monkeypatch):
     td = Path(tempfile.mkdtemp())
-    import PYTHON.paper_trading.signal_engine as se_mod
-    import PYTHON.data.auto_validator as av_mod
+    import paper_trading.signal_engine as se_mod
+    import data.auto_validator as av_mod
 
     monkeypatch.setenv("AX_PAPER_TRADING", "false")
     monkeypatch.setattr(se_mod, "apply_all", _passthrough_apply_all)
@@ -99,7 +99,7 @@ def engine(monkeypatch):
     monkeypatch.setattr(se_mod.SignalEngine, "_calculate_r_r", lambda self, entry, sl, tp: 3.0)
     monkeypatch.setattr(av_mod, "AutoValidator", DummyValidator)
 
-    from PYTHON.paper_trading.signal_engine import SignalEngine
+    from paper_trading.signal_engine import SignalEngine
     eng = SignalEngine(paper_trading=False, signal_threshold=70.0)
     eng.feed = DummyFeed()
     eng.macro_fetcher = DummyMacroFetcher("BULL")
@@ -119,7 +119,7 @@ class TestSignalEngineIntegration:
     def test_bear_regime_lowers_score_below_threshold(self, engine, monkeypatch):
         engine.macro_fetcher = DummyMacroFetcher("BEAR")
         # K95: Registry'den BEAR config alinir; test icin sabit degerler kullan
-        from PYTHON.strategy.parameter_registry import SignalConfig
+        from strategy.parameter_registry import SignalConfig
         monkeypatch.setattr(
             engine, "_get_signal_config",
             lambda symbol=None: SignalConfig(score_strong=80.0, bear_penalty=-10.0)

@@ -9,7 +9,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.optimization.vectorized_backtest import VectorizedBacktestEngine
+from optimization.vectorized_backtest import VectorizedBacktestEngine
 
 
 class TestVectorizedBacktestEngine:

@@ -5,7 +5,7 @@ test_ensemble_optimizer.py — Ensemble Optimizer Tests
 import pytest
 import pandas as pd
 import numpy as np
-from PYTHON.strategy.ensemble_optimizer import EnsembleOptimizer
+from strategy.ensemble_optimizer import EnsembleOptimizer
 
 
 class TestEnsembleOptimizer:

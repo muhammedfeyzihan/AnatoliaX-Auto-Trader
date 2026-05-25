@@ -12,7 +12,7 @@ Detects:
 - Momentum Ignition: Artificial momentum creation
 
 Usage:
-    from PYTHON.agents.manipulation_detector import ManipulationDetector
+    from agents.manipulation_detector import ManipulationDetector
     det = ManipulationDetector()
     result = det.analyze(df, symbol="THYAO")
     if result.is_manipulated:

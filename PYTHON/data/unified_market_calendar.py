@@ -7,7 +7,7 @@ Tracks official holidays, trading hours, and market status for:
 - FOREX (major sessions: London, NY, Tokyo, Sydney)
 
 Usage:
-    from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
+    from data.unified_market_calendar import UnifiedMarketCalendar
     cal = UnifiedMarketCalendar()
     if cal.is_market_open("BIST"):
         print("Borsa açık")

@@ -3,7 +3,7 @@ task_scheduler.py — Cron benzeri zamanlayici servisi.
 auto-marketplace'tan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.scheduler.task_scheduler import TaskScheduler
+    from scheduler.task_scheduler import TaskScheduler
     sched = TaskScheduler()
     sched.add_interval_job(func, minutes=15, id="signal_scan")
     sched.add_daily_job(func, hour=8, minute=30, id="morning_report")

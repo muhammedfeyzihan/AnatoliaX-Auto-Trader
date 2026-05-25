@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator, SymbolScore
-from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter
+from strategy.dynamic_symbol_rotator import DynamicSymbolRotator, SymbolScore
+from execution.manipulation_fallback import ManipulationFallbackRouter
 
 
 class TestDynamicSymbolRotator:

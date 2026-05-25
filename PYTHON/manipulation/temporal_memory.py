@@ -6,7 +6,7 @@ memory graph. Agents query temporal context to enrich predictions.
 Inspired by MiroFish's seed extraction + dynamic temporal memory.
 
 Usage:
-    from PYTHON.manipulation.temporal_memory import TemporalMemory
+    from manipulation.temporal_memory import TemporalMemory
     mem = TemporalMemory()
     mem.add_seed("USDTRY_38", "USD/TRY 38'i asti", importance=0.9, tags=["macro","usdtry"])
     mem.add_seed("KAP_THYAO_temettu", "THYAO temettu acikladi", importance=0.7, tags=["kap","THYAO"])

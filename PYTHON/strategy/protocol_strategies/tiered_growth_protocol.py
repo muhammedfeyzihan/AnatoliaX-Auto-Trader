@@ -41,7 +41,7 @@ Kural K273: Her tier ayrı ayrı kullanılabilir; birbirine bağımlı değildir
 Kural K274: Tier seçimi sermaye büyüklüğüne ve risk toleransına göre yapılır.
 
 Usage:
-    from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
+    from strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
     proto = TieredGrowthProtocol(initial_capital=10_000, target=DailyReturnTarget.PCT_5)
     signal = proto.evaluate(df, symbol="THYAO")
 """
@@ -65,12 +65,12 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
-from PYTHON.strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
-from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol, PipelineConfig
-from PYTHON.strategy.gold_mining.orchestrator import GoldMiningOrchestrator, GoldMiningState
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.risk.black_swan_guard import BlackSwanGuard
+from strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
+from strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
+from strategy.protocol_strategies.omega_protocol import OmegaProtocol, PipelineConfig
+from strategy.gold_mining.orchestrator import GoldMiningOrchestrator, GoldMiningState
+from data.unified_market_calendar import UnifiedMarketCalendar
+from risk.black_swan_guard import BlackSwanGuard
 
 
 class DailyReturnTarget(Enum):

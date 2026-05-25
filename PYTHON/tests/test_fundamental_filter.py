@@ -3,7 +3,7 @@ test_fundamental_filter.py — Fundamental Filter Tests
 """
 
 import pytest
-from PYTHON.analytics.fundamental_filter import FundamentalFilter, FundamentalData
+from analytics.fundamental_filter import FundamentalFilter, FundamentalData
 
 
 class TestFundamentalFilter:

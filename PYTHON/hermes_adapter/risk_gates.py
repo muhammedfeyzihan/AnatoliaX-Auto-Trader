@@ -4,7 +4,7 @@ Hermes Trader pattern: every order must pass 10 risk checks
 before execution. Any single RED blocks the order.
 
 Usage:
-    from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
+    from hermes_adapter.risk_gates import RiskGateEngine
     engine = RiskGateEngine()
     ok, reasons = engine.check_all(symbol="THYAO", size=100, price=105.0, side="BUY")
     if not ok:
@@ -185,7 +185,7 @@ class RiskGateEngine:
         if not self.market_open_required:
             return GateResult("MARKET_OPEN", True, "Optional")
         try:
-            from PYTHON.data.market_calendar import BISTCalendar
+            from data.market_calendar import BISTCalendar
             cal = BISTCalendar()
             ok = cal.is_market_open()
             return GateResult("MARKET_OPEN", ok, "Open" if ok else cal.get_reason())

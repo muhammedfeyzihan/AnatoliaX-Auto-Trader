@@ -5,7 +5,7 @@ Sistemdeki kritik olaylar (emir, risk, kill switch) degistirilemez kayit olarak
 SQLite'a yazilir. Hash zinciri ile tutarlilik kontrolu.
 
 Kullanim:
-    from PYTHON.observability.audit_log import ImmutableAuditLog
+    from observability.audit_log import ImmutableAuditLog
     audit = ImmutableAuditLog("data/audit.db")
     audit.append("ORDER", {"order_id": "123", "symbol": "THYAO", "side": "BUY"})
     audit.append("KILL_SWITCH", {"reason": "Max DD exceeded"})

@@ -9,7 +9,7 @@ Target: 0.01-0.05% per trade, hold 500ms-3s.
 Max agents: 1 (solo speed runner).
 
 Usage:
-    from PYTHON.strategy.gold_mining.ms_strategy import MSStrategy
+    from strategy.gold_mining.ms_strategy import MSStrategy
     strategy = MSStrategy()
     signal = strategy.generate(tick_stream)
 """

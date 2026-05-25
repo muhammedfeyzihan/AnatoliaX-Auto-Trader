@@ -5,8 +5,8 @@ EMA 3/8 cross + volume spike. Hold 30-120 seconds.
 
 import numpy as np
 from typing import Optional, Dict
-from PYTHON.hft.config import HFTConfig
-from PYTHON.hft.signal_generator import m1_momentum_signal
+from hft.config import HFTConfig
+from hft.signal_generator import m1_momentum_signal
 
 
 class M1MomentumStrategy:

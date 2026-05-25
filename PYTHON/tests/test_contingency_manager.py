@@ -8,8 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.contingency_manager import ContingencyManager
-from PYTHON.execution.order_types import BracketOrder, OCOOrder, TrailingStopOrder, IcebergOrder
+from execution.contingency_manager import ContingencyManager
+from execution.order_types import BracketOrder, OCOOrder, TrailingStopOrder, IcebergOrder
 
 
 class TestContingencyManager:

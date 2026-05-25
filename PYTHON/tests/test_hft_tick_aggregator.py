@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.hft.tick_aggregator import TickAggregator
+from hft.tick_aggregator import TickAggregator
 
 
 class TestTickAggregator:

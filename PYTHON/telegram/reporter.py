@@ -3,7 +3,7 @@ AnatoliaX Telegram Reporter
 Python tabanli Telegram bot modulu. Gunluk raporlar + anlik alarm.
 
 Kullanim:
-    from PYTHON.telegram.reporter import TelegramReporter
+    from telegram.reporter import TelegramReporter
     reporter = TelegramReporter()
     reporter.send_evening_report()
     reporter.send_alert("Max Drawdown %10 asildi!")
@@ -20,11 +20,11 @@ import os
 import requests
 from datetime import datetime, timedelta
 
-from PYTHON.paper_trading.paper_broker import PaperBroker
-from PYTHON.paper_trading.signal_engine import SignalEngine
-from PYTHON.risk.database import get_session
-from PYTHON.paper_trading.models import PaperPortfolio, PaperSignal
-from PYTHON.data.feed_aggregator import FeedAggregator
+from paper_trading.paper_broker import PaperBroker
+from paper_trading.signal_engine import SignalEngine
+from risk.database import get_session
+from paper_trading.models import PaperPortfolio, PaperSignal
+from data.feed_aggregator import FeedAggregator
 
 
 class TelegramReporter:

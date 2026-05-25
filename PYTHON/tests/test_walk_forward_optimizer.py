@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.walk_forward_optimizer import WalkForwardOptimizer
+from backtest.walk_forward_optimizer import WalkForwardOptimizer
 
 
 def dummy_backtest(params, df):

@@ -3,7 +3,7 @@ portfolio_optimizer.py — Markowitz Modern Portfolio Theory Optimizer
 AutoTrader'dan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.risk.portfolio_optimizer import PortfolioOptimizer
+    from risk.portfolio_optimizer import PortfolioOptimizer
     opt = PortfolioOptimizer()
     result = opt.optimize(symbols=["THYAO", "GARAN", "ASELS", "TUPRS", "KCHOL"])
     # result: {"weights": {...}, "sharpe": 1.8, "frontier": [...]}
@@ -19,7 +19,7 @@ if _module_dir.name == "PYTHON":
 import numpy as np
 import pandas as pd
 from typing import Optional
-from PYTHON.data.feed_aggregator import FeedAggregator
+from data.feed_aggregator import FeedAggregator
 
 
 class PortfolioOptimizer:

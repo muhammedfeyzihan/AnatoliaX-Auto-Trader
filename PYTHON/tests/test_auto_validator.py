@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.auto_validator import AutoValidator
+from data.auto_validator import AutoValidator
 
 
 class TestAutoValidator:
@@ -17,7 +17,7 @@ class TestAutoValidator:
         av = AutoValidator()
         assert av.DEVIATION_LIMIT_PCT == 1.0
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_valid(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 100.0, "source": "yahoo"}.get(k),
@@ -32,7 +32,7 @@ class TestAutoValidator:
         assert result["valid"] is True
         assert "DOGRULANDI" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_deviation(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 110.0, "source": "yahoo"}.get(k),
@@ -47,7 +47,7 @@ class TestAutoValidator:
         assert result["valid"] is False
         assert "SAPMA" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_sl_hit(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 95.0, "source": "yahoo"}.get(k),
@@ -63,7 +63,7 @@ class TestAutoValidator:
         assert result["valid"] is False
         assert "STOP" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_tp_hit(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 105.0, "source": "yahoo"}.get(k),
@@ -79,7 +79,7 @@ class TestAutoValidator:
         assert result["valid"] is False
         assert "TP" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_empty_df(self, mock_fetch):
         mock_fetch.return_value = MagicMock(empty=True)
         av = AutoValidator()
@@ -87,7 +87,7 @@ class TestAutoValidator:
         assert result["valid"] is False
         assert "cekilemedi" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_symbol_exception(self, mock_fetch):
         mock_fetch.side_effect = Exception("Timeout")
         av = AutoValidator()
@@ -95,7 +95,7 @@ class TestAutoValidator:
         assert result["valid"] is False
         assert "HATA" in result["reason"]
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_validate_batch(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 100.0, "source": "yahoo"}.get(k),
@@ -113,7 +113,7 @@ class TestAutoValidator:
         assert len(results) == 2
         assert results[0]["valid"] is True
 
-    @patch("PYTHON.data.auto_validator.FeedAggregator.fetch")
+    @patch("data.auto_validator.FeedAggregator.fetch")
     def test_monitor_open_positions(self, mock_fetch):
         row = MagicMock(
             __getitem__=lambda self, k: {"close": 95.0, "source": "yahoo"}.get(k),

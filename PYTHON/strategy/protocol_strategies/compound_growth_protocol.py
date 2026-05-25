@@ -21,7 +21,7 @@ Recovery Formula (after loss):
     Recovery_Factor decays each win until original size restored.
 
 Usage:
-    from PYTHON.strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol
+    from strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol
     proto = CompoundGrowthProtocol(initial_capital=1000)
     signal = proto.evaluate(df, symbol="THYAO", venue="BIST")
     if signal:
@@ -46,10 +46,10 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine
-from PYTHON.risk.black_swan_guard import BlackSwanGuard
-from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
+from data.unified_market_calendar import UnifiedMarketCalendar
+from risk.execution_laws import ImmutableExecutionLawEngine
+from risk.black_swan_guard import BlackSwanGuard
+from strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
 
 
 @dataclass

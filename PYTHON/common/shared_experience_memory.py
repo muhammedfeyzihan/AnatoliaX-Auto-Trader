@@ -6,7 +6,7 @@ shared memory layer. All agent decisions, outcomes, and lessons are
 persisted here for collective learning.
 
 Usage:
-    from PYTHON.common.shared_experience_memory import SharedExperienceMemory
+    from common.shared_experience_memory import SharedExperienceMemory
     mem = SharedExperienceMemory()
     mem.record_experience(agent="signal", action="BUY THYAO", outcome=1.2, context={...})
     lesson = mem.query_lessons(symbol="THYAO", min_score=0.7)

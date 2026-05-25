@@ -2,7 +2,7 @@
 advanced_stop_manager.py — AutoTrader entegre edilmis gelismis stop yonetimi.
 
 Kullanim:
-    from PYTHON.risk.advanced_stop_manager import TrailingStop, ChandelierExit
+    from risk.advanced_stop_manager import TrailingStop, ChandelierExit
     ts = TrailingStop(entry=100.0, atr=2.5, multiplier=2.0, side="BUY")
     sl = ts.update(new_price=105.0)
 """

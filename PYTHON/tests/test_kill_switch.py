@@ -9,10 +9,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.risk.kill_switch import KillSwitch, CircuitBreaker
-from PYTHON.risk.volatility_throttle import VolatilityThrottle
-from PYTHON.risk.exposure_limiter import ExposureLimiter
-from PYTHON.risk.portfolio_heat import PortfolioHeat
+from risk.kill_switch import KillSwitch, CircuitBreaker
+from risk.volatility_throttle import VolatilityThrottle
+from risk.exposure_limiter import ExposureLimiter
+from risk.portfolio_heat import PortfolioHeat
 
 
 class TestKillSwitch:

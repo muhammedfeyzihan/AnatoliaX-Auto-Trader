@@ -3,7 +3,7 @@ macro_fetcher.py — Makroekonomik Veri Cekme
 Fed, DXY, CPI/TUFE, TCMB faiz, USD/TRY, Altin, Petrol, VIX
 
 Kullanim:
-    from PYTHON.data.macro_fetcher import MacroFetcher
+    from data.macro_fetcher import MacroFetcher
     fetcher = MacroFetcher()
     macro = fetcher.fetch_all()
     print(macro)

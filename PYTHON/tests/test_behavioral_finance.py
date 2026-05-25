@@ -4,7 +4,7 @@ test_behavioral_finance.py — Behavioral Finance Guard Tests
 
 import pytest
 from datetime import datetime, timezone
-from PYTHON.risk.behavioral_finance import BehavioralFinanceGuard, TradeResult
+from risk.behavioral_finance import BehavioralFinanceGuard, TradeResult
 
 
 class TestBehavioralFinanceGuard:

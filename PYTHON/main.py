@@ -29,7 +29,7 @@ def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False,
     """CSV dosyasi uzerinde backtest calistirir.
     v3.3+: Regime-adaptive backtest destegi (K95).
     """
-    from PYTHON.strategy.parameter_registry import get_registry
+    from strategy.parameter_registry import get_registry
 
     reg = get_registry()
     cfg = reg.get_signal_config(regime=regime or "sideways", symbol=symbol)
@@ -40,7 +40,7 @@ def run_backtest(csv_path: str, symbol: str = "THYAO", vectorized: bool = False,
     df = signals.combined_signal(df, config=cfg)
 
     if vectorized:
-        from PYTHON.optimization.vectorized_backtest import VectorizedBacktestEngine
+        from optimization.vectorized_backtest import VectorizedBacktestEngine
         eng = VectorizedBacktestEngine(
             df,
             slippage_model=slippage.SlippageModel(),
@@ -148,7 +148,7 @@ def run_scan(symbols: list[str]):
 
 def run_parallel_scan(symbols: list[str], workers: int = 8):
     """Paralel sinyal taramasi calistir."""
-    from PYTHON.optimization.parallel_scanner import ParallelScanner
+    from optimization.parallel_scanner import ParallelScanner
     scanner = ParallelScanner(max_workers=workers)
     results, stats = scanner.run_scan_with_progress(symbols)
     print(f"\n[TARAMA PARALEL] {stats['scanned']}/{stats['total']} sembol | {stats['signals']} sinyal | {stats['errors']} hata")
@@ -366,6 +366,35 @@ def main():
     parser.add_argument("--tiered-scan", type=str, metavar="SYMBOLS", help="Tiered ile coklu sembol tarama")
     parser.add_argument("--tiered-table", action="store_true", help="Tum tierlerin karsilastirma tablosunu goster")
 
+    # v3.5 Enhancement CLI arguments
+    parser.add_argument("--microstructure", type=str, metavar="SYMBOL", help="Mikro yapi analizi (Phase 1)")
+    parser.add_argument("--order-book", type=str, metavar="SYMBOL", help="L2/L3 Order book reconstruction (Phase 1)")
+    parser.add_argument("--cognitive-memory", action="store_true", help="Bilissel bellek demo (Phase 5)")
+    parser.add_argument("--event-sourcing", action="store_true", help="Event sourcing demo (Phase 2)")
+    parser.add_argument("--portfolio-intelligence", action="store_true", help="Portfoy istihbarati (Phase 3)")
+    parser.add_argument("--formal-verify", action="store_true", help="Formal verification kontrolu (Phase 2)")
+    parser.add_argument("--tick-simulator", action="store_true", help="Tick-level market simulator demo (Phase 1)")
+    parser.add_argument("--shadow-exec", action="store_true", help="Shadow execution environment demo (Phase 1)")
+    parser.add_argument("--liquidity-collapse", action="store_true", help="Liquidity collapse detection demo (Phase 1)")
+    parser.add_argument("--toxic-flow", action="store_true", help="Toxic flow detection demo (Phase 1)")
+    parser.add_argument("--factor-exposure", action="store_true", help="Factor exposure engine demo (Phase 3)")
+    parser.add_argument("--dynamic-hedge", action="store_true", help="Dynamic hedging engine demo (Phase 3)")
+    parser.add_argument("--regime-predict", action="store_true", help="Regime transition prediction demo (Phase 4)")
+    parser.add_argument("--alpha-decay", action="store_true", help="Alpha decay detection demo (Phase 4)")
+    parser.add_argument("--strategy-genome", action="store_true", help="Strategy genome system demo (Phase 4)")
+    parser.add_argument("--research-agent", action="store_true", help="Autonomous research agent demo (Phase 4)")
+    parser.add_argument("--adversarial-sim", action="store_true", help="Adversarial market simulation demo (Phase 4)")
+    parser.add_argument("--macro-ontology", action="store_true", help="Macro ontology engine demo (Phase 4)")
+    parser.add_argument("--fpga-shim", action="store_true", help="FPGA shim latency assessment (Phase 5)")
+    parser.add_argument("--options-surface", action="store_true", help="Options volatility surface demo (Phase 5)")
+    parser.add_argument("--arbitrage-brain", action="store_true", help="Cross-exchange arbitrage brain demo (Phase 5)")
+    parser.add_argument("--rl-execution", action="store_true", help="RL execution policy demo (Phase 5)")
+    parser.add_argument("--gpu-pipeline", action="store_true", help="GPU pipeline benchmark (Phase 5)")
+    parser.add_argument("--colocation", action="store_true", help="Co-location intelligence demo (Phase 5)")
+    parser.add_argument("--mlops-governance", action="store_true", help="MLOps governance demo (Phase 5)")
+    parser.add_argument("--compliance-engine", action="store_true", help="Compliance regulatory engine demo (Phase 5)")
+    parser.add_argument("--cluster-orchestration", action="store_true", help="Cluster orchestration demo (Phase 5)")
+
     args = parser.parse_args()
 
     if args.add_user:
@@ -433,7 +462,7 @@ def main():
     # K243-K244: Fallback ve dinamik rotasyon
     if args.fallback_scan:
         symbols = [s.strip().upper() for s in args.fallback_scan.split(",")]
-        from PYTHON.paper_trading.signal_engine import SignalEngine
+        from paper_trading.signal_engine import SignalEngine
         engine = SignalEngine(
             enable_fallback=True,
             enable_crypto=args.enable_crypto_fallback,
@@ -445,8 +474,8 @@ def main():
 
     if args.auto_rotate_scan:
         symbols = [s.strip().upper() for s in args.auto_rotate_scan.split(",")]
-        from PYTHON.paper_trading.signal_engine import SignalEngine
-        from PYTHON.data.instrument_provider import BIST_UNIVERSE
+        from paper_trading.signal_engine import SignalEngine
+        from data.instrument_provider import BIST_UNIVERSE
         engine = SignalEngine(
             enable_fallback=True,
             enable_auto_rotate=True,
@@ -464,7 +493,7 @@ def main():
 
     # K246-K248: Zaman bazli trading kontrolu
     if args.time_check:
-        from PYTHON.common.time_rules import TimeBasedTradingManager
+        from common.time_rules import TimeBasedTradingManager
         tm = TimeBasedTradingManager()
         suggestion = tm.suggest_optimal_trading_time()
         print("\n[ZAMAN KONTROLU]")
@@ -482,7 +511,7 @@ def main():
                 print(f"    [{a.level.value.upper()}] {a.message}")
 
     if args.time_summary:
-        from PYTHON.common.time_rules import TimeBasedTradingManager
+        from common.time_rules import TimeBasedTradingManager
         tm = TimeBasedTradingManager()
         summary = tm.get_summary()
         print("\n[ZAMAN OZETI]")
@@ -500,7 +529,7 @@ def main():
 
     # v3.3 Integration orchestrator
     if args.integration_health or args.adapter_status:
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         health = orch.initialize()
         print("\n[INTEGRATION] Saglik Durumu:")
@@ -511,7 +540,7 @@ def main():
 
     if args.replay_validate:
         import json
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         tick_df = pd.read_csv(args.replay_validate, parse_dates=["timestamp"])
@@ -526,7 +555,7 @@ def main():
 
     if args.integration_execute:
         import json
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         signal = json.loads(args.integration_execute)
@@ -539,8 +568,8 @@ def main():
 
     if args.omega_protocol:
         import pandas as pd
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
-        from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol
+        from adapters.integration_orchestrator import IntegrationOrchestrator
+        from strategy.protocol_strategies.omega_protocol import OmegaProtocol
         df = pd.read_csv(args.omega_protocol, parse_dates=["timestamp"], index_col="timestamp")
         orch = IntegrationOrchestrator()
         orch.initialize()
@@ -565,8 +594,8 @@ def main():
 
     if args.omega_campaign:
         symbols = [s.strip().upper() for s in args.omega_campaign.split(",")]
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
-        from PYTHON.data.feed_aggregator import FeedAggregator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
+        from data.feed_aggregator import FeedAggregator
         feed = FeedAggregator()
         orch = IntegrationOrchestrator()
         orch.initialize()
@@ -585,7 +614,7 @@ def main():
             print(f"    Day {d['day']}: {d['capital']:,.0f} TL | PnL: {d['day_pnl']:,.0f} | Trades: {d['trades']}")
 
     if args.tiered_table:
-        from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol
+        from strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol
         proto = TieredGrowthProtocol(initial_capital=args.tiered_capital)
         df = proto.get_tier_comparison_table(capital=args.tiered_capital)
         print("\n[TIERED] Gunluk Getiri Hedefi — Aylik Karsilastirma Tablosu")
@@ -593,7 +622,7 @@ def main():
 
     if args.tiered_protocol:
         import pandas as pd
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         df = pd.read_csv(args.tiered_protocol, parse_dates=["timestamp"], index_col="timestamp")
         orch = IntegrationOrchestrator()
         orch.initialize()
@@ -612,8 +641,8 @@ def main():
 
     if args.tiered_scan:
         symbols = [s.strip().upper() for s in args.tiered_scan.split(",")]
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
-        from PYTHON.data.feed_aggregator import FeedAggregator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
+        from data.feed_aggregator import FeedAggregator
         feed = FeedAggregator()
         orch = IntegrationOrchestrator()
         orch.initialize()
@@ -625,6 +654,258 @@ def main():
         for r in results[:5]:
             sig = r.get("signal", {})
             print(f"  {r['symbol']} | {sig.get('side', '')} @ {sig.get('entry_price', 0):.2f} | Conf: {sig.get('confidence', 0):.0f}%")
+
+    # v3.5 Enhancement: Microstructure analysis
+    if args.microstructure:
+        from execution.microstructure import ExecutionMicrostructureEngine, MicrostructureState
+        eng = ExecutionMicrostructureEngine()
+        state = MicrostructureState(
+            symbol=args.microstructure,
+            bid_vol=1_000_000,
+            ask_vol=800_000,
+            book_depth=500_000,
+            arrival_rate=50.0,
+            midprice=105.0,
+            spread=0.5,
+            vpin=0.65,
+        )
+        analysis = eng.analyze_state(state)
+        print(f"\n[MICROSTRUCTURE] {args.microstructure}")
+        for k, v in analysis.items():
+            print(f"  {k}: {v}")
+
+    # v3.5 Enhancement: Order book reconstruction
+    if args.order_book:
+        from execution.order_book import OrderBookReconstructor, OrderBookEvent
+        ob = OrderBookReconstructor(symbol=args.order_book)
+        # Demo events
+        now = datetime.now(timezone.utc)
+        for i in range(5):
+            ob.apply_event(OrderBookEvent(
+                timestamp=now + timedelta(seconds=i),
+                symbol=args.order_book,
+                side="bid",
+                price=100.0 + i * 0.1,
+                size=1000.0 + i * 100,
+                event_type="add",
+                order_id=f"demo_{i}",
+            ))
+        print(f"\n[ORDER BOOK] {args.order_book}")
+        print(f"  Best Bid: {ob.get_best_bid().price if ob.get_best_bid() else 'N/A'}")
+        print(f"  Best Ask: {ob.get_best_ask().price if ob.get_best_ask() else 'N/A'}")
+        print(f"  Spread: {ob.get_spread():.4f}")
+        print(f"  Depth: {ob.get_book_depth():.0f}")
+
+    # v3.5 Enhancement: Cognitive memory demo
+    if args.cognitive_memory:
+        from agents.cognitive_memory import CognitiveMemoryLayer, EpisodicMemory
+        mem = CognitiveMemoryLayer()
+        mem.add_episode(EpisodicMemory(
+            context="BULL regime, EMA crossover",
+            action="BUY THYAO @ 103.0",
+            outcome="+2.5%",
+            emotion="euphoria",
+            symbol="THYAO",
+            pnl=2500.0,
+        ))
+        episodes = mem.retrieve_episodes("BULL")
+        print(f"\n[COGNITIVE MEMORY] Episodes: {len(episodes)}")
+        for ep in episodes:
+            print(f"  {ep.symbol} | {ep.action} -> {ep.outcome} | {ep.emotion}")
+
+    # v3.5 Enhancement: Event sourcing demo
+    if args.event_sourcing:
+        from common.event_sourcing import EventBus, EventStore, Event, EventType
+        store = EventStore()
+        bus = EventBus(event_store=store)
+        bus.publish(Event(
+            event_type=EventType.SIGNAL,
+            payload={"symbol": "THYAO", "side": "buy", "score": 85},
+            correlation_id="demo-corr-1",
+        ))
+        events = store.get_events(event_type=EventType.SIGNAL)
+        print(f"\n[EVENT SOURCING] Events: {len(events)}")
+        for e in events:
+            print(f"  {e.event_type.value} | {e.payload}")
+
+    # v3.5 Enhancement: Portfolio intelligence
+    if args.portfolio_intelligence:
+        from risk.unified_risk_engine import PortfolioIntelligenceMixin
+        intel = PortfolioIntelligenceMixin(symbols=["THYAO", "GARAN", "ASELS"])
+        intel.update_metric("THYAO", sharpe=1.2, calmar=0.8, pnl=5000, sigma=0.15)
+        intel.update_metric("GARAN", sharpe=0.9, calmar=0.6, pnl=3000, sigma=0.12)
+        intel.update_metric("ASELS", sharpe=1.5, calmar=1.1, pnl=8000, sigma=0.20)
+        weights = intel.allocate_weights()
+        print(f"\n[PORTFOLIO INTELLIGENCE] Weights:")
+        for sym, w in weights.items():
+            print(f"  {sym}: {w:.2%}")
+
+    # v3.5 Enhancement: Formal verification
+    if args.formal_verify:
+        from risk.unified_risk_engine import FormalVerificationMixin
+        verifier = FormalVerificationMixin()
+        result = verifier.verify_all(
+            drawdown=0.04,
+            position_size=8,
+            daily_loss=0.02,
+        )
+        print(f"\n[FORMAL VERIFICATION] All OK: {result['all_ok']}")
+        for k, v in result.items():
+            if k != "all_ok":
+                print(f"  {k}: {v}")
+
+    if args.tick_simulator:
+        from backtest.tick_simulator import TickLevelMarketSimulator, TickSimulatorConfig
+        sim = TickLevelMarketSimulator(TickSimulatorConfig())
+        result = sim.simulate_fill(arrival_price=100.0, order_size=5000, queue_depth=20000, volatility=0.02, spread=0.5)
+        print(f"\n[TICK SIMULATOR] Fill: {result}")
+
+    if args.shadow_exec:
+        from execution.shadow_execution import ShadowExecutionEnvironment
+        env = ShadowExecutionEnvironment()
+        env.create_shadow("order_1", "THYAO", "buy", 1000, 105.0)
+        env.record_live_fill("order_1", 105.2, 50.0)
+        alert = env.record_shadow_fill("order_1", 105.3, 80.0, 0.5)
+        print(f"\n[SHADOW EXEC] {alert}")
+
+    if args.liquidity_collapse:
+        from execution.liquidity_collapse import LiquidityCollapseDetector, LiquidityCollapseConfig
+        det = LiquidityCollapseDetector(LiquidityCollapseConfig())
+        for _ in range(30):
+            det.ingest(imbalance=0.8, spread=0.5 + _*0.01, volume=1_000_000 - _*1000, vpin=0.65)
+        pred = det.predict()
+        print(f"\n[LIQUIDITY COLLAPSE] {pred}")
+
+    if args.toxic_flow:
+        from execution.toxic_flow import ToxicFlowDetector, ToxicFlowConfig
+        det = ToxicFlowDetector(ToxicFlowConfig())
+        result = det.is_toxic(
+            execution_price=100.5, midprice_5min_after=99.8, midprice_1min_after=100.1,
+            midprice_at_fill=100.4, price_change=-0.5, size=5000, spread=0.5, adv=1_000_000
+        )
+        print(f"\n[TOXIC FLOW] {result}")
+
+    if args.factor_exposure:
+        from risk.factor_exposure import FactorExposureEngine
+        eng = FactorExposureEngine()
+        for i in range(60):
+            eng.ingest(portfolio_return=0.001 * (i % 5), factor_returns={
+                "market_beta": 0.002, "sector_momentum": 0.001, "volatility_factor": -0.0005,
+                "momentum_factor": 0.0015, "macro_rates": 0.0001, "macro_fx": -0.0002, "macro_commodities": 0.0003,
+            })
+        report = eng.get_exposure_report()
+        print(f"\n[FACTOR EXPOSURE] Betas: {report.betas}")
+
+    if args.dynamic_hedge:
+        from risk.dynamic_hedging import DynamicHedgingEngine
+        eng = DynamicHedgingEngine()
+        rec = eng.delta_hedge(portfolio_delta=1000, future_delta=50, future_symbol="XU030_FUT", midprice=105.0, spread=0.5)
+        print(f"\n[DYNAMIC HEDGE] {rec}")
+
+    if args.regime_predict:
+        from agents.regime_predictor import RegimePredictor
+        rp = RegimePredictor()
+        for i in range(100):
+            rp.ingest(regime="bull", features={"volatility_clustering": 0.1, "correlation_breakdown": 0.2, "volume_anomaly": 0.3, "options_skew": -0.1, "credit_spread": 0.05})
+        probs = rp.predict_next("bull")
+        print(f"\n[REGIME PREDICT] {probs}")
+
+    if args.alpha_decay:
+        from agents.alpha_decay import AlphaDecayDetector
+        det = AlphaDecayDetector()
+        for i in range(25):
+            det.ingest_trade(pnl=100 if i % 3 == 0 else -150)
+        result = det.check_decay()
+        print(f"\n[ALPHA DECAY] {result}")
+
+    if args.strategy_genome:
+        from agents.strategy_genome import StrategyGenomeSystem, StrategyGenome
+        sg_sys = StrategyGenomeSystem()
+        g = sg_sys.create_genome("genome_1", parameters={"ema_fast": 9, "ema_slow": 21})
+        child = sg_sys.mutate("genome_1")
+        sg_sys.score_genome(child.genome_id, sharpe=1.2, calmar=0.9, max_dd=0.08, regime="bull", paper_trades=150)
+        print(f"\n[STRATEGY GENOME] Top: {sg_sys.get_top_genomes(3)}")
+
+    if args.research_agent:
+        from agents.research_agents import AutonomousResearchAgent
+        agent = AutonomousResearchAgent()
+        data = [100 + i + (5 if i == 50 else 0) for i in range(100)]
+        result = agent.pipeline(data, "THYAO", "volume", [0.01, -0.02, 0.015, -0.01, 0.02])
+        print(f"\n[RESEARCH AGENT] Validated: {result.validated if result else 'N/A'}")
+
+    if args.adversarial_sim:
+        from agents.adversarial_simulation import AdversarialSimulation
+        sim = AdversarialSimulation()
+        def dummy_strategy(state):
+            return {"action": "buy", "size": 100}
+        result = sim.train(dummy_strategy, episodes=10)
+        print(f"\n[ADVERSARIAL SIM] Ready for live: {result['ready_for_live']}")
+
+    if args.macro_ontology:
+        from agents.macro_ontology import MacroOntologyEngine
+        ont = MacroOntologyEngine()
+        ont.add_edge("Fed_rate_hike", "USD_strengthens", 0.8, 1.0)
+        ont.add_edge("USD_strengthens", "EM_stress", 0.6, 3.0)
+        ont.add_edge("EM_stress", "BIST_outflows", 0.5, 5.0)
+        impact = ont.infer_impact("Fed_rate_hike", "BIST_outflows")
+        print(f"\n[MACRO ONTOLOGY] Impact probability: {impact:.2%}")
+
+    if args.fpga_shim:
+        from infrastructure.fpga_shim import FpgaDriver
+        drv = FpgaDriver()
+        print(f"\n[FPGA SHIM] {drv.get_latency_assessment()}")
+
+    if args.options_surface:
+        from risk.options_vol_surface import OptionsVolatilitySurface, OptionStrike
+        surf = OptionsVolatilitySurface(spot=100.0)
+        for k in range(90, 111, 5):
+            surf.add_strike(OptionStrike(strike=k, expiry_days=30, iv=0.2, open_interest=1000, volume=500, delta=0.5, gamma=0.05, theta=-0.01, vega=0.1))
+        print(f"\n[OPTIONS SURFACE] Gamma exposure: {surf.gamma_exposure():.2f}")
+
+    if args.arbitrage_brain:
+        from execution.arbitrage_brain import CrossExchangeArbitrageBrain
+        brain = CrossExchangeArbitrageBrain()
+        brain.update_rtt("binance", 45.0)
+        brain.update_rtt("bist", 12.0)
+        print(f"\n[ARBITRAGE BRAIN] Best region: {brain.best_region('bist')}")
+
+    if args.rl_execution:
+        from execution.rl_execution import RLExecutionPolicy
+        policy = RLExecutionPolicy()
+        action = policy.select_action([0.6, 0.3, 0.1, -0.2, 0.75, 50.0])
+        print(f"\n[RL EXECUTION] Action: {action}")
+
+    if args.gpu_pipeline:
+        from optimization.gpu_pipeline import GpuPipeline
+        pipe = GpuPipeline(use_gpu=False)
+        bench = pipe.benchmark(["THYAO", "GARAN"], {"THYAO": [100.0]*100, "GARAN": [50.0]*100})
+        print(f"\n[GPU PIPELINE] {bench}")
+
+    if args.colocation:
+        from infrastructure.colocation import ColocationIntelligence
+        ci = ColocationIntelligence()
+        ci.measure_rtt("binance", "tokyo", 45.0)
+        print(f"\n[COLOCATION] Best region for binance: {ci.best_region('binance')}")
+
+    if args.mlops_governance:
+        from infrastructure.mlops_governance import MLOpsGovernance, ModelVersion
+        gov = MLOpsGovernance()
+        gov.register(ModelVersion("model_1", "v1.0", sharpe=1.2, paper_trades=150, shadow_divergence=0.03, approved=True))
+        print(f"\n[MLOPS GOVERNANCE] Approval: {gov.approval_status('v1.0')}")
+
+    if args.compliance_engine:
+        from compliance.regulatory_engine import ComplianceRegulatoryEngine
+        comp = ComplianceRegulatoryEngine()
+        comp.log_order_event("order_1", "NEW", {"symbol": "THYAO", "side": "buy", "size": 1000})
+        state = comp.reconstruct_state(int(1e18))
+        print(f"\n[COMPLIANCE] Events reconstructed: {len(state)}")
+
+    if args.cluster_orchestration:
+        from infrastructure.cluster_orchestration import ClusterOrchestrator, StrategyDeployment
+        orch = ClusterOrchestrator()
+        dep = StrategyDeployment(name="strategy-a", replicas=3, cpu_limit="2", memory_limit="4Gi", strategy_version="v1.0")
+        orch.deploy(dep)
+        print(f"\n[CLUSTER ORCH] Status: {orch.rolling_update_status()}")
 
     if len(sys.argv) == 1:
         parser.print_help()

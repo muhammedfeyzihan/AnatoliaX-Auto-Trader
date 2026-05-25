@@ -9,8 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.observability.logger import AuditLogger, get_logger
-from PYTHON.observability.metrics import MetricsCollector
+from observability.logger import AuditLogger, get_logger
+from observability.metrics import MetricsCollector
 
 
 class TestAuditLogger:

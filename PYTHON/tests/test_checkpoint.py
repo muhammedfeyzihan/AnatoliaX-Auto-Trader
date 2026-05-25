@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.agents.checkpoint import CheckpointManager
+from agents.checkpoint import CheckpointManager
 
 
 class TestCheckpointManager:

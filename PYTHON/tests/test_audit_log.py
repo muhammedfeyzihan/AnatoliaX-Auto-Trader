@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.observability.audit_log import ImmutableAuditLog, TamperProofAuditLog
+from observability.audit_log import ImmutableAuditLog, TamperProofAuditLog
 
 
 class TestImmutableAuditLog:

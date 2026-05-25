@@ -6,7 +6,7 @@ import json
 import csv
 from typing import Dict, List
 from datetime import datetime, timezone
-from PYTHON.execution.latency_monitor import LatencyMonitor
+from execution.latency_monitor import LatencyMonitor
 
 
 class LatencyPrecisionExport:

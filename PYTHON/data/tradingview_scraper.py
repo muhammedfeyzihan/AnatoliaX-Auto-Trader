@@ -3,7 +3,7 @@ AnatoliaX TradingView Scraper
 TradingView chart verisi scraping (lightweight-charts endpoint).
 
 Kullanim:
-    from PYTHON.data.tradingview_scraper import TradingViewScraper
+    from data.tradingview_scraper import TradingViewScraper
     scraper = TradingViewScraper()
     df = scraper.fetch("THYAO", interval="1d", n_bars=100)
 
@@ -15,7 +15,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from time import sleep
 import random
-from PYTHON.data.cache_manager import CacheManager
+from data.cache_manager import CacheManager
 
 
 class TradingViewScraper:

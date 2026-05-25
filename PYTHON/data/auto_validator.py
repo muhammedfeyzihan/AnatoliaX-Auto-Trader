@@ -14,7 +14,7 @@ if _module_dir.name == "PYTHON":
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
-from PYTHON.data.feed_aggregator import FeedAggregator
+from data.feed_aggregator import FeedAggregator
 
 
 class AutoValidator:

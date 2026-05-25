@@ -5,7 +5,7 @@ test_market_microstructure.py — Market Microstructure Tests
 import pytest
 import pandas as pd
 import numpy as np
-from PYTHON.backtest.market_microstructure import MarketMicrostructure
+from backtest.market_microstructure import MarketMicrostructure
 
 
 class TestMarketMicrostructure:

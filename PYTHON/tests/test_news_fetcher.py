@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.news_fetcher import NewsFetcher
+from data.news_fetcher import NewsFetcher
 
 
 class TestNewsFetcher:
@@ -18,7 +18,7 @@ class TestNewsFetcher:
         assert fetcher.cache_minutes == 15
         assert fetcher._news_cache is None
 
-    @patch("PYTHON.data.news_fetcher.requests.get")
+    @patch("data.news_fetcher.requests.get")
     def test_fetch_market_news(self, mock_get):
         # RSS XML mock (duz XML, escape yok)
         rss = """<?xml version="1.0"?>
@@ -32,7 +32,7 @@ class TestNewsFetcher:
         assert len(df) == 2
         assert "Market Up" in df["title"].values
 
-    @patch("PYTHON.data.news_fetcher.requests.get")
+    @patch("data.news_fetcher.requests.get")
     def test_fetch_market_news_failure(self, mock_get):
         mock_get.side_effect = Exception("Timeout")
         fetcher = NewsFetcher()
@@ -55,7 +55,7 @@ class TestNewsFetcher:
         fetcher = NewsFetcher()
         assert fetcher._classify_sentiment("") == "neutral"
 
-    @patch("PYTHON.data.news_fetcher.requests.get")
+    @patch("data.news_fetcher.requests.get")
     def test_fetch_elon_tweets(self, mock_get):
         rss = """<?xml version="1.0"?>
 <rss><channel>
@@ -71,7 +71,7 @@ class TestNewsFetcher:
         df = fetcher.fetch_fed_calendar()
         assert len(df) == 0
 
-    @patch("PYTHON.data.news_fetcher.requests.get")
+    @patch("data.news_fetcher.requests.get")
     def test_fetch_all(self, mock_get):
         rss = """<?xml version="1.0"?>
 <rss><channel><item><title>X</title><pubDate>Mon, 01 Jan 2024 00:00:00 GMT</pubDate><link>x</link></item></channel></rss>"""

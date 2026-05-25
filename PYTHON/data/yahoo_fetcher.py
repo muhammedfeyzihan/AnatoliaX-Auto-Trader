@@ -3,7 +3,7 @@ AnatoliaX Yahoo Finance Fetcher
 BIST hisseleri icin yfinance kullanarak ucretsiz veri cekme.
 
 Kullanim:
-    from PYTHON.data.yahoo_fetcher import YahooFetcher
+    from data.yahoo_fetcher import YahooFetcher
     fetcher = YahooFetcher()
     df = fetcher.fetch("THYAO.IS", period="6mo", interval="1d")
     print(df.tail())
@@ -14,7 +14,7 @@ Not: Yahoo Finance rate limit ~2000 istek/saat. Cache ile kullan.
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
-from PYTHON.data.cache_manager import CacheManager
+from data.cache_manager import CacheManager
 
 
 class YahooFetcher:

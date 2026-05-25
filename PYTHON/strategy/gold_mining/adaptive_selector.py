@@ -5,7 +5,7 @@ Analyzes market conditions and automatically selects the best
 Gold Mining tier / timeframe for maximum profit.
 
 Usage:
-    from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+    from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
     selector = AdaptiveTierSelector()
     recommended = selector.select(df, macro={"regime": "BULL"})
     # Returns: "M5", "M15", "H1", etc.
@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from typing import Optional
 
-from PYTHON.strategy.gold_mining.tier_config import (
+from strategy.gold_mining.tier_config import (
     TIER_DEFINITIONS,
     get_tier_by_name,
 )

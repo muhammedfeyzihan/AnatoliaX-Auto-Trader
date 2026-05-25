@@ -6,9 +6,9 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from PYTHON.agents.agent_personas import AgentPersonaRegistry, Personality, Role
-from PYTHON.agents.manipulation_detector import ManipulationDetector, ManipulationPattern
-from PYTHON.agents.agent_council import AgentCouncil, Vote, ConsensusType
+from agents.agent_personas import AgentPersonaRegistry, Personality, Role
+from agents.manipulation_detector import ManipulationDetector, ManipulationPattern
+from agents.agent_council import AgentCouncil, Vote, ConsensusType
 
 
 # ------------------------------------------------------------------
@@ -286,7 +286,7 @@ class TestAgentCouncil:
 # ------------------------------------------------------------------
 class TestIntegrationAgentCouncil:
     def test_orchestrator_council_in_health(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         health = orch.health_check()
@@ -294,7 +294,7 @@ class TestIntegrationAgentCouncil:
         assert health["agent_council"]["active"] is True
 
     def test_orchestrator_council_blocks_weak_signal(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         # Mock calendar to bypass market-closed check

@@ -132,7 +132,7 @@ class YahooDataClient(DataClient):
     """
 
     def __init__(self, cache_ttl: int = 3600):
-        from PYTHON.data.yahoo_fetcher import YahooFetcher
+        from data.yahoo_fetcher import YahooFetcher
         self._fetcher = YahooFetcher(cache_ttl=cache_ttl)
         self._connected = False
         self._subscriptions: Dict[str, Any] = {}
@@ -206,7 +206,7 @@ class FeedAggregatorDataClient(DataClient):
     """
 
     def __init__(self, cache_ttl: int = 3600):
-        from PYTHON.data.feed_aggregator import FeedAggregator
+        from data.feed_aggregator import FeedAggregator
         self._agg = FeedAggregator(cache_ttl=cache_ttl)
         self._connected = False
         self._subscriptions: Dict[str, Any] = {}

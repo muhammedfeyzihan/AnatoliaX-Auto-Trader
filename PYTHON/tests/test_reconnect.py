@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, AsyncMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.reconnect import WebSocketReconnectHandler, FailoverManager
+from execution.reconnect import WebSocketReconnectHandler, FailoverManager
 
 
 class TestWebSocketReconnectHandler:

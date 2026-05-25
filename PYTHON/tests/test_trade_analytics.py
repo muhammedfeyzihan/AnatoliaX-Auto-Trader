@@ -5,7 +5,7 @@ test_trade_analytics.py — Trade Analytics Tests
 import pytest
 import pandas as pd
 import numpy as np
-from PYTHON.analytics.trade_analytics import TradeAnalytics
+from analytics.trade_analytics import TradeAnalytics
 
 
 class TestTradeAnalytics:

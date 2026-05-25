@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import pandas as pd
 import numpy as np
 
-from PYTHON.analytics.lesson_generator import LessonGenerator
+from analytics.lesson_generator import LessonGenerator
 
 
 class TestLessonGenerator:

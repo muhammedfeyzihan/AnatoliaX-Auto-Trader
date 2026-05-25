@@ -10,8 +10,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import (
+from backtest.indicators import apply_all
+from backtest.signals import (
     combined_signal,
     ema_cross_signal,
     rsi_extreme_signal,
@@ -19,7 +19,7 @@ from PYTHON.backtest.signals import (
     vwap_bounce_signal,
     momentum_spike_signal,
 )
-from PYTHON.strategy.parameter_registry import SignalConfig
+from strategy.parameter_registry import SignalConfig
 
 
 class TestSignals:

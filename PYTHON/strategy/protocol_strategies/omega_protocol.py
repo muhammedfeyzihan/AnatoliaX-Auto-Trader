@@ -34,7 +34,7 @@ Kural K270: Her gün sonu capital, drawdown ve kelly_fraction güncellenir.
 Kural K271: Eğer günlük hedef tutmazsa, sonraki gün risk azaltılır (time_decay + halving).
 
 Usage:
-    from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol
+    from strategy.protocol_strategies.omega_protocol import OmegaProtocol
     omega = OmegaProtocol(initial_capital=1000)
     signal = omega.evaluate(df, symbol="THYAO")
     if signal:
@@ -60,21 +60,21 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
-from PYTHON.strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
-from PYTHON.agents.agent_council import AgentCouncil, Vote, ConsensusType
-from PYTHON.agents.manipulation_detector import ManipulationDetector, ManipulationPattern
-from PYTHON.adapters.worldmonitor_bridge import WorldMonitorBridge
-from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine
-from PYTHON.risk.black_swan_guard import BlackSwanGuard
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
-from PYTHON.hermes_adapter.skill_engine import SkillEngine
-from PYTHON.openclaw_adapter.agent_router import OpenClawRouter
-from PYTHON.common.shared_experience_memory import SharedExperienceMemory
-from PYTHON.strategy.portfolio_orchestrator import PortfolioOrchestrator
-from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator
-from PYTHON.strategy.ensemble_optimizer import EnsembleOptimizer
+from strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal, SetupType
+from strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol, GrowthSignal
+from agents.agent_council import AgentCouncil, Vote, ConsensusType
+from agents.manipulation_detector import ManipulationDetector, ManipulationPattern
+from adapters.worldmonitor_bridge import WorldMonitorBridge
+from risk.execution_laws import ImmutableExecutionLawEngine
+from risk.black_swan_guard import BlackSwanGuard
+from data.unified_market_calendar import UnifiedMarketCalendar
+from hermes_adapter.risk_gates import RiskGateEngine
+from hermes_adapter.skill_engine import SkillEngine
+from openclaw_adapter.agent_router import OpenClawRouter
+from common.shared_experience_memory import SharedExperienceMemory
+from strategy.portfolio_orchestrator import PortfolioOrchestrator
+from strategy.dynamic_symbol_rotator import DynamicSymbolRotator
+from strategy.ensemble_optimizer import EnsembleOptimizer
 
 
 class OmegaStatus(Enum):
@@ -314,7 +314,7 @@ class OmegaProtocol:
                 df, symbol, venue, higher_tf_df, p_win, avg_win, avg_loss, last_pnl_pct
             )
         else:
-            from PYTHON.strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
+            from strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
             growth_signal = GrowthSignal(
                 symbol=alpha_signal.symbol,
                 side=alpha_signal.side,

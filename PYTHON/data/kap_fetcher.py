@@ -3,7 +3,7 @@ kap_fetcher.py — KAP.gov.tr Bildirim Cekme (Python)
 KAP (Kamu Aydinlatma Platformu) son bildirimleri ceker ve analiz eder.
 
 Kullanim:
-    from PYTHON.data.kap_fetcher import KAPFetcher
+    from data.kap_fetcher import KAPFetcher
     fetcher = KAPFetcher()
     announcements = fetcher.fetch_recent(days=1)
     print(announcements)

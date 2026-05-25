@@ -17,10 +17,10 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from PYTHON.common.shared_experience_memory import SharedExperienceMemory, ExperienceRecord
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal
-from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+from common.shared_experience_memory import SharedExperienceMemory, ExperienceRecord
+from data.unified_market_calendar import UnifiedMarketCalendar
+from strategy.protocol_strategies.alpha_protocol import AlphaProtocol, AlphaSignal
+from adapters.integration_orchestrator import IntegrationOrchestrator
 
 
 # ------------------------------------------------------------------
@@ -179,7 +179,7 @@ class TestAlphaProtocol:
         assert stats["max_positions"] == 3
 
     def test_signal_to_dict(self):
-        from PYTHON.strategy.protocol_strategies.alpha_protocol import SetupType
+        from strategy.protocol_strategies.alpha_protocol import SetupType
         sig = AlphaSignal(
             symbol="THYAO", side="BUY", setup=SetupType.MOMENTUM_BREAKOUT,
             entry_price=100.0, stop_loss=98.0, take_profit=106.0,
@@ -225,7 +225,7 @@ class TestIntegrationOrchestratorV33:
 # ------------------------------------------------------------------
 class TestBlackSwanGuardSafety:
     def test_no_divide_by_zero_with_zero_prices(self):
-        from PYTHON.risk.black_swan_guard import BlackSwanGuard
+        from risk.black_swan_guard import BlackSwanGuard
         guard = BlackSwanGuard()
         df = pd.DataFrame({
             "close": list(range(40)),

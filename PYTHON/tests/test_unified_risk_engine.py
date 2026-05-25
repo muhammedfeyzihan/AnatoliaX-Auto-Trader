@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.risk.unified_risk_engine import UnifiedRiskEngine, RiskCheckResult
+from risk.unified_risk_engine import UnifiedRiskEngine, RiskCheckResult
 
 
 class TestUnifiedRiskEngine:

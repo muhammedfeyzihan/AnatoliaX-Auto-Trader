@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.instrument_provider import InstrumentProvider, BIST_UNIVERSE
+from data.instrument_provider import InstrumentProvider, BIST_UNIVERSE
 
 
 class TestInstrumentProvider:

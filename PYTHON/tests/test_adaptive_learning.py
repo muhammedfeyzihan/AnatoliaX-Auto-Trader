@@ -3,7 +3,7 @@ test_adaptive_learning.py — Adaptive Learning Tests
 """
 
 import pytest
-from PYTHON.agents.adaptive_learning import AdaptiveLearner
+from agents.adaptive_learning import AdaptiveLearner
 
 
 class TestAdaptiveLearner:

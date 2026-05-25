@@ -6,7 +6,7 @@ BRACKET, OCO, TRAILING_STOP, and ICEBERG orders locally.
 """
 from typing import Dict, List, Optional, Callable
 from datetime import datetime, timezone
-from PYTHON.execution.order_types import (
+from execution.order_types import (
     BracketOrder, OCOOrder, TrailingStopOrder, IcebergOrder, OrderType, TimeInForce,
 )
 

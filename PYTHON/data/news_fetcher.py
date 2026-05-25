@@ -3,7 +3,7 @@ news_fetcher.py — Haber ve Sosyal Medya Verisi Cekme
 Elon Musk tweetleri, ekonomik haberler, sektor haberleri.
 
 Kullanim:
-    from PYTHON.data.news_fetcher import NewsFetcher
+    from data.news_fetcher import NewsFetcher
     fetcher = NewsFetcher()
     news = fetcher.fetch_market_news()
     tweets = fetcher.fetch_elon_tweets()

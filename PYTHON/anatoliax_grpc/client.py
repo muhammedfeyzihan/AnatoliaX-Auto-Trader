@@ -3,7 +3,7 @@ client.py — AnatoliaX gRPC Client
 Portu otomatik olarak dosyadan okur. Localhost-only.
 
 Kullanim:
-    from PYTHON.anatoliax_grpc.client import AnatoliaXGrpcClient
+    from anatoliax_grpc.client import AnatoliaXGrpcClient
     client = AnatoliaXGrpcClient()
     signal = client.get_signal("THYAO")
     risk = client.check_risk()
@@ -22,8 +22,8 @@ from typing import Optional
 
 import grpc
 
-from PYTHON.anatoliax_grpc import anatoliax_pb2
-from PYTHON.anatoliax_grpc import anatoliax_pb2_grpc
+from anatoliax_grpc import anatoliax_pb2
+from anatoliax_grpc import anatoliax_pb2_grpc
 
 
 PORT_FILE = Path(__file__).resolve().parents[2] / "data" / ".grpc_port"

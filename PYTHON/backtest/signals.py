@@ -6,7 +6,7 @@ v3.3+: SignalConfig entegrasyonu — regime-uyarlanabilir agirliklar ve esikler
 import pandas as pd
 import numpy as np
 from . import indicators
-from PYTHON.strategy.parameter_registry import SignalConfig
+from strategy.parameter_registry import SignalConfig
 
 
 def ema_cross_signal(df: pd.DataFrame) -> pd.Series:

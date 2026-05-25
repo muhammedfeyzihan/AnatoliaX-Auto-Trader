@@ -5,7 +5,7 @@ Supports 20–50 concurrent markets with async event-driven updates.
 Integrates with AsyncEventBus, FeedAggregator, and Redis/NATS pubsub.
 
 Usage:
-    from PYTHON.common.multi_market_pool import MultiMarketPool
+    from common.multi_market_pool import MultiMarketPool
     pool = MultiMarketPool(max_markets=50)
     pool.subscribe(["THYAO", "GARAN", "BTCUSDT", "EURUSD"])
     pool.start_monitoring(interval_seconds=5)
@@ -30,7 +30,7 @@ if _module_dir.name == "PYTHON":
 import numpy as np
 import pandas as pd
 
-from PYTHON.common.async_event_bus import AsyncEventBus
+from common.async_event_bus import AsyncEventBus
 
 
 @dataclass

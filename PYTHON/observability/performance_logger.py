@@ -3,7 +3,7 @@ performance_logger.py — Otomatik Performans Loglama
 Her islem sonrasi sonuc takibi, ajan performans metrikleri, hata analizi.
 
 Kullanim:
-    from PYTHON.observability.performance_logger import PerformanceLogger
+    from observability.performance_logger import PerformanceLogger
     logger = PerformanceLogger()
     logger.log_trade(trade_id=1, symbol="THYAO", expected_tp=320, actual_exit=310, pnl=1000, agent="Signal")
     logger.log_prediction(symbol="THYAO", agent="Signal", predicted_up=True, actual_up=True)

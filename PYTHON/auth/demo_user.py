@@ -6,13 +6,13 @@ without manual RBAC setup. The demo user is clearly marked
 and should be replaced in production.
 
 Usage:
-    from PYTHON.auth.demo_user import ensure_demo_user
+    from auth.demo_user import ensure_demo_user
     ensure_demo_user(rbac_manager)
 
     # CLI: python main.py --add-user <name> <role> <password>
 """
 
-from PYTHON.auth.rbac import RBACManager
+from auth.rbac import RBACManager
 
 DEMO_USERNAME = "anatoliax_demo"
 DEMO_PASSWORD = "demo123_change_me"

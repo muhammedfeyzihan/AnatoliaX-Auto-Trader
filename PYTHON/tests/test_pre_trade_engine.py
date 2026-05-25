@@ -8,10 +8,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.common.message_bus import MessageBus
-from PYTHON.common.events import EventType, OrderEvent
-from PYTHON.risk.pre_trade_engine import PreTradeRiskEngine
-from PYTHON.risk.kill_switch import KillSwitch
+from common.message_bus import MessageBus
+from common.events import EventType, OrderEvent
+from risk.pre_trade_engine import PreTradeRiskEngine
+from risk.kill_switch import KillSwitch
 
 
 class TestPreTradeRiskEngine:

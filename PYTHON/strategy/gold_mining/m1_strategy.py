@@ -8,7 +8,7 @@ Target: 0.3-1.0% per trade, hold 30-120s.
 Max agents: 2.
 
 Usage:
-    from PYTHON.strategy.gold_mining.m1_strategy import M1Strategy
+    from strategy.gold_mining.m1_strategy import M1Strategy
     strategy = M1Strategy()
     sig = strategy.generate(df)
 """

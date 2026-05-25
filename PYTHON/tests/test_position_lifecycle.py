@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.position_lifecycle import (
+from execution.position_lifecycle import (
     PositionLifecycleManager, PositionLifecycleState, LifecycleStage
 )
 

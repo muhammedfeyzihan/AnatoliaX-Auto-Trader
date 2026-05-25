@@ -3,7 +3,7 @@ arbitrage_detector.py — Cross-Venue Arbitraj ve Cross-Asset Korelasyon Bozulma
 AutoTrader'dan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.analytics.arbitrage_detector import ArbitrageDetector
+    from analytics.arbitrage_detector import ArbitrageDetector
     det = ArbitrageDetector()
     opp = det.check_symbol("THYAO")
     # opp: {"symbol": "THYAO", "deviation_pct": 0.6, "venues": [...]} veya None
@@ -19,7 +19,7 @@ if _module_dir.name == "PYTHON":
 import numpy as np
 import pandas as pd
 from typing import Optional
-from PYTHON.data.feed_aggregator import FeedAggregator
+from data.feed_aggregator import FeedAggregator
 
 
 class ArbitrageDetector:

@@ -4,11 +4,11 @@ Emir execution'a ulaşmadan önce bus üzerinde intercept edilir.
 """
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Callable
-from PYTHON.common.message_bus import MessageBus
-from PYTHON.common.events import Event, EventType, OrderEvent, RiskEvent
-from PYTHON.risk.kill_switch import KillSwitch
-from PYTHON.risk.exposure_limiter import ExposureLimiter
-from PYTHON.risk.portfolio_heat import PortfolioHeat
+from common.message_bus import MessageBus
+from common.events import Event, EventType, OrderEvent, RiskEvent
+from risk.kill_switch import KillSwitch
+from risk.exposure_limiter import ExposureLimiter
+from risk.portfolio_heat import PortfolioHeat
 
 
 class PreTradeRiskEngine:

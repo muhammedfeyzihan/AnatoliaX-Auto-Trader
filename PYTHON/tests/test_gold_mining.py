@@ -10,24 +10,24 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-from PYTHON.strategy.gold_mining.orchestrator import (
+from strategy.gold_mining.orchestrator import (
     GoldMiningOrchestrator,
     GoldMiningState,
 )
-from PYTHON.strategy.gold_mining.tier_config import (
+from strategy.gold_mining.tier_config import (
     get_tier_by_name,
     get_next_tier,
     TIER_DEFINITIONS,
 )
-from PYTHON.strategy.gold_mining.ms_strategy import MSStrategy
-from PYTHON.strategy.gold_mining.s1_strategy import S1Strategy
-from PYTHON.strategy.gold_mining.m1_strategy import M1Strategy
-from PYTHON.strategy.gold_mining.m5_strategy import M5Strategy
-from PYTHON.strategy.gold_mining.m15_strategy import M15Strategy
-from PYTHON.strategy.gold_mining.m30_strategy import M30Strategy
-from PYTHON.strategy.gold_mining.h1_strategy import H1Strategy
-from PYTHON.strategy.gold_mining.h2_strategy import H2Strategy
-from PYTHON.strategy.gold_mining.d1_strategy import D1Strategy
+from strategy.gold_mining.ms_strategy import MSStrategy
+from strategy.gold_mining.s1_strategy import S1Strategy
+from strategy.gold_mining.m1_strategy import M1Strategy
+from strategy.gold_mining.m5_strategy import M5Strategy
+from strategy.gold_mining.m15_strategy import M15Strategy
+from strategy.gold_mining.m30_strategy import M30Strategy
+from strategy.gold_mining.h1_strategy import H1Strategy
+from strategy.gold_mining.h2_strategy import H2Strategy
+from strategy.gold_mining.d1_strategy import D1Strategy
 
 
 def _make_df(n: int = 50, close_start: float = 100.0, trend: str = "up") -> pd.DataFrame:
@@ -84,7 +84,7 @@ class TestTierConfig:
 
     def test_all_tiers_have_strategy_module(self):
         for t in TIER_DEFINITIONS:
-            assert t.strategy_module.startswith("PYTHON.strategy.gold_mining")
+            assert t.strategy_module.startswith("strategy.gold_mining")
 
 
 # ------------------------------------------------------------------
@@ -649,7 +649,7 @@ class TestEdgeCases:
 
 class TestAdaptiveTierSelector:
     def test_high_volatility_selects_m5(self):
-        from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+        from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         s = AdaptiveTierSelector()
         df = _make_df(n=50, close_start=100.0)
         # Force high volatility but neutral trend (no strong directional move)
@@ -665,7 +665,7 @@ class TestAdaptiveTierSelector:
         assert tier in ("M5", "S1", "M1")
 
     def test_low_volatility_selects_safe(self):
-        from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+        from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         s = AdaptiveTierSelector()
         df = _make_df(n=50, close_start=100.0)
         df["high"] = df["close"] * 1.001
@@ -675,7 +675,7 @@ class TestAdaptiveTierSelector:
         assert tier in ("M1", "M15", "M5")
 
     def test_strong_trend_selects_h1(self):
-        from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+        from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         s = AdaptiveTierSelector()
         df = _make_df(n=50, close_start=100.0, trend="up")
         df["high"] = df["close"] * 1.02
@@ -685,7 +685,7 @@ class TestAdaptiveTierSelector:
         assert tier in ("M15", "H1", "H2", "M5")
 
     def test_score_all_tiers(self):
-        from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+        from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         s = AdaptiveTierSelector()
         df = _make_df(n=50)
         scores = s.score_all_tiers(df)

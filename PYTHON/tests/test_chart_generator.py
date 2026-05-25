@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import pandas as pd
 import numpy as np
 
-from PYTHON.backtest.chart_generator import BacktestChartGenerator
+from backtest.chart_generator import BacktestChartGenerator
 
 
 class TestBacktestChartGenerator:

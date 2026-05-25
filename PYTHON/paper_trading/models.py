@@ -7,7 +7,7 @@ Mevcut risk.models Base'ini kullanir (database.py init_db tum tablolari olusturu
 
 from sqlalchemy import Column, String, Float, Integer, DateTime, Boolean, Text
 from datetime import datetime, timezone
-from PYTHON.risk.models import Base
+from risk.models import Base
 
 
 class PaperTrade(Base):

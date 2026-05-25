@@ -14,7 +14,7 @@ Features:
 - Async batch fetching for maximum speed
 
 Usage:
-    from PYTHON.adapters.worldmonitor_bridge import WorldMonitorBridge
+    from adapters.worldmonitor_bridge import WorldMonitorBridge
     wm = WorldMonitorBridge()
     await wm.start()
     news = await wm.get_latest_news(symbol="THYAO", limit=10)

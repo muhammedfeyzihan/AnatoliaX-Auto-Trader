@@ -10,7 +10,7 @@ from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.tick_store import TickStore
+from data.tick_store import TickStore
 
 
 class TestTickStore:

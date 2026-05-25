@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.telegram.reporter import TelegramReporter
+from telegram.reporter import TelegramReporter
 
 
 class TestTelegramReporter:
@@ -25,7 +25,7 @@ class TestTelegramReporter:
         reporter = TelegramReporter(token="", chat_id="")
         assert reporter._send_message("test") is False
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_message_success(self, mock_post):
         mock_post.return_value = MagicMock(status_code=200)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")
@@ -33,14 +33,14 @@ class TestTelegramReporter:
         assert ok is True
         mock_post.assert_called_once()
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_message_failure(self, mock_post):
         mock_post.return_value = MagicMock(status_code=403)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")
         ok = reporter._send_message("Merhaba")
         assert ok is False
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_alert(self, mock_post):
         mock_post.return_value = MagicMock(status_code=200)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")
@@ -49,7 +49,7 @@ class TestTelegramReporter:
         call_args = mock_post.call_args
         assert "🚨" in call_args[1]["json"]["text"]
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_signal_alert(self, mock_post):
         mock_post.return_value = MagicMock(status_code=200)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")
@@ -69,9 +69,9 @@ class TestTelegramReporter:
         call_args = mock_post.call_args
         assert "THYAO" in call_args[1]["json"]["text"]
 
-    @patch("PYTHON.telegram.reporter.requests.post")
-    @patch("PYTHON.telegram.reporter.PaperBroker.get_portfolio_summary")
-    @patch("PYTHON.telegram.reporter.PaperBroker.get_open_positions")
+    @patch("telegram.reporter.requests.post")
+    @patch("telegram.reporter.PaperBroker.get_portfolio_summary")
+    @patch("telegram.reporter.PaperBroker.get_open_positions")
     def test_send_midday_report(self, mock_pos, mock_summary, mock_post):
         mock_summary.return_value = {
             "cash": 50000.0,
@@ -88,8 +88,8 @@ class TestTelegramReporter:
         ok = reporter.send_midday_report()
         assert ok is True
 
-    @patch("PYTHON.telegram.reporter.requests.post")
-    @patch("PYTHON.telegram.reporter.PaperBroker.get_portfolio_summary")
+    @patch("telegram.reporter.requests.post")
+    @patch("telegram.reporter.PaperBroker.get_portfolio_summary")
     def test_send_evening_report(self, mock_summary, mock_post):
         mock_summary.return_value = {
             "cash": 50000.0,
@@ -105,14 +105,14 @@ class TestTelegramReporter:
         ok = reporter.send_evening_report()
         assert ok is True
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_opening_report(self, mock_post):
         mock_post.return_value = MagicMock(status_code=200)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")
         ok = reporter.send_opening_report(symbols=["THYAO"])
         assert ok is True
 
-    @patch("PYTHON.telegram.reporter.requests.post")
+    @patch("telegram.reporter.requests.post")
     def test_send_morning_report(self, mock_post):
         mock_post.return_value = MagicMock(status_code=200)
         reporter = TelegramReporter(token="fake-token", chat_id="12345")

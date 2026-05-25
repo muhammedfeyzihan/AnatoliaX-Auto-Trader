@@ -7,7 +7,7 @@ detects, solves, verifies and learns from uncertainty. No trade bypasses these l
 Integrates with: UnifiedRiskEngine, IntegrationOrchestrator, KillSwitch.
 
 Usage:
-    from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine
+    from risk.execution_laws import ImmutableExecutionLawEngine
     law = ImmutableExecutionLawEngine()
     verdict = law.check(signal={"symbol": "THYAO", "side": "BUY", "size": 100})
     if not verdict.allowed:

@@ -3,7 +3,7 @@ rbac.py — Role-Based Access Control (RBAC).
 AnatoliaX icin özgün implementasyon.
 
 Kullanim:
-    from PYTHON.auth.rbac import RBACManager, require_permission
+    from auth.rbac import RBACManager, require_permission
     rbac = RBACManager()
     rbac.add_user("ahmet", role="trader", password="guclu_sifre")
     if rbac.check("ahmet", "trade.execute"):

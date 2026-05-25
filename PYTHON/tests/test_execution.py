@@ -7,9 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.engine import UnifiedExecutionEngine, OrderSide, OrderStatus
-from PYTHON.execution.order_manager import OrderManager
-from PYTHON.execution.latency_monitor import LatencyMonitor
+from execution.engine import UnifiedExecutionEngine, OrderSide, OrderStatus
+from execution.order_manager import OrderManager
+from execution.latency_monitor import LatencyMonitor
 
 
 class TestUnifiedExecutionEngine:

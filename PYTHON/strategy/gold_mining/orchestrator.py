@@ -6,7 +6,7 @@ The heart of the Gold Mining strategy. Manages tier progression
 risk integration, and user-customizable rules.
 
 Usage:
-    from PYTHON.strategy.gold_mining.orchestrator import GoldMiningOrchestrator
+    from strategy.gold_mining.orchestrator import GoldMiningOrchestrator
     engine = GoldMiningOrchestrator(initial_capital=50_000)
     result = engine.process_symbol("THYAO", df_1m)
     engine.report_trade_result("THYAO", exit_price=105.0)
@@ -19,25 +19,25 @@ from typing import Optional, Dict, Any
 import numpy as np
 import pandas as pd
 
-from PYTHON.strategy.gold_mining.tier_config import (
+from strategy.gold_mining.tier_config import (
     TierConfig,
     TIER_DEFINITIONS,
     get_tier_by_name,
     get_next_tier,
     get_default_tier,
 )
-from PYTHON.strategy.gold_mining.ms_strategy import MSStrategy
-from PYTHON.strategy.gold_mining.s1_strategy import S1Strategy
-from PYTHON.strategy.gold_mining.m1_strategy import M1Strategy
-from PYTHON.strategy.gold_mining.m5_strategy import M5Strategy
-from PYTHON.strategy.gold_mining.m15_strategy import M15Strategy
-from PYTHON.strategy.gold_mining.m30_strategy import M30Strategy
-from PYTHON.strategy.gold_mining.h1_strategy import H1Strategy
-from PYTHON.strategy.gold_mining.h2_strategy import H2Strategy
-from PYTHON.strategy.gold_mining.d1_strategy import D1Strategy
-from PYTHON.risk.position import Position
-from PYTHON.risk.account import Account
-from PYTHON.risk.kill_switch import KillSwitch
+from strategy.gold_mining.ms_strategy import MSStrategy
+from strategy.gold_mining.s1_strategy import S1Strategy
+from strategy.gold_mining.m1_strategy import M1Strategy
+from strategy.gold_mining.m5_strategy import M5Strategy
+from strategy.gold_mining.m15_strategy import M15Strategy
+from strategy.gold_mining.m30_strategy import M30Strategy
+from strategy.gold_mining.h1_strategy import H1Strategy
+from strategy.gold_mining.h2_strategy import H2Strategy
+from strategy.gold_mining.d1_strategy import D1Strategy
+from risk.position import Position
+from risk.account import Account
+from risk.kill_switch import KillSwitch
 
 
 class GoldMiningState:
@@ -586,7 +586,7 @@ class GoldMiningOrchestrator:
         -------
         str: recommended tier name
         """
-        from PYTHON.strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
+        from strategy.gold_mining.adaptive_selector import AdaptiveTierSelector
         selector = AdaptiveTierSelector()
         recommended = selector.select(df, macro=macro)
 

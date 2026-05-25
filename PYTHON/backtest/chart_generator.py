@@ -3,7 +3,7 @@ chart_generator.py — AutoTrader entegre edilmis Bokeh backtest grafikleri
 Fiyat + EMA + alim/satim noktalari + equity curve + drawdown.
 
 Kullanim:
-    from PYTHON.backtest.chart_generator import BacktestChartGenerator
+    from backtest.chart_generator import BacktestChartGenerator
     chart = BacktestChartGenerator(df, trades_df, equity_df)
     chart.save_html("reports/backtest_THYAO.html")
 """

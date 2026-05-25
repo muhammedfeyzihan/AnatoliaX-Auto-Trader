@@ -3,7 +3,7 @@ checkpoint.py — Ajan konsey toplantisi sonrasi state kaydetme ve crash sonrasi
 tradingagents'tan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.agents.checkpoint import CheckpointManager
+    from agents.checkpoint import CheckpointManager
     mgr = CheckpointManager()
     mgr.save(state={"agents": {...}, "decisions": [...]}, label="konsey_09_30")
     restored = mgr.load_latest()

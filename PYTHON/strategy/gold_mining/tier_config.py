@@ -41,7 +41,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=5,
         required_win_rate=0.55,
         slippage_tolerance=0.001,
-        strategy_module="PYTHON.strategy.gold_mining.ms_strategy",
+        strategy_module="strategy.gold_mining.ms_strategy",
         description="Millisecond order-flow imbalance scalping. Highest frequency, lowest per-trade profit.",
     ),
     TierConfig(
@@ -54,7 +54,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=5,
         required_win_rate=0.55,
         slippage_tolerance=0.002,
-        strategy_module="PYTHON.strategy.gold_mining.s1_strategy",
+        strategy_module="strategy.gold_mining.s1_strategy",
         description="1-second VWAP deviation + volume spike. Fast execution required.",
     ),
     TierConfig(
@@ -67,7 +67,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=5,
         required_win_rate=0.55,
         slippage_tolerance=0.003,
-        strategy_module="PYTHON.strategy.gold_mining.m1_strategy",
+        strategy_module="strategy.gold_mining.m1_strategy",
         description="1-minute EMA 3/8 cross + volume breakout. 2-agent coordination.",
     ),
     TierConfig(
@@ -80,7 +80,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=4,
         required_win_rate=0.57,
         slippage_tolerance=0.004,
-        strategy_module="PYTHON.strategy.gold_mining.m5_strategy",
+        strategy_module="strategy.gold_mining.m5_strategy",
         description="5-minute EMA 5/13 cross + volume + ATR filter. 2-agent confirmation.",
     ),
     TierConfig(
@@ -93,7 +93,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=3,
         required_win_rate=0.60,
         slippage_tolerance=0.005,
-        strategy_module="PYTHON.strategy.gold_mining.m15_strategy",
+        strategy_module="strategy.gold_mining.m15_strategy",
         description="15-minute multi-agent swing. Full 3-agent council with consensus.",
     ),
     TierConfig(
@@ -106,7 +106,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=3,
         required_win_rate=0.60,
         slippage_tolerance=0.006,
-        strategy_module="PYTHON.strategy.gold_mining.m30_strategy",
+        strategy_module="strategy.gold_mining.m30_strategy",
         description="30-minute trend continuation. EMA 13/34 + 3-agent consensus with ParameterRegistry.",
     ),
     TierConfig(
@@ -119,7 +119,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=3,
         required_win_rate=0.60,
         slippage_tolerance=0.008,
-        strategy_module="PYTHON.strategy.gold_mining.h1_strategy",
+        strategy_module="strategy.gold_mining.h1_strategy",
         description="1-hour trend strategy. EMA 9/21 + MACD + 3-agent consensus.",
     ),
     TierConfig(
@@ -132,7 +132,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=2,
         required_win_rate=0.62,
         slippage_tolerance=0.009,
-        strategy_module="PYTHON.strategy.gold_mining.h2_strategy",
+        strategy_module="strategy.gold_mining.h2_strategy",
         description="2-hour macro trend. EMA 21/55 + RSI + BB + 3-agent consensus with ParameterRegistry.",
     ),
     TierConfig(
@@ -145,7 +145,7 @@ TIER_DEFINITIONS = [
         required_consecutive_wins=2,
         required_win_rate=0.62,
         slippage_tolerance=0.010,
-        strategy_module="PYTHON.strategy.gold_mining.d1_strategy",
+        strategy_module="strategy.gold_mining.d1_strategy",
         description="1-day position strategy. EMA 21/50 + RSI + BB + 3-agent consensus.",
     ),
 ]

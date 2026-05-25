@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.replay_engine import DeterministicReplayEngine, Tick
+from backtest.replay_engine import DeterministicReplayEngine, Tick
 
 
 class TestDeterministicReplayEngine:

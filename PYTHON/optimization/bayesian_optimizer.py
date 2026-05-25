@@ -5,7 +5,7 @@ Lightweight wrapper using scikit-optimize if available, falling back to
 random search + grid refinement. Integrates with WalkForwardOptimizer.
 
 Usage:
-    from PYTHON.optimization.bayesian_optimizer import BayesianOptimizer
+    from optimization.bayesian_optimizer import BayesianOptimizer
     opt = BayesianOptimizer(param_space={"ema_fast": (3, 50), "ema_slow": (10, 200)})
     best = opt.optimize(objective_fn, n_calls=50)
 """

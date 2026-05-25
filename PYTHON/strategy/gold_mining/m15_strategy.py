@@ -10,7 +10,7 @@ Target: 1.5-5.0% per trade, hold 5-30min.
 Max agents: 3.
 
 Usage:
-    from PYTHON.strategy.gold_mining.m15_strategy import M15Strategy
+    from strategy.gold_mining.m15_strategy import M15Strategy
     strategy = M15Strategy()
     result = strategy.generate(df, macro={}, sentiment=0)
 """

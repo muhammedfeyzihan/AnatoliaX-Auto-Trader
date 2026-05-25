@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.fill_model import ImmediateFillModel, ThreeTierFillModel
+from backtest.fill_model import ImmediateFillModel, ThreeTierFillModel
 
 
 class TestImmediateFillModel:

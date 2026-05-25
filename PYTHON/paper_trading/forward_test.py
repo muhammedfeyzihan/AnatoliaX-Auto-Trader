@@ -3,7 +3,7 @@ AnatoliaX Forward Test (Out-of-Sample Live Test)
 Stratejiyi canli veri uzerinde test et, emir verme, sadece izle ve kaydet.
 
 Kullanim:
-    from PYTHON.paper_trading.forward_test import ForwardTest
+    from paper_trading.forward_test import ForwardTest
     ft = ForwardTest()
     ft.run("THYAO", days=5)
     report = ft.generate_report()
@@ -19,10 +19,10 @@ Calisma Akisi:
 import os
 from datetime import datetime, timedelta, timezone
 
-from PYTHON.data.feed_aggregator import FeedAggregator
-from PYTHON.paper_trading.models import PaperSignal
-from PYTHON.risk.database import get_session
-from PYTHON.paper_trading.signal_engine import SignalEngine
+from data.feed_aggregator import FeedAggregator
+from paper_trading.models import PaperSignal
+from risk.database import get_session
+from paper_trading.signal_engine import SignalEngine
 
 
 class ForwardTest:

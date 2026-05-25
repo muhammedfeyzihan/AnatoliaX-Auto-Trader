@@ -8,7 +8,7 @@ import os
 from typing import Callable, Dict, List, Optional
 from collections import defaultdict
 from datetime import datetime, timezone
-from PYTHON.common.events import Event, EventType, RiskEvent, Command
+from common.events import Event, EventType, RiskEvent, Command
 
 
 class MessageBus:

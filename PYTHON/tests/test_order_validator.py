@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.order_validator import OrderValidator
+from execution.order_validator import OrderValidator
 
 
 class TestOrderValidator:

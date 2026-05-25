@@ -80,7 +80,7 @@ class UnifiedExecutionEngine:
         tp: Optional[float] = None,
     ) -> Order:
         # K143: Emir validasyonu zorunlu
-        from PYTHON.execution.order_validator import OrderValidator
+        from execution.order_validator import OrderValidator
 
         validator = OrderValidator()
         validation = validator.validate({
@@ -206,3 +206,89 @@ class UnifiedExecutionEngine:
     def _notify(self, order: Order):
         for cb in self._callbacks:
             cb(order)
+
+
+class SmartOrderSlicer:
+    """
+    Execution Microstructure Engine — Module 1 (Phase 1)
+    Smart order slicing: TWAP, VWAP, POV with toxicity-aware routing.
+    """
+
+    def __init__(self, total_volume: float, slices: int = 10):
+        self.total_volume = total_volume
+        self.slices = slices
+        self.slice_volume = total_volume / slices
+
+    def twap(self) -> list[float]:
+        """TWAP: v_i = V / n (equal slices)."""
+        return [self.slice_volume] * self.slices
+
+    def vwap(self, volume_weights: list[float]) -> list[float]:
+        """VWAP: v_i = V * (w_i / sum(w))."""
+        total_w = sum(volume_weights) or 1.0
+        return [self.total_volume * (w / total_w) for w in volume_weights]
+
+    def pov(self, market_volumes: list[float], participation_rate: float = 0.1) -> list[float]:
+        """POV: v_i = alpha * market_vol_i."""
+        return [participation_rate * mv for mv in market_volumes]
+
+
+class MicrostructureAnalyzer:
+    """
+    Execution Microstructure Engine — Module 1 (Phase 1)
+    Queue position modeling, hidden liquidity detection, adverse selection.
+    """
+
+    def __init__(self):
+        self.imbalance_history: list[float] = []
+
+    def queue_position(
+        self,
+        order_size: float,
+        book_depth: float,
+        arrival_rate: float,
+    ) -> float:
+        """Q(t) = f(order_size, book_depth, arrival_rate)."""
+        if book_depth <= 0 or arrival_rate <= 0:
+            return 0.0
+        return order_size / (book_depth * arrival_rate)
+
+    def hidden_liquidity_imbalance(
+        self,
+        bid_vol: float,
+        ask_vol: float,
+    ) -> float:
+        """I = (bid_vol - ask_vol) / (bid_vol + ask_vol)."""
+        denom = bid_vol + ask_vol
+        if denom == 0:
+            return 0.0
+        return (bid_vol - ask_vol) / denom
+
+    def adverse_selection_spread(
+        self,
+        execution_price: float,
+        midprice_future: float,
+    ) -> float:
+        """Realized Spread = 2 * (execution_price - midprice_t+5min)."""
+        return 2.0 * (execution_price - midprice_future)
+
+    def vpin(self, buy_vol: float, sell_vol: float, window_vol: float) -> float:
+        """Volume-synchronized Probability of Informed Trading."""
+        if window_vol <= 0:
+            return 0.0
+        return abs(buy_vol - sell_vol) / window_vol
+
+
+class ToxicityRouter:
+    """
+    Toxicity-aware execution routing via VPIN.
+    """
+
+    def __init__(self, vpin_threshold: float = 0.7):
+        self.vpin_threshold = vpin_threshold
+
+    def route(self, vpin: float) -> str:
+        """If toxic_flow_probability > 0.7, switch to passive execution."""
+        if vpin > self.vpin_threshold:
+            return "passive"
+        return "aggressive"

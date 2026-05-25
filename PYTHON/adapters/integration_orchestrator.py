@@ -8,7 +8,7 @@ Wires together:
 - Hermes: risk gates + skill engine + TA pre-filter
 
 Usage:
-    from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+    from adapters.integration_orchestrator import IntegrationOrchestrator
     orch = IntegrationOrchestrator()
     orch.initialize()
     result = orch.execute_signal({"symbol": "THYAO", "side": "BUY", "size": 100})
@@ -29,18 +29,18 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.adapters.nautilus_adapter import NautilusAdapter
-from PYTHON.adapters.hummingbot_adapter import HummingbotAdapter
-from PYTHON.adapters.worldmonitor_bridge import WorldMonitorBridge
-from PYTHON.openclaw_adapter.agent_router import OpenClawRouter
-from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
-from PYTHON.hermes_adapter.skill_engine import SkillEngine
-from PYTHON.hermes_adapter.ta_filter import TAFPreFilter
-from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine
-from PYTHON.risk.black_swan_guard import BlackSwanGuard
-from PYTHON.common.shared_experience_memory import SharedExperienceMemory
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.agents.agent_council import AgentCouncil, Vote
+from adapters.nautilus_adapter import NautilusAdapter
+from adapters.hummingbot_adapter import HummingbotAdapter
+from adapters.worldmonitor_bridge import WorldMonitorBridge
+from openclaw_adapter.agent_router import OpenClawRouter
+from hermes_adapter.risk_gates import RiskGateEngine
+from hermes_adapter.skill_engine import SkillEngine
+from hermes_adapter.ta_filter import TAFPreFilter
+from risk.execution_laws import ImmutableExecutionLawEngine
+from risk.black_swan_guard import BlackSwanGuard
+from common.shared_experience_memory import SharedExperienceMemory
+from data.unified_market_calendar import UnifiedMarketCalendar
+from agents.agent_council import AgentCouncil, Vote
 
 
 @dataclass
@@ -127,7 +127,12 @@ class IntegrationOrchestrator:
         # Register default OpenClaw agent mappings
         self.router.map_channel("telegram", "strategy")
         self.router.map_channel("webhook", "signal")
-        self.router.map_channel("internal", "risk")
+        self.router.map_channel("internal", "strategy")
+
+        # Register default agent handlers (passthrough for internal pipeline)
+        self.router.register_agent("strategy", lambda payload: {"agent": "strategy", "routed": True, "payload": payload})
+        self.router.register_agent("signal", lambda payload: {"agent": "signal", "routed": True, "payload": payload})
+        self.router.register_agent("risk", lambda payload: {"agent": "risk", "routed": True, "payload": payload})
 
         self._initialized = True
         return self.health_check()
@@ -503,7 +508,7 @@ class IntegrationOrchestrator:
     ) -> dict:
         """Run Compound Growth Protocol with Kelly Criterion + auto-execution."""
         import pandas as pd
-        from PYTHON.strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol
+        from strategy.protocol_strategies.compound_growth_protocol import CompoundGrowthProtocol
 
         pdf = pd.DataFrame(df)
         hdf = pd.DataFrame(higher_tf_df) if higher_tf_df else None
@@ -586,7 +591,7 @@ class IntegrationOrchestrator:
     ) -> dict:
         """Run Alpha Protocol strategy and auto-execute if signal passes all gates."""
         import pandas as pd
-        from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol
+        from strategy.protocol_strategies.alpha_protocol import AlphaProtocol
 
         pdf = pd.DataFrame(df)
         hdf = pd.DataFrame(higher_tf_df) if higher_tf_df else None
@@ -646,7 +651,7 @@ class IntegrationOrchestrator:
     ) -> dict:
         """Run Omega Protocol (full 16-step pipeline) and auto-execute if signal passes ALL gates."""
         import pandas as pd
-        from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol
+        from strategy.protocol_strategies.omega_protocol import OmegaProtocol
 
         pdf = pd.DataFrame(df)
         hdf = pd.DataFrame(higher_tf_df) if higher_tf_df else None
@@ -721,7 +726,7 @@ class IntegrationOrchestrator:
         higher_tf_provider=None,
     ) -> dict:
         """Run full Omega compound campaign over max_days."""
-        from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol
+        from strategy.protocol_strategies.omega_protocol import OmegaProtocol
         proto = OmegaProtocol(initial_capital=1_000.0)
         report = proto.run_campaign(symbols, bars_provider, higher_tf_provider)
         return report
@@ -735,7 +740,7 @@ class IntegrationOrchestrator:
     ) -> dict:
         """Run Tiered Growth Protocol with specified daily return target tier."""
         import pandas as pd
-        from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
+        from strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
 
         pdf = pd.DataFrame(df)
         hdf = pd.DataFrame(higher_tf_df) if higher_tf_df else None
@@ -795,7 +800,7 @@ class IntegrationOrchestrator:
     ) -> List[dict]:
         """Scan multiple symbols with Tiered Protocol."""
         import pandas as pd
-        from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
+        from strategy.protocol_strategies.tiered_growth_protocol import TieredGrowthProtocol, DailyReturnTarget
 
         target = DailyReturnTarget[tier.upper()] if hasattr(DailyReturnTarget, tier.upper()) else DailyReturnTarget.PCT_5
         proto = TieredGrowthProtocol(initial_capital=10_000.0, target=target)

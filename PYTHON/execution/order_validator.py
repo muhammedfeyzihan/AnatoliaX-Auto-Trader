@@ -3,7 +3,7 @@ order_validator.py — Pydantic tabanli emir validasyonu.
 AnatoliaX icin özgün implementasyon.
 
 Kullanim:
-    from PYTHON.execution.order_validator import OrderValidator
+    from execution.order_validator import OrderValidator
     validator = OrderValidator()
     result = validator.validate({"symbol": "THYAO", "side": "BUY", "size": 10.0, "price": 100.0, "sl": 95.0, "tp": 110.0})
     # result: {"valid": True, "errors": []}

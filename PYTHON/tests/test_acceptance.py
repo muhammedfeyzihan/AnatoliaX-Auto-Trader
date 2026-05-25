@@ -9,12 +9,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.common.message_bus import MessageBus
-from PYTHON.common.events import EventType, OrderEvent, FillEvent
-from PYTHON.risk.pre_trade_engine import PreTradeRiskEngine
-from PYTHON.backtest.fill_model import ImmediateFillModel
-from PYTHON.risk.account import Account
-from PYTHON.risk.position import Position
+from common.message_bus import MessageBus
+from common.events import EventType, OrderEvent, FillEvent
+from risk.pre_trade_engine import PreTradeRiskEngine
+from backtest.fill_model import ImmediateFillModel
+from risk.account import Account
+from risk.position import Position
 
 
 class TestAcceptanceEventDrivenFlow:

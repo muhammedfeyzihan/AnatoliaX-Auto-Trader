@@ -9,11 +9,11 @@ import numpy as np
 from typing import Callable, Optional, Dict, List
 from datetime import datetime, timezone
 
-from PYTHON.common.message_bus import MessageBus
-from PYTHON.common.events import Event, EventType, OrderEvent, FillEvent, PositionEvent
-from PYTHON.execution.engine import UnifiedExecutionEngine, OrderSide, OrderStatus
-from PYTHON.backtest.fill_model import FillModel, ImmediateFillModel
-from PYTHON.backtest.commission import CommissionModel
+from common.message_bus import MessageBus
+from common.events import Event, EventType, OrderEvent, FillEvent, PositionEvent
+from execution.engine import UnifiedExecutionEngine, OrderSide, OrderStatus
+from backtest.fill_model import FillModel, ImmediateFillModel
+from backtest.commission import CommissionModel
 
 
 class EventDrivenBacktestEngine:

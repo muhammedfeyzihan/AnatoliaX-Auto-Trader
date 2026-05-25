@@ -9,9 +9,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.event_engine import EventDrivenBacktestEngine
-from PYTHON.backtest.fill_model import ThreeTierFillModel
-from PYTHON.common.message_bus import MessageBus
+from backtest.event_engine import EventDrivenBacktestEngine
+from backtest.fill_model import ThreeTierFillModel
+from common.message_bus import MessageBus
 
 
 class TestEventDrivenBacktestEngine:
@@ -48,7 +48,7 @@ class TestEventDrivenBacktestEngine:
         bus = MessageBus()
         eng = EventDrivenBacktestEngine(df, bus=bus, initial_capital=100_000)
         eng.run()
-        from PYTHON.common.events import EventType
+        from common.events import EventType
         hist = bus.get_history(event_type=EventType.MARKET_DATA, limit=5)
         assert len(hist) > 0
 

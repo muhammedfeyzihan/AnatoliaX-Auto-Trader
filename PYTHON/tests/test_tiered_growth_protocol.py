@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from PYTHON.strategy.protocol_strategies.tiered_growth_protocol import (
+from strategy.protocol_strategies.tiered_growth_protocol import (
     TieredGrowthProtocol,
     DailyReturnTarget,
     TieredRiskConfig,
@@ -148,7 +148,7 @@ class TestTierComparisonTable:
 
 class TestOrchestratorTiered:
     def test_run_tiered_protocol_integration(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         df = pd.DataFrame({
@@ -164,7 +164,7 @@ class TestOrchestratorTiered:
         assert res["tier"] == "PCT_1"
 
     def test_run_tiered_scan_empty(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         results = orch.run_tiered_scan(symbols=[], tier="PCT_1")

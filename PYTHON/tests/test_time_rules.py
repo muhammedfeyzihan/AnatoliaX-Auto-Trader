@@ -5,7 +5,7 @@ test_time_rules.py — TimeBasedTradingManager tests (K246-K248)
 import pytest
 from datetime import datetime, time, timedelta, timezone
 
-from PYTHON.common.time_rules import (
+from common.time_rules import (
     TimeBasedTradingManager,
     TradingWindow,
     TimeAlertLevel,

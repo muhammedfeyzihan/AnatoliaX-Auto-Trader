@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.analytics.arbitrage_detector import ArbitrageDetector
+from analytics.arbitrage_detector import ArbitrageDetector
 
 
 class TestArbitrageDetector:

@@ -5,7 +5,7 @@ Each agent has a distinct personality, memory, and behavioral bias
 that affects how it votes in council meetings.
 
 Usage:
-    from PYTHON.agents.agent_personas import AgentPersonaRegistry
+    from agents.agent_personas import AgentPersonaRegistry
     registry = AgentPersonaRegistry()
     signal_agent = registry.get("signal")
     print(signal_agent.personality)  # AGGRESSIVE

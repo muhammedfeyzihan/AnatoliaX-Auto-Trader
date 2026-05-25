@@ -5,7 +5,7 @@ Regime-specific, symbol-specific, tier-specific parameter trees.
 Injected into SignalEngine, BacktestEngine, and GoldMiningOrchestrator.
 
 Usage:
-    from PYTHON.strategy.parameter_registry import ParameterRegistry, SignalConfig
+    from strategy.parameter_registry import ParameterRegistry, SignalConfig
     reg = ParameterRegistry()
     cfg = reg.get_signal_config(regime="BULL", symbol="THYAO")
     print(cfg.rsi_weights)  # regime-adaptive

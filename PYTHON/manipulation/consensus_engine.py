@@ -6,7 +6,7 @@ Agents vote on decisions; Byzantine agents (low trust) are filtered out.
 Final decision requires weighted quorum based on trust scores.
 
 Usage:
-    from PYTHON.manipulation.consensus_engine import ByzantineConsensus
+    from manipulation.consensus_engine import ByzantineConsensus
     consensus = ByzantineConsensus()
     consensus.vote(agent="signal", decision="BUY", symbol="THYAO", confidence=75)
     consensus.vote(agent="risk", decision="BUY", symbol="THYAO", confidence=80)

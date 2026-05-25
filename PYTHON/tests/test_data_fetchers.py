@@ -11,8 +11,8 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.yahoo_fetcher import YahooFetcher
-from PYTHON.data.cache_manager import CacheManager
+from data.yahoo_fetcher import YahooFetcher
+from data.cache_manager import CacheManager
 
 
 class TestYahooFetcher:

@@ -9,9 +9,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.hermes_adapter.ta_filter import TAFPreFilter, TAFilterResult
-from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
-from PYTHON.hermes_adapter.skill_engine import SkillEngine, Skill
+from hermes_adapter.ta_filter import TAFPreFilter, TAFilterResult
+from hermes_adapter.risk_gates import RiskGateEngine
+from hermes_adapter.skill_engine import SkillEngine, Skill
 
 
 class TestTAFPreFilter:

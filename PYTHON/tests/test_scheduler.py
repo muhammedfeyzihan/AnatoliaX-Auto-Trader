@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.scheduler.task_scheduler import TaskScheduler
+from scheduler.task_scheduler import TaskScheduler
 
 
 def _make_td():
@@ -95,7 +95,7 @@ class TestTaskScheduler:
     def test_rule_evolution_job_registration(self):
         td = _make_td()
         try:
-            from PYTHON.scheduler.anatoliax_jobs import AnatoliaXJobs
+            from scheduler.anatoliax_jobs import AnatoliaXJobs
             sched = TaskScheduler(db_path=td / "tasks.db")
             jobs = AnatoliaXJobs(sched)
             jobs._register_rule_evolution()

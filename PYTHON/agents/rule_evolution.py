@@ -4,7 +4,7 @@ Ajan performans verilerini analiz eder, ayi/volatilite kosullarina gore
 kurallari otomatik olarak ayarlar. "AGI hizi" ile kendini gelistirir.
 
 Kullanim:
-    from PYTHON.agents.rule_evolution import RuleEvolution
+    from agents.rule_evolution import RuleEvolution
     evo = RuleEvolution()
     suggestions = evo.analyze_and_evolve()
     # suggestions: [{"rule": "SL", "old": "2%", "new": "1.5%", "reason": "..."}]

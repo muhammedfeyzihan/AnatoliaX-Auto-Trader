@@ -5,7 +5,7 @@ Provides platform detection, CPU-aware worker count calculation,
 and system information for maximum speed across Windows, Linux, and macOS.
 
 Usage:
-    from PYTHON.common.platform_optimizer import get_optimal_workers, get_system_info
+    from common.platform_optimizer import get_optimal_workers, get_system_info
     workers = get_optimal_workers()
     info = get_system_info()
 """

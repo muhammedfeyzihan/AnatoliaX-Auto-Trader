@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-from PYTHON.adapters.hummingbot_adapter import HummingbotAdapter, ArbitrageOpportunity
-from PYTHON.adapters.nautilus_adapter import NautilusAdapter
-from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator, ExecutionResult
+from adapters.hummingbot_adapter import HummingbotAdapter, ArbitrageOpportunity
+from adapters.nautilus_adapter import NautilusAdapter
+from adapters.integration_orchestrator import IntegrationOrchestrator, ExecutionResult
 
 
 # ------------------------------------------------------------------

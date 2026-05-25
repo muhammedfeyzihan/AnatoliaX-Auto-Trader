@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from typing import Callable, Optional
 from . import indicators, signals, slippage, commission, performance
-from PYTHON.strategy.parameter_registry import SignalConfig
+from strategy.parameter_registry import SignalConfig
 
 
 class BacktestEngine:

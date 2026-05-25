@@ -5,7 +5,7 @@ test_oos_validator.py — OOS Validator Tests
 import pytest
 import pandas as pd
 import numpy as np
-from PYTHON.backtest.oos_validator import OOSValidator
+from backtest.oos_validator import OOSValidator
 
 
 def _mock_strategy(df):

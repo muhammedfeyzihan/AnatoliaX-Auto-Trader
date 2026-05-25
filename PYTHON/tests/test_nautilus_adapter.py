@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.adapters.nautilus_adapter import NautilusAdapter
+from adapters.nautilus_adapter import NautilusAdapter
 
 
 class TestNautilusAdapter:
@@ -44,7 +44,7 @@ class TestNautilusAdapter:
         # Nautilus yoksa False, varsa True
         assert ok is False or ok is True
 
-    @patch("PYTHON.adapters.nautilus_adapter._NAUTILUS_AVAILABLE", True)
+    @patch("adapters.nautilus_adapter._NAUTILUS_AVAILABLE", True)
     def test_mock_available_without_live_env(self):
         adapter = NautilusAdapter()
         # Mock ile available true ama NAUTILUS_LIVE aktif degilse fallback
@@ -55,7 +55,7 @@ class TestNautilusAdapter:
         assert result["status"] in ("FILLED", "ERROR", "PAPER")
 
     @patch.dict("os.environ", {"NAUTILUS_LIVE": "true"})
-    @patch("PYTHON.adapters.nautilus_adapter._NAUTILUS_AVAILABLE", True)
+    @patch("adapters.nautilus_adapter._NAUTILUS_AVAILABLE", True)
     def test_mock_available_with_live_env(self):
         adapter = NautilusAdapter()
         assert adapter.is_available() is True

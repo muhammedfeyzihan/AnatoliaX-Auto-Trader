@@ -3,7 +3,7 @@ AnatoliaX Paper Broker
 Sanal emir, pozisyon ve P&L yonetimi.
 
 Kullanim:
-    from PYTHON.paper_trading.paper_broker import PaperBroker
+    from paper_trading.paper_broker import PaperBroker
     broker = PaperBroker(initial_capital=100000)
     broker.place_order("THYAO", "BUY", 100, 103.0, sl=99.0, tp1=110.0, tp2=115.0)
     broker.close_trade(1, 110.0)
@@ -24,10 +24,10 @@ if _module_dir.name == "PYTHON":
 from datetime import datetime, timezone
 from typing import Literal
 
-from PYTHON.risk.database import get_session
-from PYTHON.paper_trading.models import PaperTrade, PaperPortfolio
-from PYTHON.backtest.commission import CommissionModel
-from PYTHON.backtest.slippage import SlippageModel
+from risk.database import get_session
+from paper_trading.models import PaperTrade, PaperPortfolio
+from backtest.commission import CommissionModel
+from backtest.slippage import SlippageModel
 
 
 class PaperBroker:

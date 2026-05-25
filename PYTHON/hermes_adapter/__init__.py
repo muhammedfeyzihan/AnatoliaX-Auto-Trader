@@ -7,8 +7,8 @@ Inspired by hermes-trader's zero-cost TA gating pattern:
 - 10 independent risk gates block invalid orders before execution.
 
 Usage:
-    from PYTHON.hermes_adapter.ta_filter import TAFPreFilter
-    from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
+    from hermes_adapter.ta_filter import TAFPreFilter
+    from hermes_adapter.risk_gates import RiskGateEngine
 
     gate = TAFPreFilter(threshold=65)
     result = gate.evaluate(symbol="THYAO", timeframes=["1h","4h","1d"])

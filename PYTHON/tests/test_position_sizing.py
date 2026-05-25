@@ -4,7 +4,7 @@ test_position_sizing.py — Advanced Position Sizing Tests
 
 import pytest
 import math
-from PYTHON.risk.position_sizing import PositionSizer
+from risk.position_sizing import PositionSizer
 
 
 class TestPositionSizer:

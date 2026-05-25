@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.hft.order_manager import HFTOrderManager, HFTOrderStatus
+from hft.order_manager import HFTOrderManager, HFTOrderStatus
 
 
 class TestHFTOrderManager:

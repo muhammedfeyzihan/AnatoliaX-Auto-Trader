@@ -5,7 +5,7 @@ Ana mimariyi bozmadan, Nautilus Trader'in event-driven engine,
 precision ve multi-venue ozelliklerinden yararlanir.
 
 Kullanim:
-    from PYTHON.adapters.nautilus_adapter import NautilusAdapter
+    from adapters.nautilus_adapter import NautilusAdapter
     adapter = NautilusAdapter()
     adapter.register_symbol("THYAO")
     adapter.place_market_order("THYAO", "BUY", 100)
@@ -167,7 +167,7 @@ class NautilusAdapter:
     def _fallback_order(self, symbol: str, side: str, size: int, price: Optional[float] = None) -> dict:
         """Nautilus yoksa mevcut PaperBroker'a yonlendir."""
         try:
-            from PYTHON.paper_trading.paper_broker import PaperBroker
+            from paper_trading.paper_broker import PaperBroker
             broker = PaperBroker()
             trade = broker.place_order(
                 symbol=symbol,

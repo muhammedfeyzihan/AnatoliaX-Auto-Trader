@@ -6,8 +6,8 @@ VWAP deviation + volume spike. Hold 3-15 seconds.
 import numpy as np
 import pandas as pd
 from typing import Optional, Dict
-from PYTHON.hft.config import HFTConfig
-from PYTHON.hft.signal_generator import s1_micro_scalp_signal
+from hft.config import HFTConfig
+from hft.signal_generator import s1_micro_scalp_signal
 
 
 class S1MicroScalpStrategy:

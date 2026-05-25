@@ -10,7 +10,7 @@ from pathlib import Path
 # Proje kokunu ekle
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.commission import CommissionModel
+from backtest.commission import CommissionModel
 
 
 class TestCommissionModel:

@@ -3,7 +3,7 @@ server.py — AnatoliaX gRPC Server
 Local-only, token/IP gerektirmez. Otomatik port seçimi.
 
 Kullanim:
-    from PYTHON.anatoliax_grpc.server import AnatoliaXGrpcServer
+    from anatoliax_grpc.server import AnatoliaXGrpcServer
     server = AnatoliaXGrpcServer()
     port = server.start()
     # ...
@@ -26,8 +26,8 @@ from datetime import datetime
 
 import grpc
 
-from PYTHON.anatoliax_grpc import anatoliax_pb2
-from PYTHON.anatoliax_grpc import anatoliax_pb2_grpc
+from anatoliax_grpc import anatoliax_pb2
+from anatoliax_grpc import anatoliax_pb2_grpc
 
 
 # Otomatik port kayit dosyasi (git ignore edilebilir)
@@ -40,7 +40,7 @@ class SignalServiceServicer(anatoliax_pb2_grpc.SignalServiceServicer):
     def GetSignal(self, request, context):
         symbol = request.symbol
         try:
-            from PYTHON.paper_trading.signal_engine import SignalEngine
+            from paper_trading.signal_engine import SignalEngine
             engine = SignalEngine(paper_trading=False)
             signal = engine.analyze_symbol(symbol)
             if signal is None:
@@ -71,7 +71,7 @@ class RiskServiceServicer(anatoliax_pb2_grpc.RiskServiceServicer):
 
     def CheckRisk(self, request, context):
         try:
-            from PYTHON.risk.kill_switch import KillSwitch
+            from risk.kill_switch import KillSwitch
             ks = KillSwitch(max_drawdown=20.0, daily_loss_limit=3.0)
             allowed = ks.is_trading_allowed()
             return anatoliax_pb2.RiskResponse(
@@ -93,7 +93,7 @@ class ReportServiceServicer(anatoliax_pb2_grpc.ReportServiceServicer):
     def GenerateReport(self, request, context):
         report_type = request.report_type
         try:
-            from PYTHON.telegram.reporter import send_report
+            from telegram.reporter import send_report
             send_report(report_type=report_type)
             return anatoliax_pb2.ReportResponse(
                 report_type=report_type,

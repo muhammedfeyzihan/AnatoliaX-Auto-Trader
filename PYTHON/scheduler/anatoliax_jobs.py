@@ -2,7 +2,7 @@
 anatoliax_jobs.py — AnatoliaX standart zamanlanmis gorevleri.
 
 Kullanim:
-    from PYTHON.scheduler.anatoliax_jobs import register_all_jobs
+    from scheduler.anatoliax_jobs import register_all_jobs
     sched = TaskScheduler()
     register_all_jobs(sched)
     sched.start()
@@ -15,7 +15,7 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.scheduler.task_scheduler import TaskScheduler
+from scheduler.task_scheduler import TaskScheduler
 
 
 class AnatoliaXJobs:
@@ -42,7 +42,7 @@ class AnatoliaXJobs:
         def _scan():
             print("[SCHEDULER] Sinyal taramasi basladi")
             try:
-                from PYTHON.paper_trading.signal_engine import SignalEngine
+                from paper_trading.signal_engine import SignalEngine
                 engine = SignalEngine(paper_trading=False)
                 # Demo: BIST 30 hisseleri (gercek uygulamada dinamik liste)
                 symbols = ["THYAO", "GARAN", "ASELS", "TUPRS", "KCHOL"]
@@ -57,7 +57,7 @@ class AnatoliaXJobs:
         def _risk():
             print("[SCHEDULER] Risk kontrolu basladi")
             try:
-                from PYTHON.risk.kill_switch import KillSwitch
+                from risk.kill_switch import KillSwitch
                 ks = KillSwitch(max_drawdown=20.0, daily_loss_limit=3.0)
                 if not ks.is_trading_allowed():
                     print("[SCHEDULER] KILL SWITCH AKTIF - Islem yapilamaz")
@@ -72,7 +72,7 @@ class AnatoliaXJobs:
         def _morning():
             print("[SCHEDULER] Sabah raporu gonderiliyor (08:30)")
             try:
-                from PYTHON.telegram.reporter import send_report
+                from telegram.reporter import send_report
                 send_report(report_type="morning")
             except Exception as e:
                 print(f"[SCHEDULER] Sabah raporu hatasi: {e}")
@@ -83,7 +83,7 @@ class AnatoliaXJobs:
         def _opening():
             print("[SCHEDULER] Acilis raporu gonderiliyor (09:30)")
             try:
-                from PYTHON.telegram.reporter import send_report
+                from telegram.reporter import send_report
                 send_report(report_type="opening")
             except Exception as e:
                 print(f"[SCHEDULER] Acilis raporu hatasi: {e}")
@@ -94,7 +94,7 @@ class AnatoliaXJobs:
         def _midday():
             print("[SCHEDULER] Ogle raporu gonderiliyor (14:00)")
             try:
-                from PYTHON.telegram.reporter import send_report
+                from telegram.reporter import send_report
                 send_report(report_type="midday")
             except Exception as e:
                 print(f"[SCHEDULER] Ogle raporu hatasi: {e}")
@@ -105,7 +105,7 @@ class AnatoliaXJobs:
         def _evening():
             print("[SCHEDULER] Kapanis raporu gonderiliyor (17:30)")
             try:
-                from PYTHON.telegram.reporter import send_report
+                from telegram.reporter import send_report
                 send_report(report_type="evening")
             except Exception as e:
                 print(f"[SCHEDULER] Kapanis raporu hatasi: {e}")
@@ -116,7 +116,7 @@ class AnatoliaXJobs:
         def _health():
             print("[SCHEDULER] Saglik kontrolu (07:30)")
             try:
-                from PYTHON.monitor.health_check import HealthCheck
+                from monitor.health_check import HealthCheck
                 hc = HealthCheck()
                 result = hc.run()
                 if result.get("status") != "OK":
@@ -130,7 +130,7 @@ class AnatoliaXJobs:
         def _subs():
             print("[SCHEDULER] Abonelik kontrolu")
             try:
-                from PYTHON.telegram.subscription_manager import SubscriptionManager
+                from telegram.subscription_manager import SubscriptionManager
                 sm = SubscriptionManager()
                 # Demo: THYAO fiyat kontrolu
                 # Gercek uygulamada tum abonelikler taranir
@@ -146,7 +146,7 @@ class AnatoliaXJobs:
         def _evolve():
             print("[SCHEDULER] Kural evrimi basladi (16:30)")
             try:
-                from PYTHON.agents.rule_evolution import RuleEvolution
+                from agents.rule_evolution import RuleEvolution
                 evo = RuleEvolution()
                 suggestions = evo.analyze_and_evolve()
                 if suggestions and suggestions[0].get("rule") != "NOP":
@@ -167,7 +167,7 @@ def register_all_jobs(scheduler: TaskScheduler):
 
 
 if __name__ == "__main__":
-    from PYTHON.scheduler.task_scheduler import TaskScheduler
+    from scheduler.task_scheduler import TaskScheduler
     sched = TaskScheduler()
     register_all_jobs(sched)
     print("Kayitli gorevler:", [j["id"] for j in sched.list_jobs()])

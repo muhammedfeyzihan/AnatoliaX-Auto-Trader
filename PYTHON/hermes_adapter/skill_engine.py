@@ -6,7 +6,7 @@ Skills are small, reusable units of knowledge learned from trade outcomes.
 The engine auto-creates skills after complex tasks and refines them over time.
 
 Usage:
-    from PYTHON.hermes_adapter.skill_engine import SkillEngine
+    from hermes_adapter.skill_engine import SkillEngine
     engine = SkillEngine()
     engine.learn(symbol="THYAO", setup="ema_cross", outcome="win", pnl=500)
     skill = engine.get_best_skill("THYAO")

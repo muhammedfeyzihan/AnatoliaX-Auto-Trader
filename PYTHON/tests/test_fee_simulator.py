@@ -3,7 +3,7 @@ test_fee_simulator.py — Realistic Fee Simulator Tests
 """
 
 import pytest
-from PYTHON.backtest.fee_simulator import RealisticFeeSimulator
+from backtest.fee_simulator import RealisticFeeSimulator
 
 
 class TestRealisticFeeSimulator:

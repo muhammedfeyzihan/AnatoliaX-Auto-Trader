@@ -19,7 +19,7 @@ import numpy as np
 from typing import Callable, Optional, List, Dict
 from dataclasses import dataclass, field
 
-from PYTHON.backtest import slippage, commission
+from backtest import slippage, commission
 
 
 @dataclass
@@ -261,7 +261,7 @@ class VectorizedBacktestEngine:
 
         equity_df = pd.DataFrame(self.equity_curve, columns=["timestamp", "equity"]).set_index("timestamp")
 
-        from PYTHON.backtest import performance
+        from backtest import performance
         metrics = performance.calculate_all_metrics(trades_df, equity_df["equity"])
 
         return {

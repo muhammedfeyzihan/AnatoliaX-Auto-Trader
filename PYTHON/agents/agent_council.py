@@ -17,7 +17,7 @@ Consensus protocols:
 The Queen agent (Strategy/Leader) breaks ties and has veto power.
 
 Usage:
-    from PYTHON.agents.agent_council import AgentCouncil
+    from agents.agent_council import AgentCouncil
     council = AgentCouncil()
     result = council.hold_meeting(symbol="THYAO", signal={...}, df=df)
     print(result.decision, result.votes)
@@ -35,9 +35,9 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
 
-from PYTHON.agents.agent_personas import AgentPersonaRegistry, Role, Personality
-from PYTHON.agents.manipulation_detector import ManipulationDetector, ManipulationResult
-from PYTHON.common.platform_optimizer import get_optimal_workers
+from agents.agent_personas import AgentPersonaRegistry, Role, Personality
+from agents.manipulation_detector import ManipulationDetector, ManipulationResult
+from common.platform_optimizer import get_optimal_workers
 
 
 class Vote(Enum):

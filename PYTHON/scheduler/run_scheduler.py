@@ -17,8 +17,8 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.scheduler.task_scheduler import TaskScheduler
-from PYTHON.scheduler.anatoliax_jobs import register_all_jobs
+from scheduler.task_scheduler import TaskScheduler
+from scheduler.anatoliax_jobs import register_all_jobs
 
 
 def main():

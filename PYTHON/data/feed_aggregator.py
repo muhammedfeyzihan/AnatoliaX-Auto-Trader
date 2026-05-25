@@ -3,7 +3,7 @@ AnatoliaX Feed Aggregator
 Tum ucretsiz veri kaynaklarini birlestiren merkezi modul.
 
 Kullanim:
-    from PYTHON.data.feed_aggregator import FeedAggregator
+    from data.feed_aggregator import FeedAggregator
     agg = FeedAggregator()
     df = agg.fetch("THYAO", interval="1d", period="6mo")
     print(df)
@@ -26,11 +26,11 @@ from datetime import datetime
 from typing import Literal
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from PYTHON.data.yahoo_fetcher import YahooFetcher
-from PYTHON.data.tradingview_scraper import TradingViewScraper
-from PYTHON.data.investing_scraper import InvestingScraper
-from PYTHON.data.bigpara_fetcher import BigparaFetcher
-from PYTHON.data.cache_manager import CacheManager
+from data.yahoo_fetcher import YahooFetcher
+from data.tradingview_scraper import TradingViewScraper
+from data.investing_scraper import InvestingScraper
+from data.bigpara_fetcher import BigparaFetcher
+from data.cache_manager import CacheManager
 
 
 class FeedAggregator:

@@ -34,7 +34,7 @@ Risk Protocol:
   - Correlation filter: no pair > 0.80
 
 Usage:
-    from PYTHON.strategy.protocol_strategies.alpha_protocol import AlphaProtocol
+    from strategy.protocol_strategies.alpha_protocol import AlphaProtocol
     proto = AlphaProtocol(account_size=100_000)
     signal = proto.evaluate(df, symbol="THYAO", venue="BIST")
     if signal:
@@ -59,9 +59,9 @@ while _module_dir.name != "PYTHON" and _module_dir.parent != _module_dir:
 if _module_dir.name == "PYTHON":
     sys.path.insert(0, str(_module_dir.parent))
 
-from PYTHON.data.unified_market_calendar import UnifiedMarketCalendar
-from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine, LawVerdict
-from PYTHON.risk.black_swan_guard import BlackSwanGuard
+from data.unified_market_calendar import UnifiedMarketCalendar
+from risk.execution_laws import ImmutableExecutionLawEngine, LawVerdict
+from risk.black_swan_guard import BlackSwanGuard
 
 
 class SetupType(Enum):
@@ -518,6 +518,18 @@ class AlphaProtocol:
         return 100.0 - (100.0 / (1.0 + rs))
 
     def _build_law_signal(self, df: pd.DataFrame, symbol: str) -> dict:
+        if df.empty or not {"high", "low", "close"}.issubset(df.columns):
+            return {
+                "symbol": symbol,
+                "side": "WAIT",
+                "size": 0,
+                "price": 0.0,
+                "confidence": 0.0,
+                "atr_pct": 0.0,
+                "spread_pct": 0.0,
+                "leverage": 1.0,
+                "prob_win": 0.5,
+            }
         close = df["close"].iloc[-1] if len(df) > 0 else 0.0
         atr = self._atr(df["high"].values, df["low"].values, df["close"].values)
         atr_pct = atr / close * 100.0 if close > 0 else 0.0

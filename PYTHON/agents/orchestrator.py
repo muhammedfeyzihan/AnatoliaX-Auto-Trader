@@ -3,7 +3,7 @@ orchestrator.py — Agent orchestration, planner/executor ayrimi, tool routing
 """
 import json
 import time
-from typing import Dict, List, Callable, Optional
+from typing import Dict, List, Callable, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -22,9 +22,9 @@ class AgentTask:
 
 class AgentOrchestrator:
     """
-    Ajan orkestrasyonu:
-    - Planlayici: is sirasini belirler
-    - Yurutucu: her ajanin tool'unu cagirir
+    Ajan orkestrasyonu v3.0:
+    - 3 Ajan pipeline: Sinyal -> Risk -> Strateji
+    - Enhancement module integration (Phase 1-5)
     - Geri bildirim: basari/basarisizlik kaydet
     """
 
@@ -33,21 +33,22 @@ class AgentOrchestrator:
         self._tasks: List[AgentTask] = []
         self._feedback: Dict[str, List[dict]] = {}
         self._scoreboard: Dict[str, dict] = {}
+        # Enhancement module references (wired externally)
+        self._enhancements: Dict[str, Any] = {}
 
     def register_tool(self, agent: str, tool: Callable):
         self._tools[agent] = tool
 
+    def attach_module(self, name: str, module: Any):
+        """Wire an enhancement module into the orchestrator."""
+        self._enhancements[name] = module
+
     def plan(self, symbol: str, context: dict) -> List[AgentTask]:
-        """Ajan calisma sirasini planla."""
+        """v3.0 3-agent pipeline planlama."""
         plan = [
-            AgentTask(id=f"{symbol}_E", agent="E", action="macro_regime", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_B", agent="B", action="technical_signal", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_C", agent="C", action="news_score", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_D", agent="D", action="risk_check", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_F", agent="F", action="anomaly_check", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_G", agent="G", action="memory_query", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_H", agent="H", action="backtest_metrics", params={"symbol": symbol}),
-            AgentTask(id=f"{symbol}_A", agent="A", action="final_decision", params={"symbol": symbol, "context": context}),
+            AgentTask(id=f"{symbol}_SINYAL", agent="Sinyal", action="analyze", params={"symbol": symbol, "context": context}),
+            AgentTask(id=f"{symbol}_RISK", agent="Risk", action="check", params={"symbol": symbol, "context": context}),
+            AgentTask(id=f"{symbol}_STRATEJI", agent="Strateji", action="decide", params={"symbol": symbol, "context": context}),
         ]
         self._tasks.extend(plan)
         return plan
@@ -74,13 +75,39 @@ class AgentOrchestrator:
         return task.result
 
     def run_all(self, symbol: str, context: dict) -> dict:
-        """Bir sembol icin tum ajani calistir, son karari dondur."""
+        """v3.0 pipeline: Sinyal -> Risk -> Strateji -> Karar."""
         plan = self.plan(symbol, context)
-        for task in plan:
-            self.execute(task)
-        # Son gorev A'nin karari
-        a_task = next((t for t in plan if t.agent == "A"), None)
-        return a_task.result if a_task else {"status": "NO_DECISION"}
+        signal_task = next((t for t in plan if t.agent == "Sinyal"), None)
+        risk_task = next((t for t in plan if t.agent == "Risk"), None)
+        strategy_task = next((t for t in plan if t.agent == "Strateji"), None)
+
+        signal_result = self.execute(signal_task) if signal_task else {}
+        risk_result = self.execute(risk_task) if risk_task else {}
+        strategy_result = self.execute(strategy_task) if strategy_task else {}
+
+        # 3/3 onay: Sinyal ve Risk RED ise Strateji karar vermez
+        if signal_result.get("status") == "RED" or risk_result.get("status") == "RED":
+            return {"status": "REJECTED", "reason": "Sinyal/Risk RED", "signal": signal_result, "risk": risk_result}
+
+        return strategy_result if strategy_result else {"status": "NO_DECISION"}
+
+    def run_with_enhancements(self, symbol: str, context: dict) -> dict:
+        """v3.0 pipeline with Phase 1-5 enhancement modules pre-flight."""
+        # Pre-flight: microstructure, order book, liquidity check
+        preflight = {}
+        if "microstructure" in self._enhancements:
+            preflight["microstructure"] = self._enhancements["microstructure"]
+        if "liquidity_collapse" in self._enhancements:
+            preflight["liquidity"] = self._enhancements["liquidity_collapse"].calculate_lcs()
+        if "toxic_flow" in self._enhancements:
+            preflight["toxicity"] = self._enhancements["toxic_flow"]
+
+        if preflight.get("liquidity", 0) > 0.7:
+            return {"status": "REJECTED", "reason": "Liquidity collapse predicted", "preflight": preflight}
+
+        result = self.run_all(symbol, context)
+        result["preflight"] = preflight
+        return result
 
     def _record_feedback(self, task: AgentTask, success: bool):
         if task.agent not in self._feedback:

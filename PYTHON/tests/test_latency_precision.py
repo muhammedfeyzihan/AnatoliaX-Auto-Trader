@@ -9,8 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.execution.latency_monitor import LatencyMonitor
-from PYTHON.execution.latency_precision import LatencyPrecisionExport
+from execution.latency_monitor import LatencyMonitor
+from execution.latency_precision import LatencyPrecisionExport
 
 
 class TestLatencyPrecisionExport:

@@ -3,11 +3,12 @@ async_event_bus.py — Async MessageBus with priority queues and backpressure.
 K214: AsyncEventBus for event-driven architecture.
 """
 import asyncio
+import inspect
 import time
 from typing import Callable, Dict, List, Optional, Any
 from collections import defaultdict
 from datetime import datetime, timezone
-from PYTHON.common.events import Event, EventType
+from common.events import Event, EventType
 
 
 class AsyncEventBus:
@@ -74,7 +75,7 @@ class AsyncEventBus:
 
             for cb in self._subscribers.get(event.event_type, []):
                 try:
-                    if asyncio.iscoroutinefunction(cb):
+                    if inspect.iscoroutinefunction(cb):
                         await cb(event)
                     else:
                         cb(event)

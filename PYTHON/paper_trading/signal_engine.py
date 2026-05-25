@@ -3,7 +3,7 @@ AnatoliaX Signal Engine (Paper Trading)
 Canli veri uzerinden sinyal uretimi + risk kontrolu + sanal emir.
 
 Kullanim:
-    from PYTHON.paper_trading.signal_engine import SignalEngine
+    from paper_trading.signal_engine import SignalEngine
     engine = SignalEngine()
     engine.run_scan(symbols=["THYAO", "GARAN", "ASELS"])
 
@@ -31,22 +31,22 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 
-from PYTHON.data.feed_aggregator import FeedAggregator
-from PYTHON.data.market_calendar import BISTCalendar
-from PYTHON.data.macro_fetcher import MacroFetcher
-from PYTHON.data.news_fetcher import NewsFetcher
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import combined_signal
-from PYTHON.paper_trading.paper_broker import PaperBroker
-from PYTHON.risk.database import get_session
-from PYTHON.paper_trading.models import PaperSignal
-from PYTHON.manipulation.multi_tf_detector import MultiTFManipDetector
-from PYTHON.manipulation.agent_trust_scorer import AgentTrustScorer
-from PYTHON.manipulation.consensus_engine import ByzantineConsensus
-from PYTHON.execution.manipulation_fallback import ManipulationFallbackRouter
-from PYTHON.strategy.dynamic_symbol_rotator import DynamicSymbolRotator
-from PYTHON.common.time_rules import TimeBasedTradingManager
-from PYTHON.strategy.parameter_registry import ParameterRegistry, get_registry, SignalConfig
+from data.feed_aggregator import FeedAggregator
+from data.market_calendar import BISTCalendar
+from data.macro_fetcher import MacroFetcher
+from data.news_fetcher import NewsFetcher
+from backtest.indicators import apply_all
+from backtest.signals import combined_signal
+from paper_trading.paper_broker import PaperBroker
+from risk.database import get_session
+from paper_trading.models import PaperSignal
+from manipulation.multi_tf_detector import MultiTFManipDetector
+from manipulation.agent_trust_scorer import AgentTrustScorer
+from manipulation.consensus_engine import ByzantineConsensus
+from execution.manipulation_fallback import ManipulationFallbackRouter
+from strategy.dynamic_symbol_rotator import DynamicSymbolRotator
+from common.time_rules import TimeBasedTradingManager
+from strategy.parameter_registry import ParameterRegistry, get_registry, SignalConfig
 
 
 class SignalEngine:
@@ -89,7 +89,7 @@ class SignalEngine:
         self._news_cache: pd.DataFrame | None = None
         self._news_cache_time: datetime | None = None
         # Sinyal Ajanı — Kimi/Bulut AI entegrasyonu
-        from PYTHON.ai.cloud_client import SignalAgentAI
+        from ai.cloud_client import SignalAgentAI
         self.ai_signal = SignalAgentAI()
         # Manipülasyon tespiti
         self.enable_manipulation_check = enable_manipulation_check
@@ -114,8 +114,8 @@ class SignalEngine:
         self.registry = get_registry()
         self._last_regime: str = "sideways"
         # Validators — init once to avoid hot-path instantiation (K97)
-        from PYTHON.data.auto_validator import AutoValidator
-        from PYTHON.execution.order_validator import OrderValidator
+        from data.auto_validator import AutoValidator
+        from execution.order_validator import OrderValidator
         self._auto_validator = AutoValidator()
         self._order_validator = OrderValidator(max_size=1_000_000.0)
         # Batch insert buffer (K97)
@@ -644,7 +644,7 @@ class SignalEngine:
 
 
 if __name__ == "__main__":
-    from PYTHON.risk.database import init_db
+    from risk.database import init_db
     init_db()
     engine = SignalEngine(paper_trading=True)
     results = engine.run_scan(["THYAO", "GARAN", "ASELS"])

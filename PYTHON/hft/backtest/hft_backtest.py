@@ -9,15 +9,15 @@ import numpy as np
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
-from PYTHON.hft.tick_aggregator import TickAggregator
-from PYTHON.hft.signal_generator import generate_signal_from_df
-from PYTHON.hft.risk_filter import RiskFilter, RiskFilterResult
-from PYTHON.hft.position_manager import HFTPositionManager
-from PYTHON.hft.order_manager import HFTOrderManager, HFTOrderStatus
-from PYTHON.hft.latency_tracker import LatencyTracker
-from PYTHON.risk.account import Account
-from PYTHON.backtest.commission import CommissionModel
-from PYTHON.backtest.fill_model import FillModel, ImmediateFillModel
+from hft.tick_aggregator import TickAggregator
+from hft.signal_generator import generate_signal_from_df
+from hft.risk_filter import RiskFilter, RiskFilterResult
+from hft.position_manager import HFTPositionManager
+from hft.order_manager import HFTOrderManager, HFTOrderStatus
+from hft.latency_tracker import LatencyTracker
+from risk.account import Account
+from backtest.commission import CommissionModel
+from backtest.fill_model import FillModel, ImmediateFillModel
 
 
 class HFTBacktestEngine:

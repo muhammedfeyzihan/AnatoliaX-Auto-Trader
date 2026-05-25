@@ -9,9 +9,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.risk.database import init_db, get_session
-from PYTHON.paper_trading.paper_broker import PaperBroker
-from PYTHON.paper_trading.models import PaperTrade, PaperPortfolio
+from risk.database import init_db, get_session
+from paper_trading.paper_broker import PaperBroker
+from paper_trading.models import PaperTrade, PaperPortfolio
 
 # Test veritabanini baslat
 init_db()

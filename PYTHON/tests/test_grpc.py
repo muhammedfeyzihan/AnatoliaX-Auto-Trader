@@ -10,8 +10,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.anatoliax_grpc.server import AnatoliaXGrpcServer
-from PYTHON.anatoliax_grpc.client import AnatoliaXGrpcClient
+from anatoliax_grpc.server import AnatoliaXGrpcServer
+from anatoliax_grpc.client import AnatoliaXGrpcClient
 
 
 class TestGrpcCommunication:

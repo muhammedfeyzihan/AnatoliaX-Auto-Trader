@@ -8,7 +8,7 @@ Target: 4.0-10.0% per trade, hold 2h-8h.
 Max agents: 3.
 
 Usage:
-    from PYTHON.strategy.gold_mining.h2_strategy import H2Strategy
+    from strategy.gold_mining.h2_strategy import H2Strategy
     strategy = H2Strategy()
     result = strategy.generate(df, macro={"regime": "BULL"}, sentiment=0.3)
 """
@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from typing import Optional, Dict
 
-from PYTHON.strategy.parameter_registry import get_registry
+from strategy.parameter_registry import get_registry
 
 
 def _ema(prices: np.ndarray, period: int) -> np.ndarray:

@@ -4,7 +4,7 @@ Token SADECE ortam degiskeninden okunur, kodda asla yazilmaz.
 Fallback: Ollama yerel (token yoksa).
 
 Kullanim:
-    from PYTHON.ai.cloud_client import CloudClient
+    from ai.cloud_client import CloudClient
     client = CloudClient()
     response = client.generate("Nihai karar: THYAO", provider="kimi")
 """
@@ -20,7 +20,7 @@ import os
 import requests
 from typing import Optional
 
-from PYTHON.ai.ollama_client import OllamaClient
+from ai.ollama_client import OllamaClient
 
 
 class CloudClient:

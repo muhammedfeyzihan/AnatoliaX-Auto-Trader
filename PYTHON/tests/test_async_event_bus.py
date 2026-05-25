@@ -8,8 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.common.async_event_bus import AsyncEventBus
-from PYTHON.common.events import Event, EventType
+from common.async_event_bus import AsyncEventBus
+from common.events import Event, EventType
 
 
 @pytest.mark.asyncio

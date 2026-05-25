@@ -8,8 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.risk.account import Account
-from PYTHON.hft.position_manager import HFTPositionManager
+from risk.account import Account
+from hft.position_manager import HFTPositionManager
 
 
 class TestHFTPositionManager:

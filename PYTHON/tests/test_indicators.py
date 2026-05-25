@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.indicators import apply_all
+from backtest.indicators import apply_all
 
 
 class TestIndicators:

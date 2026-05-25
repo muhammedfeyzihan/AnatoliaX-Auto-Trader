@@ -3,7 +3,7 @@ AnatoliaX Bigpara Fetcher
 Bigpara (Hurriyet) JSON API'dan BIST fiyat cekme.
 
 Kullanim:
-    from PYTHON.data.bigpara_fetcher import BigparaFetcher
+    from data.bigpara_fetcher import BigparaFetcher
     fetcher = BigparaFetcher()
     df = fetcher.fetch_current("THYAO")
     print(df)
@@ -14,7 +14,7 @@ Not: Bigpara 15dk gecikmeli. Ikincil kaynak olarak kullan (K91).
 import requests
 import pandas as pd
 from datetime import datetime
-from PYTHON.data.cache_manager import CacheManager
+from data.cache_manager import CacheManager
 
 
 class BigparaFetcher:

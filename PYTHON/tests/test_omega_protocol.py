@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from PYTHON.strategy.protocol_strategies.omega_protocol import OmegaProtocol, OmegaSignal, OmegaStatus, PipelineResult
+from strategy.protocol_strategies.omega_protocol import OmegaProtocol, OmegaSignal, OmegaStatus, PipelineResult
 
 
 class TestOmegaProtocolInit:
@@ -105,9 +105,9 @@ class TestOmegaPipelineSteps:
 
     def test_step_risk_gate_pass(self):
         omega = OmegaProtocol()
-        from PYTHON.hermes_adapter.risk_gates import RiskGateEngine
+        from hermes_adapter.risk_gates import RiskGateEngine
         omega.risk_gate = RiskGateEngine(market_open_required=False)
-        from PYTHON.strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
+        from strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
         gs = GrowthSignal(
             symbol="THYAO", side="BUY", setup="MOMENTUM",
             entry_price=100.0, stop_loss=99.0, take_profit=105.0,
@@ -121,7 +121,7 @@ class TestOmegaPipelineSteps:
 
     def test_step_laws_pass(self):
         omega = OmegaProtocol()
-        from PYTHON.strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
+        from strategy.protocol_strategies.compound_growth_protocol import GrowthSignal
         gs = GrowthSignal(
             symbol="THYAO", side="BUY", setup="MOMENTUM",
             entry_price=100.0, stop_loss=99.0, take_profit=105.0,
@@ -189,7 +189,7 @@ class TestOmegaCampaign:
 
 class TestOrchestratorOmega:
     def test_run_omega_protocol_integration(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         df = pd.DataFrame({
@@ -204,7 +204,7 @@ class TestOrchestratorOmega:
         assert "symbol" in res
 
     def test_run_omega_campaign_integration(self):
-        from PYTHON.adapters.integration_orchestrator import IntegrationOrchestrator
+        from adapters.integration_orchestrator import IntegrationOrchestrator
         orch = IntegrationOrchestrator()
         orch.initialize()
         report = orch.run_omega_campaign(

@@ -3,7 +3,7 @@ AnatoliaX Investing.com Scraper
 Ucretsiz scraping ile Investing.com'dan BIST verisi cekme.
 
 Kullanim:
-    from PYTHON.data.investing_scraper import InvestingScraper
+    from data.investing_scraper import InvestingScraper
     scraper = InvestingScraper()
     df = scraper.fetch("THYAO", interval="1d")
 
@@ -16,7 +16,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 from time import sleep
-from PYTHON.data.cache_manager import CacheManager
+from data.cache_manager import CacheManager
 
 
 class InvestingScraper:

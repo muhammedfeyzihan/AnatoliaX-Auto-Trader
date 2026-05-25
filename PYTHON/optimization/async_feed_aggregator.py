@@ -21,11 +21,11 @@ from datetime import datetime
 from typing import Literal, Optional
 from concurrent.futures import ThreadPoolExecutor
 
-from PYTHON.data.yahoo_fetcher import YahooFetcher
-from PYTHON.data.tradingview_scraper import TradingViewScraper
-from PYTHON.data.investing_scraper import InvestingScraper
-from PYTHON.data.bigpara_fetcher import BigparaFetcher
-from PYTHON.optimization.fast_cache import FastCacheManager
+from data.yahoo_fetcher import YahooFetcher
+from data.tradingview_scraper import TradingViewScraper
+from data.investing_scraper import InvestingScraper
+from data.bigpara_fetcher import BigparaFetcher
+from optimization.fast_cache import FastCacheManager
 
 
 class AsyncFeedAggregator:

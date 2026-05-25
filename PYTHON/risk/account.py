@@ -8,7 +8,7 @@ Designed for in-memory fast accounting; persists via SQLAlchemy separately if ne
 
 from dataclasses import dataclass, field
 from typing import Dict, Optional
-from PYTHON.risk.position import Position
+from risk.position import Position
 
 
 @dataclass

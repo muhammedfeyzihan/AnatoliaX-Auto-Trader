@@ -18,13 +18,13 @@ import tempfile
 import time
 from pathlib import Path
 
-from PYTHON.common.multi_market_pool import MultiMarketPool, MarketSnapshot
-from PYTHON.risk.execution_laws import ImmutableExecutionLawEngine, LawVerdict
-from PYTHON.risk.black_swan_guard import BlackSwanGuard, BlackSwanAlert
-from PYTHON.execution.crash_recovery import CrashRecoveryManager
-from PYTHON.adapters.hummingbot_adapter import HummingbotAdapter
-from PYTHON.strategy.strategy_registry import StrategyRegistry
-from PYTHON.optimization.bayesian_optimizer import BayesianOptimizer
+from common.multi_market_pool import MultiMarketPool, MarketSnapshot
+from risk.execution_laws import ImmutableExecutionLawEngine, LawVerdict
+from risk.black_swan_guard import BlackSwanGuard, BlackSwanAlert
+from execution.crash_recovery import CrashRecoveryManager
+from adapters.hummingbot_adapter import HummingbotAdapter
+from strategy.strategy_registry import StrategyRegistry
+from optimization.bayesian_optimizer import BayesianOptimizer
 
 
 # ------------------------------------------------------------------
@@ -266,7 +266,7 @@ class TestHummingbotSpreadWidening:
 
     def test_analyze_spread_widening_stable(self):
         hb = HummingbotAdapter()
-        from PYTHON.adapters.hummingbot_adapter import LiquiditySnapshot
+        from adapters.hummingbot_adapter import LiquiditySnapshot
         hist = [LiquiditySnapshot(symbol="THYAO", exchange="binance", bid=99.5, ask=100.5, mid=100.0, spread_pct=0.5, bid_volume=5000, ask_volume=4800, depth_score=50.0) for _ in range(10)]
         res = hb.analyze_spread_widening("THYAO", history=hist)
         assert res["trend"] == "STABLE"
@@ -274,7 +274,7 @@ class TestHummingbotSpreadWidening:
 
     def test_analyze_spread_widening_anomaly(self):
         hb = HummingbotAdapter()
-        from PYTHON.adapters.hummingbot_adapter import LiquiditySnapshot
+        from adapters.hummingbot_adapter import LiquiditySnapshot
         hist = [LiquiditySnapshot(symbol="THYAO", exchange="binance", bid=99.5, ask=100.5, mid=100.0, spread_pct=0.5, bid_volume=5000, ask_volume=4800, depth_score=50.0) for _ in range(10)]
         # Add anomalous wide spread entries
         hist += [LiquiditySnapshot(symbol="THYAO", exchange="binance", bid=95.0, ask=105.0, mid=100.0, spread_pct=10.0, bid_volume=100, ask_volume=100, depth_score=5.0) for _ in range(5)]
@@ -323,7 +323,7 @@ class DummyStrategy:
 
     def test_validation_hook_blocks_bad_strategy(self):
         reg = StrategyRegistry()
-        meta = reg.load_from_module("PYTHON.strategy.gold_mining.m1_strategy", "M1Strategy")
+        meta = reg.load_from_module("strategy.gold_mining.m1_strategy", "M1Strategy")
         reg.add_validation_hook(lambda m: (False, "test block"))
         ok, reason = reg._validate(meta)
         assert ok is False

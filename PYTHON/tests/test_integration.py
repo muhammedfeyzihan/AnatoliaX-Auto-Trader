@@ -9,13 +9,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.backtest.signals import combined_signal
-from PYTHON.risk.kill_switch import KillSwitch
-from PYTHON.risk.exposure_limiter import ExposureLimiter
-from PYTHON.execution.engine import UnifiedExecutionEngine, OrderSide
-from PYTHON.paper_trading.paper_broker import PaperBroker
-from PYTHON.risk.database import init_db
+from backtest.indicators import apply_all
+from backtest.signals import combined_signal
+from risk.kill_switch import KillSwitch
+from risk.exposure_limiter import ExposureLimiter
+from execution.engine import UnifiedExecutionEngine, OrderSide
+from paper_trading.paper_broker import PaperBroker
+from risk.database import init_db
 
 init_db()
 

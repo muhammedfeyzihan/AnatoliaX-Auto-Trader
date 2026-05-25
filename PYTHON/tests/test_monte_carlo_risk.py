@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.monte_carlo_risk import MonteCarloRiskWrapper
+from backtest.monte_carlo_risk import MonteCarloRiskWrapper
 
 
 class TestMonteCarloRiskWrapper:

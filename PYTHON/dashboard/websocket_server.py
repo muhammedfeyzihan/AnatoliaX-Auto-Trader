@@ -68,8 +68,8 @@ manager = ConnectionManager()
 def _get_portfolio_snapshot() -> dict:
     """SQLite'den canli portfoy ozeti cek."""
     try:
-        from PYTHON.risk.database import get_session
-        from PYTHON.paper_trading.models import PaperPortfolio, PaperSignal
+        from risk.database import get_session
+        from paper_trading.models import PaperPortfolio, PaperSignal
 
         session = get_session()
         try:

@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timezone
 from dataclasses import asdict
-from PYTHON.agents.weekly_council import WeeklyCouncil, WeeklyReport, CouncilDecision
+from agents.weekly_council import WeeklyCouncil, WeeklyReport, CouncilDecision
 
 
 class TestWeeklyCouncil:

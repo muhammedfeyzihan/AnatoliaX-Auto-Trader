@@ -7,7 +7,7 @@ and halts execution before catastrophic loss.
 Integrates with: KillSwitch, ImmutableExecutionLawEngine, UnifiedRiskEngine.
 
 Usage:
-    from PYTHON.risk.black_swan_guard import BlackSwanGuard
+    from risk.black_swan_guard import BlackSwanGuard
     guard = BlackSwanGuard()
     alert = guard.check(df, portfolio_value=100_000)
     if alert.is_black_swan:

@@ -10,9 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.backtest.engine import BacktestEngine
-from PYTHON.backtest.indicators import apply_all
-from PYTHON.strategy.parameter_registry import SignalConfig
+from backtest.engine import BacktestEngine
+from backtest.indicators import apply_all
+from strategy.parameter_registry import SignalConfig
 
 
 class TestBacktestEngine:

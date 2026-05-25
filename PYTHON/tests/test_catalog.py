@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.data.catalog import DataCatalog
+from data.catalog import DataCatalog
 
 
 class TestDataCatalog:

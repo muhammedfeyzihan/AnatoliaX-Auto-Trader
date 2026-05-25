@@ -4,7 +4,7 @@ test_bist_regulations.py — BIST Regulatory Compliance Tests
 
 import pytest
 from datetime import datetime, timezone, timedelta
-from PYTHON.risk.bist_regulations import (
+from risk.bist_regulations import (
     BISTRegulatoryChecker,
     VBTSMeasure,
     CircuitBreakerState,

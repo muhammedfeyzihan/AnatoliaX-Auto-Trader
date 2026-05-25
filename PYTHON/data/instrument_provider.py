@@ -7,7 +7,7 @@ Eliminates hardcoded "THYAO" references by centralizing symbol metadata.
 """
 
 from typing import Dict, List, Optional
-from PYTHON.data.instrument import Instrument
+from data.instrument import Instrument
 
 
 # Official BIST 30 / 50 / 100 universe (representative subset)

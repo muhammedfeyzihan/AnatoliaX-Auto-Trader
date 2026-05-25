@@ -3,7 +3,7 @@ subscription_manager.py — Hisse basi alarm abonelik sistemi.
 auto-marketplace'tan entegre edilmistir.
 
 Kullanim:
-    from PYTHON.telegram.subscription_manager import SubscriptionManager
+    from telegram.subscription_manager import SubscriptionManager
     sm = SubscriptionManager()
     sm.add_subscription(user_id="YOUR_CHAT_ID_HERE", symbol="THYAO", condition={"type": "price_above", "value": 105.0})
     triggers = sm.check_subscriptions(symbol="THYAO", current_price=106.0)

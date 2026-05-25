@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from PYTHON.manipulation.agent_trust_scorer import AgentTrustScorer
+from manipulation.agent_trust_scorer import AgentTrustScorer
 
 
 class TestAgentTrustScorer:

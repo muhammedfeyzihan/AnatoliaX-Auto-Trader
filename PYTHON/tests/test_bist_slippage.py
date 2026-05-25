@@ -4,7 +4,7 @@ test_bist_slippage.py — BIST Slippage Model Tests
 
 import pytest
 from datetime import time
-from PYTHON.backtest.bist_slippage import BISTSlippageModel
+from backtest.bist_slippage import BISTSlippageModel
 
 
 class TestBISTSlippageModel:

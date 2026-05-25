@@ -3,7 +3,7 @@ lesson_generator.py — Backtest sonuclarindan derinlemesine ders cikarma.
 AutoTrader'dan esinlenilmis: "Why did this trade lose? What can we learn?"
 
 Kullanim:
-    from PYTHON.analytics.lesson_generator import LessonGenerator
+    from analytics.lesson_generator import LessonGenerator
     lg = LessonGenerator()
     lessons = lg.analyze_backtest(trades_df, metrics_dict)
 """
